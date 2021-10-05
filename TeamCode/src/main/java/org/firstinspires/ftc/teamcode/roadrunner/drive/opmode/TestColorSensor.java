@@ -22,6 +22,11 @@ public class TestColorSensor extends LinearOpMode {
             telemetry.addData("Red", color.red());
             telemetry.addData("Green", color.green());
             telemetry.addData("Blue", color.blue());
+            if (color.blue() <= color.red() * 0.8 && color.blue() <= color.green() *0.8) {
+                telemetry.addData("Color Detected: ", "Yellow");
+            } else {
+                telemetry.addData("Color Detected: ", "Not Yellow");
+            }
             telemetry.update();
         }
     }

@@ -15,17 +15,20 @@ public class DistanceTest extends LinearOpMode{
     public void runOpMode() {
         // Get the distance sensor and motor from hardwareMap
         distance = hardwareMap.get(DistanceSensor.class, "Distance");
-        motor = hardwareMap.get(DcMotor.class, "Motor");
+        //motor = hardwareMap.get(DcMotor.class, "Motor");
 
         // Loop while the Op Mode is running
         waitForStart();
         while (opModeIsActive()) {
             // If the distance in centimeters is less than 10, set the motor power to 0.3
             if (distance.getDistance(DistanceUnit.CM) < 10) {
-                motor.setPower(0.3);
+                //motor.setPower(0.3);
+                telemetry.addData("In Range: ", "Yes");
             } else { // Otherwise, stop the motor
-                motor.setPower(0);
+                //motor.setPower(0);
+                telemetry.addData("In Range: ", "No");
             }
+            telemetry.update();
         }
     }
 }
