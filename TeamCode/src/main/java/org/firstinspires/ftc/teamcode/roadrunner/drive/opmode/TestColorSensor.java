@@ -3,16 +3,30 @@ package org.firstinspires.ftc.teamcode.roadrunner.drive.opmode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @TeleOp
 public class TestColorSensor extends LinearOpMode {
-    //Define a variable for our color snesor
+    //Define variables for our color sensor
     ColorSensor color;
+    DistanceSensor distance;
+    double mm = 0;
+
+    public boolean isAvailable() {
+        return (color != null);
+    }
 
     @Override
     public void runOpMode() {
         // Get the color sensor from hardwareMap
         color = hardwareMap.get(ColorSensor.class, "C1");
+        distance = hardwareMap.get(DistanceSensor.class, "C1");
+
+        if (isAvailable()) {
+            mm = distance.getDistance(DistanceUnit.MM);
+        }
 
         // Wait for the Play button to be pressed
         waitForStart();
@@ -27,6 +41,7 @@ public class TestColorSensor extends LinearOpMode {
             } else {
                 telemetry.addData("Color Detected: ", "Not Yellow");
             }
+            telemetry.addData("Distance: ", mm);
             telemetry.update();
         }
     }
