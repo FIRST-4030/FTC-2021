@@ -24,15 +24,14 @@ public class TestColorSensor extends LinearOpMode {
         color = hardwareMap.get(ColorSensor.class, "C1");
         distance = hardwareMap.get(DistanceSensor.class, "C1");
 
-        if (isAvailable()) {
-            mm = distance.getDistance(DistanceUnit.MM);
-        }
-
         // Wait for the Play button to be pressed
         waitForStart();
 
         // While the Op Mode is running, update the telemetry values
         while (opModeIsActive()) {
+            if (isAvailable()) {
+                mm = distance.getDistance(DistanceUnit.MM);
+            }
             telemetry.addData("Red", color.red());
             telemetry.addData("Green", color.green());
             telemetry.addData("Blue", color.blue());
