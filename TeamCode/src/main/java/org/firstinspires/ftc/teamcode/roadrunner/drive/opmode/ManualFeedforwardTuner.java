@@ -20,10 +20,10 @@ import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleTankDrive;
 
 import java.util.Objects;
 
-import static org.firstinspires.ftc.teamcode.roadrunner.drive.DriveConstants.RUN_USING_ENCODER;
-import static org.firstinspires.ftc.teamcode.roadrunner.drive.DriveConstants.kA;
-import static org.firstinspires.ftc.teamcode.roadrunner.drive.DriveConstants.kStatic;
-import static org.firstinspires.ftc.teamcode.roadrunner.drive.DriveConstants.kV;
+import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.RUN_USING_ENCODER;
+import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kA;
+import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kStatic;
+import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kV;
 
 /*
  * This routine is designed to tune the open-loop feedforward coefficients. Although it may seem unnecessary,
