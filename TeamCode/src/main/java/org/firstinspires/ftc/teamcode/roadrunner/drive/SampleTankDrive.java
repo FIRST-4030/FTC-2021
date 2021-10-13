@@ -25,6 +25,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -125,6 +126,8 @@ public class SampleTankDrive extends TankDrive {
         DcMotorEx rightRear = hardwareMap.get(DcMotorEx.class, "BR");
         //DcMotorEx rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
         //DcMotorEx rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
+
+        leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
 
         motors = Arrays.asList(leftRear, rightRear);
         leftMotors = Arrays.asList(leftRear);
