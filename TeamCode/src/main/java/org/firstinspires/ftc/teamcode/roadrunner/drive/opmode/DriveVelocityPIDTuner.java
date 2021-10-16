@@ -138,15 +138,15 @@ public class DriveVelocityPIDTuner extends LinearOpMode {
                     List<Double> velocities = drive.getWheelVelocities();
 
                     // update telemetry
-                    leftFront = hardwareMap.get(DcMotorEx.class, "FL");
-                    rightFront = hardwareMap.get(DcMotorEx.class, "FR");
+                    //leftFront = hardwareMap.get(DcMotorEx.class, "FL");
+                    //rightFront = hardwareMap.get(DcMotorEx.class, "FR");
                     leftRear = hardwareMap.get(DcMotorEx.class, "BL");
                     rightRear = hardwareMap.get(DcMotorEx.class, "BR");
 
-                    rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
-                    rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
+                    //rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+                    //rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
 
-                    motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
+                    motors = Arrays.asList(leftRear, rightRear);
                     telemetry.addData("targetVelocity", motionState.getV());
                     for (int i = 0; i < velocities.size(); i++) {
                         telemetry.addData("measuredVelocity" + i, velocities.get(i));

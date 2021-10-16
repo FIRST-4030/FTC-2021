@@ -9,6 +9,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 //import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleTankDrive;
+import org.firstinspires.ftc.teamcode.robot.Robot;
+import org.firstinspires.ftc.teamcode.wheels.MOTOR_END;
+import org.firstinspires.ftc.teamcode.wheels.MOTOR_SIDE;
 
 /**
  * This is a simple teleop routine for testing localization. Drive the robot around like a normal
@@ -24,6 +27,7 @@ public class LocalizationTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         SampleTankDrive drive = new SampleTankDrive(hardwareMap);
+        Robot robot = new Robot(hardwareMap, telemetry);
 
         drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -44,6 +48,10 @@ public class LocalizationTest extends LinearOpMode {
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
+            telemetry.addData("encoder vel", drive.getWheelVelocities());
+            telemetry.addData("encoder pos", drive.getWheelPositions());
+            robot.telemetry.addData("BL", robot.wheels.getEncoder(MOTOR_SIDE.LEFT, MOTOR_END.BACK));
+            robot.telemetry.addData("BR", robot.wheels.getEncoder(MOTOR_SIDE.RIGHT, MOTOR_END.BACK));
             telemetry.update();
         }
     }
