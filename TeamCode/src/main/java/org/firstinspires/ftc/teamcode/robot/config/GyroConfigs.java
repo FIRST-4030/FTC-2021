@@ -51,6 +51,9 @@ public class GyroConfigs extends Configs {
             case MECANUM:
                 config = new GyroConfig(GYRO_TYPES.REV, "imu");
                 break;
+            case TANKTEST:
+                config = new GyroConfig(GYRO_TYPES.REV, "imu");
+                break;
         }
         return config;
     }

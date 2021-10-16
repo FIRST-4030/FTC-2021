@@ -21,8 +21,8 @@ public class TankDriveConstants {
      * from DriveVelocityPIDTuner.
      */
     public static final boolean RUN_USING_ENCODER = true;
-    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(0, 0, 0,
-            getMotorVelocityF(MAX_RPM / 60 * TICKS_PER_REV));
+    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(0, 0, 0, 6.695);
+            //getMotorVelocityF(MAX_RPM / 60 * TICKS_PER_REV));
 
     /*
      * These are physical constants that can be determined from your robot (including the track
@@ -75,7 +75,7 @@ public class TankDriveConstants {
 
      */
     public static DriveConstraints BASE_CONSTRAINTS = new DriveConstraints(
-            28.483773392547455, 28.483773392547455, 0.0,
+            60.3, 28.483773392547455, 0.0,
             Math.toRadians(129.52380952380952), Math.toRadians(129.52380952380952), 0.0
     );
    /*  public static double MAX_VEL = 28.483773392547455;

@@ -27,7 +27,6 @@ public class LocalizationTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         SampleTankDrive drive = new SampleTankDrive(hardwareMap);
-        Robot robot = new Robot(hardwareMap, telemetry);
 
         drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -50,8 +49,6 @@ public class LocalizationTest extends LinearOpMode {
             telemetry.addData("heading", poseEstimate.getHeading());
             telemetry.addData("encoder vel", drive.getWheelVelocities());
             telemetry.addData("encoder pos", drive.getWheelPositions());
-            robot.telemetry.addData("BL", robot.wheels.getEncoder(MOTOR_SIDE.LEFT, MOTOR_END.BACK));
-            robot.telemetry.addData("BR", robot.wheels.getEncoder(MOTOR_SIDE.RIGHT, MOTOR_END.BACK));
             telemetry.update();
         }
     }
