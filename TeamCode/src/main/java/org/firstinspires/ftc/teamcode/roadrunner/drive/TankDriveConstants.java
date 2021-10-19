@@ -33,7 +33,7 @@ public class TankDriveConstants {
      * convenience. Make sure to exclude any gear ratio included in MOTOR_CONFIG from GEAR_RATIO.
      */
     public static double WHEEL_RADIUS = 2.3; // in
-    public static double GEAR_RATIO = 1 * 10.8 / 22; // output (wheel) speed / input (motor) speed
+    public static double GEAR_RATIO = 1 * 30.8 / 34.8; // output (wheel) speed / input (motor) speed
     public static double TRACK_WIDTH = 12.6; // in
 
     /*
