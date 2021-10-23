@@ -36,7 +36,7 @@ public class DistanceTestDetailed extends LinearOpMode {
             } else { // Otherwise, stop the motor
                 telemetry.addData("In Range1: ", "No");
             }
-            if (Distance2.getDistance(DistanceUnit.CM) < 10) {
+            if (Distance2.getDistance(DistanceUnit.INCH) <= 19) {
                 //motor.setPower(0.3);
                 telemetry.addData("In Range2: ", "Yes");
             } else { // Otherwise, stop the motor
