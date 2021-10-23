@@ -31,6 +31,18 @@ public class DistanceTestDetailed extends LinearOpMode {
         while(opModeIsActive()) {
             // generic DistanceSensor methods.
             //telemetry.addData("deviceName", Distance.getDeviceName() );
+            if (Distance1.getDistance(DistanceUnit.INCH) <= 19) {
+                telemetry.addData("In Range1: ", "Yes");
+            } else { // Otherwise, stop the motor
+                telemetry.addData("In Range1: ", "No");
+            }
+            if (Distance2.getDistance(DistanceUnit.CM) < 10) {
+                //motor.setPower(0.3);
+                telemetry.addData("In Range2: ", "Yes");
+            } else { // Otherwise, stop the motor
+                //motor.setPower(0);
+                telemetry.addData("In Range2: ", "No");
+            }
             telemetry.addData("D1 range", String.format("%.01f mm", Distance1.getDistance(DistanceUnit.MM)));
             telemetry.addData("range", String.format("%.01f cm", Distance1.getDistance(DistanceUnit.CM)));
             telemetry.addData("range", String.format("%.01f m", Distance1.getDistance(DistanceUnit.METER)));
