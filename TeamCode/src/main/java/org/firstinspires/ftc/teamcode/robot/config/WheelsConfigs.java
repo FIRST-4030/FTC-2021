@@ -52,8 +52,8 @@ public class WheelsConfigs extends Configs {
         switch (bot) {
             case PRODUCTION:
                 motors = new WheelMotor[2];
-                motors[0] = new WheelMotor("FR", MOTOR_SIDE.RIGHT, true);
-                motors[1] = new WheelMotor("BL", MOTOR_SIDE.LEFT, false);
+                motors[0] = new WheelMotor("BL", MOTOR_SIDE.LEFT, true);
+                motors[1] = new WheelMotor("BR", MOTOR_SIDE.RIGHT, false);
                 config = new WheelsConfig(DRIVE_TYPE.TANK, motors, true, DcMotor.RunMode.RUN_USING_ENCODER);
                 break;
 

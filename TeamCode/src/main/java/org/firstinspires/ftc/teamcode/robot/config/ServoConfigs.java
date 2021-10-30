@@ -31,7 +31,7 @@ public class ServoConfigs extends Configs {
             case PRODUCTION:
                 switch(servo) {
 
-                    case WOBBLE_GOAL_GRIP:
+                    /* case WOBBLE_GOAL_GRIP:
                         config = new ServoConfig("Wobble Goal Grip", false, 0.0f, 1.0f);
                         break;
                     case BACK_RAISE_LOWER:
@@ -47,7 +47,7 @@ public class ServoConfigs extends Configs {
                         config = new ServoConfig("Flipper", false, 0.0f, 1.0f);
                         break;
                     case WOBBLE_GOAL_ARM:
-                        config = new ServoConfig("Wobble Goal Arm", false, 0.0f, 1.0f);
+                        config = new ServoConfig("Wobble Goal Arm", false, 0.0f, 1.0f); */
 
                 }
                 break;

@@ -82,11 +82,10 @@ public class Robot {
         this.map = map;
         this.telemetry = telemetry;
         if (bot == null) {
-            bot = BOT.MECANUM;
-            //bot = detectBot();
+            bot = detectBot();
         }
         this.bot = bot;
-        odometry = new StandardTrackingWheelLocalizer(map);
+        //odometry = new StandardTrackingWheelLocalizer(map);
 
         GyroConfigs gyros = new GyroConfigs(map, telemetry, bot);
         WheelsConfigs wheels = new WheelsConfigs(map, telemetry, bot);
@@ -107,17 +106,7 @@ public class Robot {
         // Bot specific
         switch (bot) {
             case PRODUCTION:
-                odometry = new StandardTrackingWheelLocalizer(map);
-                wobbleGoalArm = servos.init(SERVOS.WOBBLE_GOAL_ARM);
-                wobbleGoalGrip = servos.init(SERVOS.WOBBLE_GOAL_GRIP);
-                queueFlipper = servos.init(SERVOS.QUEUE_FLIPPER);
-                collectorBack = motors.init(MOTORS.COLLECTOR_BACK);
-                collectorFront = motors.init(MOTORS.COLLECTOR_FRONT);
-                backRaiseLower = servos.init(SERVOS.BACK_RAISE_LOWER);
-                frontRaiseLower = servos.init(SERVOS.FRONT_RAISE_LOWER);
-                shooter = motors.init(MOTORS.SHOOTER);
-                queue = servos.init(SERVOS.QUEUE);
-                shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+                //odometry = new StandardTrackingWheelLocalizer(map);
                 break;
 
             case ARM:

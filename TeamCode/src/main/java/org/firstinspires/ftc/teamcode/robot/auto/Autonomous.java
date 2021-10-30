@@ -62,11 +62,11 @@ public class Autonomous extends LinearOpMode implements RobotConstants {
         //vuforia.start();
         //vuforia.enableCapture();
 
-        auto = new NewAuto("BL","FR", hardwareMap, robot.odometry);
+        /* auto = new NewAuto("BL","FR", hardwareMap, robot.odometry);
         ringDetector = new RingStackTF(hardwareMap, telemetry);
 
         newPIDF = auto.getPIDFCoefficients();
-        robot.frontRaiseLower.setPosition(COLLECT_NO);
+        zrobot.frontRaiseLower.setPosition(COLLECT_NO);
         robot.backRaiseLower.setPosition(COLLECT_NO);
         robot.wobbleGoalGrip.setPosition(CLAW_CLOSED);
         sleep(350);
@@ -193,14 +193,14 @@ public class Autonomous extends LinearOpMode implements RobotConstants {
                 //auto.drive(-55, 1);
                 break;
         }
-        robot.wobbleGoalArm.setPosition(ARM_OUT);
+         robot.wobbleGoalArm.setPosition(ARM_OUT);
         sleep(1000);
         robot.wobbleGoalGrip.setPosition(CLAW_OPEN);
         sleep(350);
         robot.wobbleGoalArm.setPosition(ARM_IN);
         sleep(350); */
-        if(depot != 2) auto.driveToPosition(68, 47, 1);
-        else auto.drive(-30, 1);
+        //if(depot != 2) auto.driveToPosition(68, 47, 1);
+        //else auto.drive(-30, 1);
 
     }
 

@@ -33,14 +33,14 @@ public class MotorConfigs extends Configs {
             // IMPORTANT: If you need to change the *names* of the motors here, change them in PIDMotorConfigs too
             case PRODUCTION:
                 switch(motor) {
-                    case SHOOTER:
+                    /* case SHOOTER:
                         config = new MotorConfig("Shooter", true, true);
                         break;
                     case COLLECTOR_BACK:
                         config = new MotorConfig("Back Collector", true, true);
                         break;
                     case COLLECTOR_FRONT:
-                        config = new MotorConfig("Front Collector", true, true);
+                        config = new MotorConfig("Front Collector", true, true); */
                 }
                 break;
         }
