@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -22,7 +23,7 @@ public class DistanceTestDetailed extends LinearOpMode {
 
         // you can also cast this to a Rev2mDistanceSensor if you want to use added
         // methods associated with the Rev2mDistanceSensor class.
-        //ModernRoboticsI2cRangeSensor sensorTimeOfFlight = (ModernRoboticsI2cRangeSensor)Distance1;
+        //Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor) Distance1;
 
         telemetry.addData(">>", "Press start to continue");
         telemetry.update();
@@ -52,9 +53,9 @@ public class DistanceTestDetailed extends LinearOpMode {
             telemetry.addData("range", String.format("%.01f m", Distance2.getDistance(DistanceUnit.METER)));
             telemetry.addData("range", String.format("%.01f in", Distance2.getDistance(DistanceUnit.INCH)));
 
-            /*// Rev2mDistanceSensor specific methods.
-            telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
-            telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));*/
+            // Rev2mDistanceSensor specific methods.
+            /* telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
+            telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur())); */
 
             telemetry.update();
         }
