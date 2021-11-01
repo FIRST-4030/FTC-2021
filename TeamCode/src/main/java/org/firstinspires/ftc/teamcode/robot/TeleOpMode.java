@@ -52,7 +52,7 @@ public class TeleOpMode extends LinearOpMode implements RobotConstants {
 
         // Register buttons
         buttons = new ButtonHandler(robot);
-        //buttons.register("UPDATE_ODOMETRY", gamepad1, PAD_BUTTON.x);
+        buttons.register("SLOW_MODE", gamepad1, PAD_BUTTON.x);
 
         // Wait for the game to begin
         telemetry.addData(">", "Ready for game start");
@@ -91,11 +91,11 @@ public class TeleOpMode extends LinearOpMode implements RobotConstants {
     //Slow mode
     private void driveBase() {
         //robot.odometry.update();
-        /* if (buttons.get("SLOW_MODE")) {
+        if (buttons.get("SLOW_MODE")) {
             robot.wheels.setSpeedScale(SLOW_MODE);
         } else {
             robot.wheels.setSpeedScale(NORMAL_SPEED);
-        } */
+        }
         robot.wheels.loop(gamepad1);
     }
 
@@ -108,6 +108,8 @@ public class TeleOpMode extends LinearOpMode implements RobotConstants {
         //telemetry.addData("R:", robot.odometry.getRightEncoder());
         //telemetry.addData("X:", robot.odometry.getPoseEstimate().getX());
         //telemetry.addData("Y:", robot.odometry.getPoseEstimate().getY());
+        telemetry.addData("encoder left pos", robot.wheels.getEncoder(MOTOR_SIDE.LEFT));
+        telemetry.addData("encoder right pos", robot.wheels.getEncoder(MOTOR_SIDE.RIGHT));
 
     }
 
