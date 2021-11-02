@@ -45,19 +45,19 @@ public class NewTeleOp extends OpMode
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
     private DcMotor duckSpinner = null;
-    private DcMotor DepBelt = null;
-    private Servo DepLow = null;
-    private Servo DepMid = null;
-    private DcMotor Collector = null;
+    private DcMotor depBelt = null;
+    private Servo depLow = null;
+    private Servo depMid = null;
+    private DcMotor collector = null;
 
     // Constants used for hardware
-    private static double duckPower = 0.5;
-    private static double beltPower = 0.5;
+    private static double DUCK_POWER = 0.5;
+    private static double DEP_BELT_POWER = 0.5;
     private static double LOW_OPEN = 0.5;
     private static double LOW_CLOSE = 0.5;
     private static double MID_OPEN = 0.5;
     private static double MID_CLOSE = 0.5;
-    private static double collectorPower = 0.5;
+    private static double COLLECTOR_POWER = 0.5;
 
     // Members
     private ElapsedTime runtime = new ElapsedTime();
@@ -76,12 +76,12 @@ public class NewTeleOp extends OpMode
         duckSpinner = hardwareMap.get(DcMotor.class, "duck");
 
         // Depositor
-        DepBelt = hardwareMap.get(DcMotor.class, "Dbelt");
-        DepLow = hardwareMap.get(Servo.class, "Dlow");
-        DepMid = hardwareMap.get(Servo.class, "Dmid");
+        depBelt = hardwareMap.get(DcMotor.class, "Dbelt");
+        depLow = hardwareMap.get(Servo.class, "Dlow");
+        depMid = hardwareMap.get(Servo.class, "Dmid");
 
         // Collector
-        Collector = hardwareMap.get(DcMotor.class, "Collector");
+        collector = hardwareMap.get(DcMotor.class, "Collector");
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Ready");
@@ -112,33 +112,33 @@ public class NewTeleOp extends OpMode
 
         // Duck spinner
         if (gamepad1.a) {
-            duckSpinner.setPower(duckPower);
+            duckSpinner.setPower(DUCK_POWER);
         } else {
             duckSpinner.setPower(0);
         }
 
         // Depositor
         if (gamepad2.a || gamepad2.b || gamepad2.x) {
-            DepBelt.setPower(beltPower);
+            depBelt.setPower(DEP_BELT_POWER);
         } else {
-            DepBelt.setPower(0);
+            depBelt.setPower(0);
         }
         if (gamepad2.a) {
-            DepLow.setPosition(LOW_OPEN);
+            depLow.setPosition(LOW_OPEN);
         } else {
-            DepLow.setPosition(LOW_CLOSE);
+            depLow.setPosition(LOW_CLOSE);
         }
         if (gamepad2.b) {
-            DepMid.setPosition(MID_OPEN);
+            depMid.setPosition(MID_OPEN);
         } else {
-            DepMid.setPosition(MID_CLOSE);
+            depMid.setPosition(MID_CLOSE);
         }
 
         // Collector
         if (gamepad1.left_bumper) {
-            Collector.setPower(collectorPower);
+            collector.setPower(COLLECTOR_POWER);
         } else {
-            Collector.setPower(0);
+            collector.setPower(0);
         }
 
         // Feedback
@@ -146,9 +146,9 @@ public class NewTeleOp extends OpMode
                 leftDrive.getCurrentPosition(), leftDrive.getCurrentPosition(),
                 rightDrive.getCurrentPosition(), rightDrive.getCurrentPosition());
         telemetry.addData("Duck/Collector", "D %.2f, C (%.2f)",
-                duckSpinner.getPower(), Collector.getPower());
+                duckSpinner.getPower(), collector.getPower());
         telemetry.addData("Depositor", "B %.2f, L %.2f, M %.2f",
-                DepBelt.getPower(), DepLow.getPosition(), DepMid.getPosition());
+                depBelt.getPower(), depLow.getPosition(), depMid.getPosition());
     }
 
     @Override
