@@ -143,8 +143,8 @@ public class NewTeleOp extends OpMode
 
         // Feedback
         telemetry.addData("Drive", "L %.2f/%d, R %.2f/%d",
-                leftDrive.getCurrentPosition(), leftDrive.getCurrentPosition(),
-                rightDrive.getCurrentPosition(), rightDrive.getCurrentPosition());
+                leftDrive.getPower(), leftDrive.getCurrentPosition(),
+                rightDrive.getPower(), rightDrive.getCurrentPosition());
         telemetry.addData("Duck/Collector", "D %.2f, C (%.2f)",
                 duckSpinner.getPower(), collector.getPower());
         telemetry.addData("Depositor", "B %.2f, L %.2f, M %.2f",
