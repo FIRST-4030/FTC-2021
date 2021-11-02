@@ -30,7 +30,6 @@
 package org.firstinspires.ftc.teamcode.robot;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -38,27 +37,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-/**
- * This file contains an example of an iterative (Non-Linear) "OpMode".
- * An OpMode is a 'program' that runs in either the autonomous or the teleop period of an FTC match.
- * The names of OpModes appear on the menu of the FTC Driver Station.
- * When an selection is made from the menu, the corresponding OpMode
- * class is instantiated on the Robot Controller and executed.
- *
- * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
- * It includes all the skeletal structure that all iterative OpModes contain.
- *
- * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- */
-
-@TeleOp(name="Basic: Iterative OpMode", group="Iterative Opmode")
-@Disabled
 @Config
+@TeleOp(name="NewTeleOp", group="Test")
 public class NewTeleOp extends OpMode
 {
-    // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
+    // Hardware
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
     private DcMotor duckSpinner = null;
@@ -67,6 +50,7 @@ public class NewTeleOp extends OpMode
     private Servo DepMid = null;
     private DcMotor Collector = null;
 
+    // Constants used for hardware
     private static double duckPower = 0.5;
     private static double beltPower = 0.5;
     private static double LOW_OPEN = 0.5;
@@ -74,16 +58,15 @@ public class NewTeleOp extends OpMode
     private static double MID_OPEN = 0.5;
     private static double MID_CLOSE = 0.5;
     private static double collectorPower = 0.5;
-    /*
-     * Code to run ONCE when the driver hits INIT
-     */
+
+    // Members
+    private ElapsedTime runtime = new ElapsedTime();
+
     @Override
     public void init() {
-        telemetry.addData("Status", "Initialized");
+        telemetry.addData("Status", "Initializing...");
 
-        // Initialize the hardware variables. Note that the strings used here as parameters
-        // to 'get' must correspond to the names assigned during the robot configuration
-        // step (using the FTC Robot Controller app on the phone).
+        // Drive Motors
         leftDrive  = hardwareMap.get(DcMotor.class, "BL");
         rightDrive = hardwareMap.get(DcMotor.class, "BR");
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
@@ -101,58 +84,40 @@ public class NewTeleOp extends OpMode
         Collector = hardwareMap.get(DcMotor.class, "Collector");
 
         // Tell the driver that initialization is complete.
-        telemetry.addData("Status", "Initialized");
+        telemetry.addData("Status", "Ready");
     }
 
-    /*
-     * Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
-     */
     @Override
     public void init_loop() {
     }
 
-    /*
-     * Code to run ONCE when the driver hits PLAY
-     */
     @Override
     public void start() {
         runtime.reset();
+
+        // Zero the drive encoders and enable RUN_USING_ENCODER for velocity PID
+        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    /*
-     * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
-     */
     @Override
     public void loop() {
-        // Setup a variable for each drive wheel to save power level for telemetry
-        double leftPower;
-        double rightPower;
-
-        // Choose to drive using either Tank Mode, or POV Mode
-        // Comment out the method that's not used.  The default below is POV.
-
-        // POV Mode uses left stick to go forward, and right stick to turn.
-        // - This uses basic math to combine motions and is easier to drive straight.
+        // PoV drive
         double drive = -gamepad1.left_stick_y;
         double turn  =  gamepad1.right_stick_x;
-        leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
-        rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
+        leftDrive.setPower(Range.clip(drive + turn, -1.0, 1.0));
+        rightDrive.setPower(Range.clip(drive - turn, -1.0, 1.0));
 
-        // Tank Mode uses one stick to control each wheel.
-        // - This requires no math, but it is hard to drive forward slowly and keep straight.
-        // leftPower  = -gamepad1.left_stick_y ;
-        // rightPower = -gamepad1.right_stick_y ;
-
-        // Send calculated power to wheels
-        leftDrive.setPower(leftPower);
-        rightDrive.setPower(rightPower);
-
+        // Duck spinner
         if (gamepad1.a) {
             duckSpinner.setPower(duckPower);
         } else {
             duckSpinner.setPower(0);
         }
 
+        // Depositor
         if (gamepad2.a || gamepad2.b || gamepad2.x) {
             DepBelt.setPower(beltPower);
         } else {
@@ -169,22 +134,24 @@ public class NewTeleOp extends OpMode
             DepMid.setPosition(MID_CLOSE);
         }
 
+        // Collector
         if (gamepad1.left_bumper) {
             Collector.setPower(collectorPower);
         } else {
             Collector.setPower(0);
         }
 
-        // Show the elapsed game time and wheel power.
-        telemetry.addData("Status", "Run Time: " + runtime.toString());
-        telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+        // Feedback
+        telemetry.addData("Drive", "L %.2f/%d, R %.2f/%d",
+                leftDrive.getCurrentPosition(), leftDrive.getCurrentPosition(),
+                rightDrive.getCurrentPosition(), rightDrive.getCurrentPosition());
+        telemetry.addData("Duck/Collector", "D %.2f, C (%.2f)",
+                duckSpinner.getPower(), Collector.getPower());
+        telemetry.addData("Depositor", "B %.2f, L %.2f, M %.2f",
+                DepBelt.getPower(), DepLow.getPosition(), DepMid.getPosition());
     }
 
-    /*
-     * Code to run ONCE after the driver hits STOP
-     */
     @Override
     public void stop() {
     }
-
 }
