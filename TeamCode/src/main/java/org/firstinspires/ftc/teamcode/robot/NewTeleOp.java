@@ -38,9 +38,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 @Config
-@TeleOp(name="NewTeleOp", group="Test")
-public class NewTeleOp extends OpMode
-{
+@TeleOp(name = "NewTeleOp", group = "Test")
+public class NewTeleOp extends OpMode {
     // Hardware
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
@@ -64,27 +63,53 @@ public class NewTeleOp extends OpMode
 
     @Override
     public void init() {
+        boolean error = false;
         telemetry.addData("Status", "Initializing...");
 
         // Drive Motors
-        leftDrive  = hardwareMap.get(DcMotor.class, "BL");
-        rightDrive = hardwareMap.get(DcMotor.class, "BR");
-        leftDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightDrive.setDirection(DcMotor.Direction.REVERSE);
+        try {
+            leftDrive = hardwareMap.get(DcMotor.class, "BL");
+            rightDrive = hardwareMap.get(DcMotor.class, "BR");
+            leftDrive.setDirection(DcMotor.Direction.FORWARD);
+            rightDrive.setDirection(DcMotor.Direction.REVERSE);
+        } catch (Exception e) {
+            telemetry.log().add("Could not find drive");
+            error = true;
+        }
 
         // Duck Spinner
-        duckSpinner = hardwareMap.get(DcMotor.class, "duck");
+        try {
+            duckSpinner = hardwareMap.get(DcMotor.class, "duck");
+        } catch (Exception e) {
+            telemetry.log().add("Could not find duck spinner");
+            error = true;
+        }
 
         // Depositor
-        depBelt = hardwareMap.get(DcMotor.class, "Dbelt");
-        depLow = hardwareMap.get(Servo.class, "Dlow");
-        depMid = hardwareMap.get(Servo.class, "Dmid");
+        try {
+            depBelt = hardwareMap.get(DcMotor.class, "Dbelt");
+            depLow = hardwareMap.get(Servo.class, "Dlow");
+            depMid = hardwareMap.get(Servo.class, "Dmid");
+        } catch (Exception e) {
+            telemetry.log().add("Could not find depositor");
+            error = true;
+        }
+
 
         // Collector
-        collector = hardwareMap.get(DcMotor.class, "Collector");
+        try {
+            collector = hardwareMap.get(DcMotor.class, "Collector");
+        } catch (Exception e) {
+            telemetry.log().add("Could not find collector");
+            error = true;
+        }
 
-        // Tell the driver that initialization is complete.
-        telemetry.addData("Status", "Ready");
+        // Initialization status
+        String status = "Ready";
+        if (error) {
+            status = "Hardware Error";
+        }
+        telemetry.addData("Status", status);
     }
 
     @Override
@@ -106,7 +131,7 @@ public class NewTeleOp extends OpMode
     public void loop() {
         // PoV drive
         double drive = -gamepad1.left_stick_y;
-        double turn  =  gamepad1.right_stick_x;
+        double turn = gamepad1.right_stick_x;
         leftDrive.setPower(Range.clip(drive + turn, -1.0, 1.0));
         rightDrive.setPower(Range.clip(drive - turn, -1.0, 1.0));
 
