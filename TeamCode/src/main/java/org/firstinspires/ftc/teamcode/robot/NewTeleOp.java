@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode.robot;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -53,6 +54,7 @@ import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name="Basic: Iterative OpMode", group="Iterative Opmode")
 @Disabled
+@Config
 public class NewTeleOp extends OpMode
 {
     // Declare OpMode members.
@@ -65,13 +67,13 @@ public class NewTeleOp extends OpMode
     private Servo DepMid = null;
     private DcMotor Collector = null;
 
-    private final double duckPower = 0.5;
-    private final double beltPower = 0.5;
-    private final double LOW_OPEN = 0.5;
-    private final double LOW_CLOSE = 0.5;
-    private final double MID_OPEN = 0.5;
-    private final double MID_CLOSE = 0.5;
-    private final double collectorPower = 0.5;
+    private static double duckPower = 0.5;
+    private static double beltPower = 0.5;
+    private static double LOW_OPEN = 0.5;
+    private static double LOW_CLOSE = 0.5;
+    private static double MID_OPEN = 0.5;
+    private static double MID_CLOSE = 0.5;
+    private static double collectorPower = 0.5;
     /*
      * Code to run ONCE when the driver hits INIT
      */
