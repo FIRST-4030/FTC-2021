@@ -50,16 +50,21 @@ public class NewTeleOp extends OpMode {
     private DcMotor collector = null;
 
     // Constants used for hardware
-    private static double DUCK_POWER = 0.5;
-    private static double DEP_BELT_POWER = 0.5;
-    private static double LOW_OPEN = 0.5;
+    private static double DUCK_POWER = 0;
+    private static double DEP_BELT_POWER = 1;
+    private static double LOW_OPEN = 0.9;
     private static double LOW_CLOSE = 0.5;
-    private static double MID_OPEN = 0.5;
-    private static double MID_CLOSE = 0.5;
+    private static double MID_OPEN = 0.9;
+    private static double MID_CLOSE = 0.4;
     private static double COLLECTOR_POWER = 0.5;
+    private static double timerRatio = 0;
+    private static double duckPowerMin = 0.65;  // min duck spinner speed (0 - 1.0)
+    private static double duckPowerMax = 0.9;  // max duck spinner speed (0 - 1.0)
+    private static double duckRampTime = 1.25;  // duck spinner ramp time (seconds, >0)
 
     // Members
     private ElapsedTime runtime = new ElapsedTime();
+    private ElapsedTime duckTimer = new ElapsedTime();
 
     @Override
     public void init() {
@@ -136,11 +141,14 @@ public class NewTeleOp extends OpMode {
         rightDrive.setPower(Range.clip(drive - turn, -1.0, 1.0));
 
         // Duck spinner
-        if (gamepad1.a) {
-            duckSpinner.setPower(DUCK_POWER);
+        if (gamepad1.a) duckTimer.reset();
+        timerRatio = Math.max(Math.min(duckTimer.seconds() / duckRampTime, 1.0), 0);
+        if (timerRatio != 0.0 && timerRatio != 1.0) {
+            DUCK_POWER = duckPowerMin + timerRatio * (duckPowerMax - duckPowerMin);
         } else {
-            duckSpinner.setPower(0);
+            DUCK_POWER = 0.0;
         }
+        duckSpinner.setPower(DUCK_POWER);
 
         // Depositor
         if (gamepad2.a || gamepad2.b || gamepad2.x) {
