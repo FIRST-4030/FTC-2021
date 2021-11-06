@@ -33,8 +33,8 @@ public class TankDriveConstants {
      * angular distances although most angular parameters are wrapped in Math.toRadians() for
      * convenience. Make sure to exclude any gear ratio included in MOTOR_CONFIG from GEAR_RATIO.
      */
-    public static double WHEEL_RADIUS = 2.25; // in
-    public static double GEAR_RATIO = 3.444; // output (wheel) speed / input (motor) speed
+    public static double WHEEL_RADIUS = 1.125; // in
+    public static double GEAR_RATIO = 3.66 * 29.45 / 24; // output (wheel) speed / input (motor) speed
     public static double TRACK_WIDTH = 15.25; // in
 
     /*
@@ -92,7 +92,7 @@ public class TankDriveConstants {
     public static double MAX_ANG_VEL = Math.toRadians(338.13902663458424);
     public static double MAX_ANG_ACCEL = Math.toRadians(338.13902663458424); */
     public static DriveConstraints BASE_CONSTRAINTS = new DriveConstraints(
-            90, 90, 0.0,
+            90, 70, 0.0,
             Math.toRadians(338.13902663458424), Math.toRadians(338.13902663458424), 0.0
     );
 
