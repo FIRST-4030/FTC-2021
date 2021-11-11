@@ -47,6 +47,7 @@ public class NewAuto extends OpMode {
     private static double ANGLE_CONST = 1.23;
 
     // Members
+    private boolean done = false;
     private boolean driveCmdRunning = false;
     private int autoStep = 0;
 
@@ -81,12 +82,13 @@ public class NewAuto extends OpMode {
     @Override
     public void start() {
         driveStop();
+        done = false;
+        autoStep = 0;
     }
 
     @Override
     public void loop() {
         // Stop when the autoSteps are complete
-        boolean done = false;
         if (done) {
             requestOpModeStop();
             return;
