@@ -85,6 +85,12 @@ public class NewAuto extends OpMode {
 
     @Override
     public void loop() {
+        // Stop when the autoSteps are complete
+        boolean done = false;
+        if (done) {
+            requestOpModeStop();
+            return;
+        }
 
         // Feedback
         telemetry.addData("Drive", "L %.2f/%d, R %.2f/%d",
@@ -137,6 +143,11 @@ public class NewAuto extends OpMode {
             // Forward 31
             case 6:
                 driveTo(DRIVE_POWER, 31);
+                break;
+            // If we get past the end stop and end the loop
+            default:
+                driveStop();
+                done = true;
                 break;
         }
     }
