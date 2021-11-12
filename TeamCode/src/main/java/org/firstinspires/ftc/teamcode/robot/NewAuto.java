@@ -33,6 +33,12 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
 @TeleOp(name = "NewAuto", group = "Test")
@@ -40,6 +46,8 @@ public class NewAuto extends OpMode {
     // Hardware
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
+    private DistanceSensor distanceLeft = null;
+    private DistanceSensor distanceRight = null;
 
     // Consts
     private static float DRIVE_POWER = 0.77f;
@@ -64,6 +72,15 @@ public class NewAuto extends OpMode {
             rightDrive.setDirection(DcMotor.Direction.REVERSE);
         } catch (Exception e) {
             telemetry.log().add("Could not find drive");
+            error = true;
+        }
+
+        // Distance Sensors
+        try {
+            distanceLeft = hardwareMap.get(DistanceSensor.class, "DL");
+            distanceRight = hardwareMap.get(DistanceSensor.class, "DR");
+        } catch (Exception e) {
+            telemetry.log().add("Could not find distance sensors");
             error = true;
         }
 

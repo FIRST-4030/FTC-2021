@@ -33,6 +33,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -55,29 +56,31 @@ public class NewTeleOp extends OpMode {
     private Servo collectorArm = null;
     private Servo capstoneArm = null;
     //private Servo capstoneHook = null;
-    private DistanceSensor distanceLeft;
-    private DistanceSensor distanceRight;
+    private DistanceSensor distanceLeft = null;
+    private DistanceSensor distanceRight = null;
 
     // Constants used for hardware
     private static double DUCK_POWER = 0.0;
-    private static double DEP_BELT_POWER = 1;
+    private static double DEP_BELT_POWER = 0.8;
+    private static double DEP_UP = 0.6;
     private static double DEP_DOWN = 0.44;
-    private static double LOW_OPEN = 1;
+    private static double LOW_OPEN = 0.98;
     private static double LOW_CLOSE = 0.56;
     private static double MID_OPEN = 0.9;
-    private static double MID_CLOSE = 0.49;
-    private static double COLLECTOR_UP = 0.75;
-    private static double COLLECTOR_DOWN = 0.0;
+    private static double MID_CLOSE = 0.48;
+    private static double COLLECTOR_UP = 0.55;
+    private static double COLLECTOR_DOWN = 0.07;
     private static double COLLECTOR_POWER = -1;
     private static double timerRatio = 0.0;
     private static double duckPowerMin = 0.65;  // min duck spinner speed (0 - 1.0)
     private static double duckPowerMax = 0.9;  // max duck spinner speed (0 - 1.0)
     private static double duckRampTime = 1.25;  // duck spinner ramp time (seconds, >0)
-    private static double CAP_UP = 0.25;
-    private static double CAP_MID = 0.5;
-    private static double CAP_DOWN = 0.75;
+    private static double CAP_IN = 0.05;
+    private static double CAP_UP = 0.44;
+    private static double CAP_DOWN = 0.945;
     //private static double CAP_HOOK_DOWN = 0.75;
     //private static double CAP_HOOK_UP = 0.25;
+    private static double duckTimecount = 0;
 
     // Servo position test constants
     private float servoPos = 0.5f;
@@ -96,8 +99,8 @@ public class NewTeleOp extends OpMode {
         try {
             leftDrive = hardwareMap.get(DcMotor.class, "BL");
             rightDrive = hardwareMap.get(DcMotor.class, "BR");
-            leftDrive.setDirection(DcMotor.Direction.FORWARD);
-            rightDrive.setDirection(DcMotor.Direction.REVERSE);
+            leftDrive.setDirection(DcMotor.Direction.REVERSE);
+            rightDrive.setDirection(DcMotor.Direction.FORWARD);
         } catch (Exception e) {
             telemetry.log().add("Could not find drive");
             error = true;
@@ -137,7 +140,7 @@ public class NewTeleOp extends OpMode {
             //capstoneHook = hardwareMap.get(Servo.class, "Caphook");
             capstoneArm = hardwareMap.get(Servo.class, "Caparm");
         } catch (Exception e) {
-            telemetry.log().add("Could not find collector");
+            telemetry.log().add("Could not find capstone dep");
             error = true;
         }
 
@@ -146,7 +149,7 @@ public class NewTeleOp extends OpMode {
             distanceLeft = hardwareMap.get(DistanceSensor.class, "DL");
             distanceRight = hardwareMap.get(DistanceSensor.class, "DR");
         } catch (Exception e) {
-            telemetry.log().add("Could not find collector");
+            telemetry.log().add("Could not find range sensors");
             error = true;
         }
 
@@ -181,19 +184,26 @@ public class NewTeleOp extends OpMode {
     @Override
     public void loop() {
         // PoV drive
-        double drive = gamepad1.left_stick_y;
+        double drive = -gamepad1.left_stick_y;
         double turn = gamepad1.right_stick_x;
         leftDrive.setPower(Range.clip(drive + turn, -1.0, 1.0));
         rightDrive.setPower(Range.clip(drive - turn, -1.0, 1.0));
 
         // Duck spinner
-        if (gamepad1.a) duckTimer.reset();
-        timerRatio = Math.max(Math.min(duckTimer.seconds() / duckRampTime, 1.0), 0);
+        if (gamepad1.a) {
+            DUCK_POWER = duckPowerMin;
+            duckTime(12.5);
+        } else if (gamepad1.b) {
+            DUCK_POWER = -duckPowerMin;
+            duckTime(-12.5);
+        }
+
+        /* timerRatio = Math.max(Math.min(duckTimer.seconds() / duckRampTime, 1.0), 0);
         if (timerRatio != 0.0 && timerRatio != 1.0) {
             DUCK_POWER = duckPowerMin + timerRatio * (duckPowerMax - duckPowerMin);
         } else {
             DUCK_POWER = 0.0;
-        }
+        } */
         duckSpinner.setPower(DUCK_POWER);
 
         // Depositor
@@ -213,6 +223,12 @@ public class NewTeleOp extends OpMode {
             depMid.setPosition(MID_CLOSE);
         }
 
+        if (gamepad1.y) {
+            depTilt.setPosition(DEP_UP);
+        } else {
+            depTilt.setPosition(DEP_DOWN);
+        }
+
         // Collector
         if (gamepad1.right_bumper) {
             collector.setPower(COLLECTOR_POWER);
@@ -227,10 +243,10 @@ public class NewTeleOp extends OpMode {
 
         // Capstone
         if (gamepad2.dpad_up) {
-            capstoneArm.setPosition(CAP_UP);
+            capstoneArm.setPosition(CAP_IN);
         }
         if (gamepad2.left_bumper) {
-            capstoneArm.setPosition(CAP_MID);
+            capstoneArm.setPosition(CAP_UP);
         }
         if (gamepad2.right_bumper) {
             capstoneArm.setPosition(CAP_DOWN);
@@ -258,7 +274,7 @@ public class NewTeleOp extends OpMode {
                 duckSpinner.getPower(), collector.getPower());
         telemetry.addData("Depositor", "B %.2f, L %.2f, M %.2f",
                 depBelt.getPower(), depLow.getPosition(), depMid.getPosition());
-        /*
+
         // Shows number of servoPos
         telemetry.addData("Pos:", servoPos);
         // Moving the servo position and number should increase
@@ -271,7 +287,27 @@ public class NewTeleOp extends OpMode {
             servoPos = Math.max(0.0f, servoPos);
         }
         // Set position of desired servo
-        depMid.setPosition(servoPos);*/
+        //collectorArm.setPosition(servoPos);
+    }
+
+    public void duckTime(double time) {
+        if (time == 0) {
+            DUCK_POWER = 0;
+        } else if (time / time == 1) {
+            if (duckTimecount <= time) {
+                DUCK_POWER += 0.02;
+                duckTimecount++;
+            } else {
+                DUCK_POWER = 0;
+            }
+        } else if (time / time == -1) {
+            if (duckTimecount >= time) {
+                DUCK_POWER -= 0.02;
+                duckTimecount--;
+            } else {
+                DUCK_POWER = 0;
+            }
+        }
     }
 
     @Override
