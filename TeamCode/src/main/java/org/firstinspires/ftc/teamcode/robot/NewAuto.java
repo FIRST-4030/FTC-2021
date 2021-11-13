@@ -159,13 +159,6 @@ public class NewAuto extends OpMode {
             error = true;
         }
 
-        // Register buttons
-        buttons = new ButtonHandler(this);
-        buttons.register("RED", gamepad1, PAD_BUTTON.dpad_left);
-        buttons.register("BLUE", gamepad1, PAD_BUTTON.dpad_right);
-        buttons.register("DUCK", gamepad1, PAD_BUTTON.dpad_up);
-        buttons.register("WAREHOUSE", gamepad1, PAD_BUTTON.dpad_down);
-
         // Initialization status
         String status = "Ready";
         if (error) {
@@ -181,10 +174,10 @@ public class NewAuto extends OpMode {
 
     @Override
     public void init_loop() {
-        if (buttons.get("RED")) redAlliance = true;
-        if (buttons.get("BLUE")) redAlliance = false;
-        if (buttons.get("DUCK")) duckSide = true;
-        if (buttons.get("WAREHOUSE")) duckSide = false;
+        if (gamepad1.dpad_right) redAlliance = true;
+        if (gamepad1.dpad_left) redAlliance = false;
+        if (gamepad1.dpad_up) duckSide = true;
+        if (gamepad1.dpad_down) duckSide = false;
         telemetry.addData("Alliance", redAlliance ? "Red" : "Blue");
         telemetry.addData("Direction", duckSide ? "Duck" : "Warehouse");
     }
