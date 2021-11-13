@@ -64,7 +64,7 @@ public class NewAuto extends OpMode {
     // Consts
     private static float DRIVE_POWER = 0.375f;
     private static double TICKS_PER_INCH = 43.24;
-    private static double TURN_RATIO = 7.98;
+    private static double TURN_RATIO = 8;
     private static double ANGLE_CONST = 1.23;
     private static double DUCK_POWER = 0.0;
     private static double DEP_BELT_POWER = 0.9;
@@ -239,18 +239,27 @@ public class NewAuto extends OpMode {
                 break;*/
             // Forward 16
             case 0:
-                //driveTo(DRIVE_POWER, 16);
-                driveTo(DRIVE_POWER, 24.8f);
+                if (!duckSide) {
+                    driveTo(DRIVE_POWER, 15f);
+                } else {
+                    driveTo(DRIVE_POWER, 24.5f);
+                }
                 break;
             // Counter-clockwise 90
             case 1:
-                //turnTo(DRIVE_POWER, -90);
-                turnTo(DRIVE_POWER, 90);
+                if ((redAlliance && !duckSide) || (!redAlliance && duckSide)) {
+                    turnTo(DRIVE_POWER, -90);
+                } else {
+                    turnTo(DRIVE_POWER, 90);
+                }
                 break;
             // Backwards 32
             case 2:
-                //driveTo(-DRIVE_POWER * 0.4f, -36);
-                driveTo(-DRIVE_POWER, -25);
+                if (!duckSide) {
+                    driveTo(-DRIVE_POWER, -40);
+                } else {
+                    driveTo(-DRIVE_POWER, -24.8f);
+                }
                 break;
             /* // Backward 35
             case 3:

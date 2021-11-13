@@ -188,12 +188,12 @@ public class NewTeleOp extends OpMode {
     @Override
     public void loop() {
         // PoV drive
-        double drive = -gamepad1.left_stick_y;
+        double drive = Math.pow(-gamepad1.left_stick_y, 3);
         double turn = gamepad1.right_stick_x;
         //leftDrive.setPower(Range.clip(drive + turn, -1.0, 1.0));
         //rightDrive.setPower(Range.clip(drive - turn, -1.0, 1.0));
-        leftDrive.setPower(-gamepad1.left_stick_y);
-        rightDrive.setPower(-gamepad1.right_stick_y);
+        leftDrive.setPower(Math.pow(-gamepad1.left_stick_y, 3));
+        rightDrive.setPower(Math.pow(-gamepad1.right_stick_y, 3));
 
         if (gamepad1.right_trigger != 0) {
             double speed = 1 - gamepad1.right_trigger;
@@ -280,7 +280,10 @@ public class NewTeleOp extends OpMode {
         } else if (gamepad2.dpad_left) {
             capstoneTarget = CAP_DOWN;
         } else if (gamepad2.dpad_up) {
-            capstoneTarget = CAP_IN;
+            capstoneTarget = CAP_MID;
+        }
+        if (capstoneTarget >= 0 && capstoneTarget <= 1) {
+            capstoneTarget += (gamepad2.right_stick_y * 0.02);
         }
 
         double capError = capstoneTarget - capstoneArm.getPosition();
