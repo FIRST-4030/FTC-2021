@@ -58,9 +58,9 @@ public class NewAuto extends OpMode {
     private DistanceSensor distanceRight = null;
 
     // Consts
-    private static float DRIVE_POWER = 0.77f;
+    private static float DRIVE_POWER = 0.375f;
     private static double TICKS_PER_INCH = 43.24;
-    private static double TURN_RATIO = 7.4;
+    private static double TURN_RATIO = 7.98;
     private static double ANGLE_CONST = 1.23;
     private static double DUCK_POWER = 0.0;
     private static double DEP_BELT_POWER = 0.9;
@@ -227,7 +227,7 @@ public class NewAuto extends OpMode {
             // Forward 16
             case 0:
                 //driveTo(DRIVE_POWER, 16);
-                driveTo(DRIVE_POWER, 25.5f);
+                driveTo(DRIVE_POWER, 24.8f);
                 break;
             // Counter-clockwise 90
             case 1:
@@ -237,7 +237,7 @@ public class NewAuto extends OpMode {
             // Backwards 32
             case 2:
                 //driveTo(-DRIVE_POWER * 0.4f, -36);
-                driveTo(-DRIVE_POWER * 0.4f, -27);
+                driveTo(-DRIVE_POWER, -25);
                 break;
             /* // Backward 35
             case 3:
