@@ -68,8 +68,8 @@ public class NewTeleOp extends OpMode {
     private static double LOW_CLOSE = 0.56;
     private static double MID_OPEN = 0.9;
     private static double MID_CLOSE = 0.48;
-    private static double COLLECTOR_UP = 0.55;
-    private static double COLLECTOR_DOWN = 0.07;
+    private static double COLLECTOR_UP = 0.96;
+    private static double COLLECTOR_DOWN = 0.23;
     private static double COLLECTOR_POWER = -1;
     private static double timerRatio = 0.0;
     private static double duckPowerMin = 0.65;  // min duck spinner speed (0 - 1.0)
@@ -81,7 +81,9 @@ public class NewTeleOp extends OpMode {
     private static double CAP_DOWN = 0.94;
     //private static double CAP_HOOK_DOWN = 0.75;
     //private static double CAP_HOOK_UP = 0.25;
+    private static double CAPSTONE_DELTA = 0.02;
     private static double delayTime = 0.1;
+    private static double capstoneTarget = 0;
 
     // Servo position test constants
     private float servoPos = 0.5f;
@@ -90,7 +92,7 @@ public class NewTeleOp extends OpMode {
     // Members
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime duckTimer = new ElapsedTime();
-    private ElapsedTime capstoneTime = new ElapsedTime();
+    private ElapsedTime capTimer = new ElapsedTime();
 
     @Override
     public void init() {
@@ -180,7 +182,7 @@ public class NewTeleOp extends OpMode {
         depLow.setPosition(LOW_CLOSE);
         depMid.setPosition(MID_CLOSE);
         capstoneArm.setPosition(0.5);
-        collectorArm.setPosition(COLLECTOR_DOWN);
+        collectorArm.setPosition(0.5);
     }
 
     @Override
@@ -215,8 +217,10 @@ public class NewTeleOp extends OpMode {
             if (duckTimer.seconds() >= delayTime) {
                 if (DUCK_POWER > 0 && DUCK_POWER < duckPowerMax) {
                     DUCK_POWER += 0.02;
+                    duckTimer.reset();
                 } else if (DUCK_POWER < 0 && DUCK_POWER > -duckPowerMax) {
                     DUCK_POWER -= 0.02;
+                    duckTimer.reset();
                 }
             }
         } else {
@@ -258,7 +262,7 @@ public class NewTeleOp extends OpMode {
 
         // Collector
         double spin = -gamepad2.left_stick_y;
-        collector.setPower(Range.clip(spin, -COLLECTOR_POWER, COLLECTOR_POWER));
+        collector.setPower(Range.clip(spin, COLLECTOR_POWER, -COLLECTOR_POWER));
         if (gamepad2.right_bumper) {
             collectorArm.setPosition(COLLECTOR_DOWN);
         } else {
@@ -269,20 +273,29 @@ public class NewTeleOp extends OpMode {
         /* if (gamepad2.dpad_up) {
             capstoneArm.setPosition(CAP_IN);
         }
-        if (gamepad2.left_bumper) {
-            capstoneTime.reset();
-            //capstoneArm.setPosition(CAP_UP);
+        if (gamepad2.dpad_right) {
+            capstoneArm.setPosition(CAP_UP);
         }
-        if (gamepad2.right_bumper) {
+        if (gamepad2.dpad_left) {
             capstoneArm.setPosition(CAP_DOWN);
+        } */
+
+
+        if (gamepad2.dpad_right) {
+            capstoneTarget = CAP_UP;
+        } else if (gamepad2.dpad_left) {
+            capstoneTarget = CAP_DOWN;
+        } else if (gamepad2.dpad_up) {
+            capstoneTarget = CAP_IN;
         }
 
-        if (capstoneTime.milliseconds() >= delayTime && capstoneTime.milliseconds() < 150) {
-            if (capstoneArm.getPosition() <= CAP_UP) {
-                capstoneArm.setPosition(capstoneArm.getPosition() - 0.02);
-                capstoneTime.reset();
-            }
-        } */
+        double capError = capstoneTarget - capstoneArm.getPosition();
+        if (capError != 0 && capTimer.seconds() > delayTime) {
+            double delta = Math.max(CAPSTONE_DELTA, Math.abs(capError));
+            delta *= Math.signum(capError);
+            capstoneArm.setPosition(capstoneArm.getPosition() + delta);
+            capTimer.reset();
+        }
 
         // Distance Sensor
         if (distanceLeft.getDistance(DistanceUnit.INCH) <= 19) {
@@ -307,6 +320,8 @@ public class NewTeleOp extends OpMode {
         telemetry.addData("Depositor", "B %.2f, L %.2f, M %.2f",
                 depBelt.getPower(), depLow.getPosition(), depMid.getPosition());
 
+        telemetry.addData("Spin", spin);
+
         // Shows number of servoPos
         telemetry.addData("Pos:", servoPos);
         // Moving the servo position and number should increase
@@ -319,7 +334,7 @@ public class NewTeleOp extends OpMode {
             servoPos = Math.max(0.0f, servoPos);
         }
         // Set position of desired servo
-        capstoneArm.setPosition(servoPos);
+        collectorArm.setPosition(servoPos);
     }
 
     @Override

@@ -46,6 +46,12 @@ public class NewAuto extends OpMode {
     // Hardware
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
+    private DcMotor duckSpinner = null;
+    private DcMotor depBelt = null;
+    private Servo depLow = null;
+    private Servo depMid = null;
+    private Servo depTilt = null;
+    private Servo capstoneArm = null;
     private DistanceSensor distanceLeft = null;
     private DistanceSensor distanceRight = null;
 
@@ -69,9 +75,37 @@ public class NewAuto extends OpMode {
             leftDrive = hardwareMap.get(DcMotor.class, "BL");
             rightDrive = hardwareMap.get(DcMotor.class, "BR");
             leftDrive.setDirection(DcMotor.Direction.FORWARD);
-            rightDrive.setDirection(DcMotor.Direction.REVERSE);
+            rightDrive.setDirection(DcMotor.Direction.FORWARD);
         } catch (Exception e) {
             telemetry.log().add("Could not find drive");
+            error = true;
+        }
+
+        // Duck Spinner
+        try {
+            duckSpinner = hardwareMap.get(DcMotor.class, "duck");
+        } catch (Exception e) {
+            telemetry.log().add("Could not find duck spinner");
+            error = true;
+        }
+
+        // Depositor
+        try {
+            depBelt = hardwareMap.get(DcMotor.class, "Depbelt");
+            depLow = hardwareMap.get(Servo.class, "Deplow");
+            depMid = hardwareMap.get(Servo.class, "Depmid");
+            depTilt = hardwareMap.get(Servo.class, "Deptilt");
+        } catch (Exception e) {
+            telemetry.log().add("Could not find depositor");
+            error = true;
+        }
+
+        // Capstone Grabber
+        try {
+            //capstoneHook = hardwareMap.get(Servo.class, "Caphook");
+            capstoneArm = hardwareMap.get(Servo.class, "Caparm");
+        } catch (Exception e) {
+            telemetry.log().add("Could not find capstone dep");
             error = true;
         }
 
@@ -135,6 +169,17 @@ public class NewAuto extends OpMode {
 
         // Step through the auto commands
         switch (autoStep) {
+            /*case -2:
+                sensorTimer.reset();
+                leftSensorAccum = 0;
+                autoStep++;
+                break;
+            case -1 :
+                leftSensorAccum = (leftSensorAccum * 0.9) + (0.1 * distanceLeft.getDistance());
+                if (sensorTimer.seconds() > SENSOR_TIME) {
+                    autoStep++;
+                }
+                break;*/
             // Forward 19
             case 0:
                 driveTo(DRIVE_POWER, 19);
