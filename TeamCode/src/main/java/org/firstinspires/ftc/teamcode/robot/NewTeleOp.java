@@ -72,16 +72,16 @@ public class NewTeleOp extends OpMode {
     private static double COLLECTOR_DOWN = 0.23;
     private static double COLLECTOR_POWER = -1;
     private static double timerRatio = 0.0;
-    private static double duckPowerMin = 0.65;  // min duck spinner speed (0 - 1.0)
-    private static double duckPowerMax = 0.9;  // max duck spinner speed (0 - 1.0)
+    private static double duckPowerMin = 0.2;  // min duck spinner speed (0 - 1.0)
+    private static double duckPowerMax = 0.45;  // max duck spinner speed (0 - 1.0)
     private static double duckRampTime = 1.25;  // duck spinner ramp time (seconds, >0)
-    private static double CAP_IN = 0.05;
-    private static double CAP_MID = 0.71;
-    private static double CAP_UP = 0.48;
-    private static double CAP_DOWN = 0.94;
+    private static double CAP_IN = 0;
+    private static double CAP_UP = 0.35;
+    private static double CAP_MID = 0.52;
+    private static double CAP_DOWN = 0.87;
     //private static double CAP_HOOK_DOWN = 0.75;
     //private static double CAP_HOOK_UP = 0.25;
-    private static double CAPSTONE_DELTA = 0.02;
+    private static double CAPSTONE_DELTA = 0.01;
     private static double delayTime = 0.1;
     private static double capstoneTarget = 0;
 
@@ -182,7 +182,7 @@ public class NewTeleOp extends OpMode {
         depLow.setPosition(LOW_CLOSE);
         depMid.setPosition(MID_CLOSE);
         capstoneArm.setPosition(0.5);
-        collectorArm.setPosition(0.5);
+        collectorArm.setPosition(COLLECTOR_UP);
     }
 
     @Override
@@ -212,28 +212,22 @@ public class NewTeleOp extends OpMode {
             DUCK_POWER = -duckPowerMin;
             duckTimer.reset();
         }
-        timerRatio = Math.max(Math.min(duckTimer.seconds() / duckRampTime, 1.0), 0);
-        if (timerRatio != 0.0 && timerRatio != 1.0) {
-            if (duckTimer.seconds() >= delayTime) {
-                if (DUCK_POWER > 0 && DUCK_POWER < duckPowerMax) {
-                    DUCK_POWER += 0.02;
-                    duckTimer.reset();
-                } else if (DUCK_POWER < 0 && DUCK_POWER > -duckPowerMax) {
-                    DUCK_POWER -= 0.02;
-                    duckTimer.reset();
-                }
-            }
+
+        if (DUCK_POWER != 0 && duckTimer.seconds() < duckRampTime) {
+            DUCK_POWER = (duckPowerMin + (duckTimer.seconds() / duckRampTime) *
+                    (duckPowerMax - duckPowerMin)) * Math.signum(DUCK_POWER);
         } else {
-            DUCK_POWER = 0;
+            DUCK_POWER = 0.0;
         }
+        duckSpinner.setPower(DUCK_POWER);
 
         /* timerRatio = Math.max(Math.min(duckTimer.seconds() / duckRampTime, 1.0), 0);
         if (timerRatio != 0.0 && timerRatio != 1.0) {
             DUCK_POWER = duckPowerMin + timerRatio * (duckPowerMax - duckPowerMin);
         } else {
             DUCK_POWER = 0.0;
-        } */
-        duckSpinner.setPower(DUCK_POWER);
+        }
+        duckSpinner.setPower(DUCK_POWER); */
 
         // Depositor
         if (gamepad2.a || gamepad2.b || gamepad2.x) {
@@ -334,7 +328,7 @@ public class NewTeleOp extends OpMode {
             servoPos = Math.max(0.0f, servoPos);
         }
         // Set position of desired servo
-        collectorArm.setPosition(servoPos);
+        //capstoneArm.setPosition(servoPos);
     }
 
     @Override

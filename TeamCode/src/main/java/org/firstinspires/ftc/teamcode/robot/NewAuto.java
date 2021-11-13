@@ -51,14 +51,39 @@ public class NewAuto extends OpMode {
     private Servo depLow = null;
     private Servo depMid = null;
     private Servo depTilt = null;
+    private DcMotor collector = null;
+    private Servo collectorArm = null;
     private Servo capstoneArm = null;
     private DistanceSensor distanceLeft = null;
     private DistanceSensor distanceRight = null;
 
     // Consts
     private static float DRIVE_POWER = 0.77f;
-    private static double TICKS_PER_INCH = 123.45;
+    private static double TICKS_PER_INCH = 43.24;
+    private static double TURN_RATIO = 7.4;
     private static double ANGLE_CONST = 1.23;
+    private static double DUCK_POWER = 0.0;
+    private static double DEP_BELT_POWER = 0.9;
+    private static double DEP_UP = 0.6;
+    private static double DEP_DOWN = 0.44;
+    private static double LOW_OPEN = 0.98;
+    private static double LOW_CLOSE = 0.56;
+    private static double MID_OPEN = 0.9;
+    private static double MID_CLOSE = 0.48;
+    private static double COLLECTOR_UP = 0.96;
+    private static double COLLECTOR_DOWN = 0.23;
+    private static double COLLECTOR_POWER = -1;
+    private static double timerRatio = 0.0;
+    private static double duckPowerMin = 0.2;  // min duck spinner speed (0 - 1.0)
+    private static double duckPowerMax = 0.45;  // max duck spinner speed (0 - 1.0)
+    private static double duckRampTime = 1.25;  // duck spinner ramp time (seconds, >0)
+    private static double CAP_IN = 0;
+    private static double CAP_MID = 0.52;
+    private static double CAP_UP = 0.35;
+    private static double CAP_DOWN = 0.87;
+
+    // Members
+    private ElapsedTime runtime = new ElapsedTime();
 
     // Members
     private boolean done = false;
@@ -100,6 +125,15 @@ public class NewAuto extends OpMode {
             error = true;
         }
 
+        // Collector
+        try {
+            collector = hardwareMap.get(DcMotor.class, "Collector");
+            collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
+        } catch (Exception e) {
+            telemetry.log().add("Could not find collector");
+            error = true;
+        }
+
         // Capstone Grabber
         try {
             //capstoneHook = hardwareMap.get(Servo.class, "Caphook");
@@ -123,6 +157,11 @@ public class NewAuto extends OpMode {
         if (error) {
             status = "Hardware Error";
         }
+        depTilt.setPosition(DEP_UP);
+        depLow.setPosition(LOW_CLOSE);
+        depMid.setPosition(MID_CLOSE);
+        capstoneArm.setPosition(CAP_IN);
+        collectorArm.setPosition(COLLECTOR_UP);
         telemetry.addData("Status", status);
     }
 
@@ -135,6 +174,11 @@ public class NewAuto extends OpMode {
         driveStop();
         done = false;
         autoStep = 0;
+        depTilt.setPosition(DEP_DOWN);
+        depLow.setPosition(LOW_CLOSE);
+        depMid.setPosition(MID_CLOSE);
+        capstoneArm.setPosition(CAP_UP);
+        collectorArm.setPosition(COLLECTOR_UP);
     }
 
     @Override
@@ -180,19 +224,22 @@ public class NewAuto extends OpMode {
                     autoStep++;
                 }
                 break;*/
-            // Forward 19
+            // Forward 16
             case 0:
-                driveTo(DRIVE_POWER, 19);
+                //driveTo(DRIVE_POWER, 16);
+                driveTo(DRIVE_POWER, 25.5f);
                 break;
-            // Counter-clockwise 135
+            // Counter-clockwise 90
             case 1:
-                turnTo(DRIVE_POWER, -135);
+                //turnTo(DRIVE_POWER, -90);
+                turnTo(DRIVE_POWER, 90);
                 break;
-            // Forward 23
+            // Backwards 32
             case 2:
-                driveTo(DRIVE_POWER, 23);
+                //driveTo(-DRIVE_POWER * 0.4f, -36);
+                driveTo(-DRIVE_POWER * 0.4f, -27);
                 break;
-            // Backward 35
+            /* // Backward 35
             case 3:
                 driveTo(DRIVE_POWER, 35);
                 break;
@@ -207,7 +254,7 @@ public class NewAuto extends OpMode {
             // Forward 31
             case 6:
                 driveTo(DRIVE_POWER, 31);
-                break;
+                break; */
             // If we get past the end stop and end the loop
             default:
                 driveStop();
@@ -223,13 +270,13 @@ public class NewAuto extends OpMode {
     public void driveStop() {
         // Stop, zero the drive encoders, and enable RUN_TO_POSITION
         leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftDrive.setTargetPosition(leftDrive.getTargetPosition());
+        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftDrive.setPower(0);
 
         rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightDrive.setTargetPosition(rightDrive.getTargetPosition());
+        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightDrive.setPower(0);
     }
 
@@ -237,7 +284,7 @@ public class NewAuto extends OpMode {
         return leftDrive.isBusy() || rightDrive.isBusy();
     }
 
-    public void driveTo(float speed, int distance) {
+    public void driveTo(float speed, float distance) {
         // Don't allow new moves if we're still busy
         if (isBusy()) {
             telemetry.log().add("driveTo(): Motors in use");
@@ -269,8 +316,8 @@ public class NewAuto extends OpMode {
         // We have a gyro but let's start with just one control mode
         int leftTarget = leftDrive.getCurrentPosition();
         int rightTarget = rightDrive.getCurrentPosition();
-        leftTarget += angle * TICKS_PER_INCH;
-        rightTarget -= angle * TICKS_PER_INCH;
+        leftTarget += angle * TURN_RATIO;
+        rightTarget -= angle * TURN_RATIO;
         leftDrive.setTargetPosition(leftTarget);
         rightDrive.setTargetPosition(rightTarget);
 
