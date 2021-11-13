@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode.robot;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -39,9 +40,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.buttons.BUTTON_TYPE;
+import org.firstinspires.ftc.teamcode.buttons.ButtonHandler;
+import org.firstinspires.ftc.teamcode.buttons.PAD_BUTTON;
 
 @Config
-@TeleOp(name = "NewAuto", group = "Test")
+@Autonomous(name = "NewAuto", group = "Test")
 public class NewAuto extends OpMode {
     // Hardware
     private DcMotor leftDrive = null;
@@ -64,6 +68,9 @@ public class NewAuto extends OpMode {
     private boolean done = false;
     private boolean driveCmdRunning = false;
     private int autoStep = 0;
+    private ButtonHandler buttons;
+    private boolean redAlliance = false;
+    private boolean duckSide = false;
 
     @Override
     public void init() {
@@ -118,6 +125,13 @@ public class NewAuto extends OpMode {
             error = true;
         }
 
+        // Register buttons
+        buttons = new ButtonHandler(this);
+        buttons.register("RED", gamepad1, PAD_BUTTON.dpad_left);
+        buttons.register("BLUE", gamepad1, PAD_BUTTON.dpad_right);
+        buttons.register("DUCK", gamepad1, PAD_BUTTON.dpad_up);
+        buttons.register("WAREHOUSE", gamepad1, PAD_BUTTON.dpad_down);
+
         // Initialization status
         String status = "Ready";
         if (error) {
@@ -128,6 +142,12 @@ public class NewAuto extends OpMode {
 
     @Override
     public void init_loop() {
+        if (buttons.get("RED")) redAlliance = true;
+        if (buttons.get("BLUE")) redAlliance = false;
+        if (buttons.get("DUCK")) duckSide = true;
+        if (buttons.get("WAREHOUSE")) duckSide = false;
+        telemetry.addData("Alliance", redAlliance ? "Red" : "Blue");
+        telemetry.addData("Direction", duckSide ? "Duck" : "Warehouse");
     }
 
     @Override
@@ -218,6 +238,11 @@ public class NewAuto extends OpMode {
 
     @Override
     public void stop() {
+        // Reset to the standard drive mode
+        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void driveStop() {

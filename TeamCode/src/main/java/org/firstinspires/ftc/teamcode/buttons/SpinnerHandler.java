@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.buttons;
 
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.robot.Robot;
@@ -9,15 +10,15 @@ import java.util.HashMap;
 
 public class SpinnerHandler {
     private final ButtonHandler parent;
-    private final Robot robot;
+    private final OpMode opmode;
     private final HashMap<String, Spinner> spinners;
     private boolean disabled = true;
 
-    public SpinnerHandler(ButtonHandler parent, Robot robot) {
+    public SpinnerHandler(ButtonHandler parent, OpMode opMode) {
         if (parent == null) {
             throw new IllegalArgumentException(this.getClass().getSimpleName() + "Null handler");
         }
-        this.robot = robot;
+        this.opmode = opMode;
         this.parent = parent;
         spinners = new HashMap<>();
     }
@@ -55,7 +56,7 @@ public class SpinnerHandler {
                 value = ((Double) (Round.truncate((Double) spinner.value, 6))).toString();
                 break;
         }
-        robot.telemetry.addData(label, value);
+        opmode.telemetry.addData(label, value);
     }
 
     public double getDouble(String name) {
@@ -201,7 +202,7 @@ public class SpinnerHandler {
 
         // Main object
         if (spinners.containsKey(name)) {
-            robot.telemetry.log().add("De-registering existing spinner: " + name);
+            opmode.telemetry.log().add("De-registering existing spinner: " + name);
         }
         Spinner spinner = new Spinner(this, name, type, increment, value);
         spinners.put(name, spinner);
