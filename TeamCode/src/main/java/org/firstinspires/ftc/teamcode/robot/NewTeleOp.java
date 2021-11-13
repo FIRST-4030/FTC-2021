@@ -61,7 +61,7 @@ public class NewTeleOp extends OpMode {
 
     // Constants used for hardware
     private static double DUCK_POWER = 0.0;
-    private static double DEP_BELT_POWER = 0.8;
+    private static double DEP_BELT_POWER = 0.9;
     private static double DEP_UP = 0.6;
     private static double DEP_DOWN = 0.44;
     private static double LOW_OPEN = 0.98;
@@ -76,11 +76,12 @@ public class NewTeleOp extends OpMode {
     private static double duckPowerMax = 0.9;  // max duck spinner speed (0 - 1.0)
     private static double duckRampTime = 1.25;  // duck spinner ramp time (seconds, >0)
     private static double CAP_IN = 0.05;
-    private static double CAP_UP = 0.44;
-    private static double CAP_DOWN = 0.945;
+    private static double CAP_MID = 0.71;
+    private static double CAP_UP = 0.48;
+    private static double CAP_DOWN = 0.94;
     //private static double CAP_HOOK_DOWN = 0.75;
     //private static double CAP_HOOK_UP = 0.25;
-    private static double duckTimecount = 0;
+    private static double delayTime = 0.1;
 
     // Servo position test constants
     private float servoPos = 0.5f;
@@ -89,6 +90,7 @@ public class NewTeleOp extends OpMode {
     // Members
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime duckTimer = new ElapsedTime();
+    private ElapsedTime capstoneTime = new ElapsedTime();
 
     @Override
     public void init() {
@@ -99,7 +101,7 @@ public class NewTeleOp extends OpMode {
         try {
             leftDrive = hardwareMap.get(DcMotor.class, "BL");
             rightDrive = hardwareMap.get(DcMotor.class, "BR");
-            leftDrive.setDirection(DcMotor.Direction.REVERSE);
+            leftDrive.setDirection(DcMotor.Direction.FORWARD);
             rightDrive.setDirection(DcMotor.Direction.FORWARD);
         } catch (Exception e) {
             telemetry.log().add("Could not find drive");
@@ -186,16 +188,39 @@ public class NewTeleOp extends OpMode {
         // PoV drive
         double drive = -gamepad1.left_stick_y;
         double turn = gamepad1.right_stick_x;
-        leftDrive.setPower(Range.clip(drive + turn, -1.0, 1.0));
-        rightDrive.setPower(Range.clip(drive - turn, -1.0, 1.0));
+        //leftDrive.setPower(Range.clip(drive + turn, -1.0, 1.0));
+        //rightDrive.setPower(Range.clip(drive - turn, -1.0, 1.0));
+        leftDrive.setPower(-gamepad1.left_stick_y);
+        rightDrive.setPower(-gamepad1.right_stick_y);
+
+        if (gamepad1.right_trigger != 0) {
+            double speed = 1 - gamepad1.right_trigger;
+            if (gamepad1.right_trigger >= 0.7) {
+                speed = 1 - 0.7;
+            }
+            leftDrive.setPower(Range.clip(drive + turn, -speed, speed));
+            rightDrive.setPower(Range.clip(drive - turn, -speed, speed));
+        }
 
         // Duck spinner
         if (gamepad1.a) {
             DUCK_POWER = duckPowerMin;
-            duckTime(12.5);
+            duckTimer.reset();
         } else if (gamepad1.b) {
             DUCK_POWER = -duckPowerMin;
-            duckTime(-12.5);
+            duckTimer.reset();
+        }
+        timerRatio = Math.max(Math.min(duckTimer.seconds() / duckRampTime, 1.0), 0);
+        if (timerRatio != 0.0 && timerRatio != 1.0) {
+            if (duckTimer.seconds() >= delayTime) {
+                if (DUCK_POWER > 0 && DUCK_POWER < duckPowerMax) {
+                    DUCK_POWER += 0.02;
+                } else if (DUCK_POWER < 0 && DUCK_POWER > -duckPowerMax) {
+                    DUCK_POWER -= 0.02;
+                }
+            }
+        } else {
+            DUCK_POWER = 0;
         }
 
         /* timerRatio = Math.max(Math.min(duckTimer.seconds() / duckRampTime, 1.0), 0);
@@ -209,6 +234,8 @@ public class NewTeleOp extends OpMode {
         // Depositor
         if (gamepad2.a || gamepad2.b || gamepad2.x) {
             depBelt.setPower(DEP_BELT_POWER);
+        } else if (gamepad2.y) {
+            depBelt.setPower(-DEP_BELT_POWER);
         } else {
             depBelt.setPower(0);
         }
@@ -223,34 +250,39 @@ public class NewTeleOp extends OpMode {
             depMid.setPosition(MID_CLOSE);
         }
 
-        if (gamepad1.y) {
+        if (gamepad2.dpad_down) {
             depTilt.setPosition(DEP_UP);
         } else {
             depTilt.setPosition(DEP_DOWN);
         }
 
         // Collector
-        if (gamepad1.right_bumper) {
-            collector.setPower(COLLECTOR_POWER);
-        } else {
-            collector.setPower(0);
-        }
-        if (gamepad1.left_bumper) {
-            collectorArm.setPosition(COLLECTOR_UP);
-        } else {
+        double spin = -gamepad2.left_stick_y;
+        collector.setPower(Range.clip(spin, -COLLECTOR_POWER, COLLECTOR_POWER));
+        if (gamepad2.right_bumper) {
             collectorArm.setPosition(COLLECTOR_DOWN);
+        } else {
+            collectorArm.setPosition(COLLECTOR_UP);
         }
 
         // Capstone
-        if (gamepad2.dpad_up) {
+        /* if (gamepad2.dpad_up) {
             capstoneArm.setPosition(CAP_IN);
         }
         if (gamepad2.left_bumper) {
-            capstoneArm.setPosition(CAP_UP);
+            capstoneTime.reset();
+            //capstoneArm.setPosition(CAP_UP);
         }
         if (gamepad2.right_bumper) {
             capstoneArm.setPosition(CAP_DOWN);
         }
+
+        if (capstoneTime.milliseconds() >= delayTime && capstoneTime.milliseconds() < 150) {
+            if (capstoneArm.getPosition() <= CAP_UP) {
+                capstoneArm.setPosition(capstoneArm.getPosition() - 0.02);
+                capstoneTime.reset();
+            }
+        } */
 
         // Distance Sensor
         if (distanceLeft.getDistance(DistanceUnit.INCH) <= 19) {
@@ -287,27 +319,7 @@ public class NewTeleOp extends OpMode {
             servoPos = Math.max(0.0f, servoPos);
         }
         // Set position of desired servo
-        //collectorArm.setPosition(servoPos);
-    }
-
-    public void duckTime(double time) {
-        if (time == 0) {
-            DUCK_POWER = 0;
-        } else if (time / time == 1) {
-            if (duckTimecount <= time) {
-                DUCK_POWER += 0.02;
-                duckTimecount++;
-            } else {
-                DUCK_POWER = 0;
-            }
-        } else if (time / time == -1) {
-            if (duckTimecount >= time) {
-                DUCK_POWER -= 0.02;
-                duckTimecount--;
-            } else {
-                DUCK_POWER = 0;
-            }
-        }
+        capstoneArm.setPosition(servoPos);
     }
 
     @Override
