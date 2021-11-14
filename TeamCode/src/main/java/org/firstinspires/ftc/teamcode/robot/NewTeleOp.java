@@ -67,13 +67,13 @@ public class NewTeleOp extends OpMode {
     private static double LOW_OPEN = 0.98;
     private static double LOW_CLOSE = 0.56;
     private static double MID_OPEN = 0.9;
-    private static double MID_CLOSE = 0.48;
+    private static double MID_CLOSE = 0.47;
     private static double COLLECTOR_UP = 0.96;
     private static double COLLECTOR_DOWN = 0.23;
     private static double COLLECTOR_POWER = -1;
     private static double timerRatio = 0.0;
-    private static double duckPowerMin = 0.2;  // min duck spinner speed (0 - 1.0)
-    private static double duckPowerMax = 0.45;  // max duck spinner speed (0 - 1.0)
+    private static double duckPowerMin = 0.21;  // min duck spinner speed (0 - 1.0)
+    private static double duckPowerMax = 0.46;  // max duck spinner speed (0 - 1.0)
     private static double duckRampTime = 1.25;  // duck spinner ramp time (seconds, >0)
     private static double CAP_IN = 0;
     private static double CAP_UP = 0.35;

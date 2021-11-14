@@ -164,7 +164,6 @@ public class NewAuto extends OpMode {
         if (error) {
             status = "Hardware Error";
         }
-        depTilt.setPosition(DEP_UP);
         depLow.setPosition(LOW_CLOSE);
         depMid.setPosition(MID_CLOSE);
         capstoneArm.setPosition(CAP_IN);
