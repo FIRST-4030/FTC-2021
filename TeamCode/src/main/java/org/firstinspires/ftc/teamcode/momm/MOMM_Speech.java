@@ -12,10 +12,6 @@ public class MOMM_Speech extends MultiOpModeManager {
     ElapsedTime speechDelay = new ElapsedTime();
 
     @Override
-    public void init() {
-    }
-
-    @Override
     public void init_loop() {
         telemetry.addData("Init Time", "%.2f", time);
     }
@@ -32,9 +28,5 @@ public class MOMM_Speech extends MultiOpModeManager {
             telemetry.speak("Speak");
         }
         telemetry.addData("Loop Time", "%.2f", time);
-    }
-
-    @Override
-    public void stop() {
     }
 }

@@ -45,9 +45,9 @@ public class MOMM_Sample extends MultiOpModeManager {
     public void loop() {
         // Adjust the drive power from outside the OM
         if ((int) time % 2 == 0) {
-            drive.power(0.5);
+            drive.lowSpeed(0.5);
         } else {
-            drive.power(1.0);
+            drive.lowSpeed(1.0);
         }
 
         super.loop();
