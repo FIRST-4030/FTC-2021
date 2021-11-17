@@ -1,12 +1,19 @@
 package org.firstinspires.ftc.teamcode.momm;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
+// Extend OpMode as usual
+// If you must extend MultiOpModeManger be sure to @override all of the standard methods (or else)
+//
+// Register with @TeleOp or @Autonomous if you want to expose this OpMode independently
+// It will still work as a sub-mode in MOMM even if it is not registered for independent use
+//@TeleOp(name = "MOMM_Drive", group = "Test")
 @Config
-public class MOMM_Drive extends MultiOpModeManager {
+public class MOMM_Drive extends OpMode {
     // Config
     public static boolean DEBUG = false;
     private static final double LOW_SPEED_DEFAULT = 0.7;

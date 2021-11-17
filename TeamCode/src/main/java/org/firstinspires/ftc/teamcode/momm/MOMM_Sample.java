@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.momm;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+// Extend MultiOpModeManager instead of OpMode
+// Register with @TeleOp or @Autonomous as with any other OpMode
 @TeleOp(name = "MOMM_Sample", group = "MOMM")
 public class MOMM_Sample extends MultiOpModeManager {
     // External OMs
@@ -12,10 +14,10 @@ public class MOMM_Sample extends MultiOpModeManager {
     /*
      * Standard OM methods
      *
-     * All of the standard OM methods are available for @override
+     * All of the standard OM methods are available to @override
      * It is acceptable to exclude a method; for example, if init_loop is empty it can be excluded
      * If you define one of the standard methods it must call the same method's super()
-     * super() can be called anywhere in the method; first or last is often best
+     * super() can be called anywhere within the method; first or last is often easiest to grok
      */
 
     @Override

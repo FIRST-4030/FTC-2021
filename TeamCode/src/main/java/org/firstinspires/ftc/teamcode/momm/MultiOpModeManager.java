@@ -7,12 +7,10 @@ import java.util.Vector;
 public class MultiOpModeManager extends OpMode {
 
     private final Vector<OpMode> opmodes;
-    private final OpMode primary;
 
-    // Init the list and register the primary OM
+    // Init the list
     public MultiOpModeManager() {
         opmodes = new Vector<>();
-        primary = this;
     }
 
     // Add new OMs for concurrent execution
@@ -25,7 +23,7 @@ public class MultiOpModeManager extends OpMode {
             throw new IllegalArgumentException(getClass().getSimpleName() + ": " +
                     "OpMode already registered: " + opMode.getClass().getSimpleName());
         }
-        if (opMode.equals(primary)) {
+        if (opMode.equals(this)) {
             throw new IllegalArgumentException(getClass().getSimpleName() + ": " +
                     "Refusing to re-register the primary OpMode: " + opMode.getClass().getSimpleName());
         }
@@ -39,11 +37,6 @@ public class MultiOpModeManager extends OpMode {
                     "OpMode not specified");
         }
         opmodes.remove(opMode);
-    }
-
-    // Provide access to the primary OM
-    public OpMode opMode() {
-        return primary;
     }
 
     /*

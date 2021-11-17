@@ -1,15 +1,20 @@
 package org.firstinspires.ftc.teamcode.momm;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
-public class MOMM_Speech extends MultiOpModeManager {
+public class MOMM_Speech extends OpMode {
     // Constants
     private static final double SPEECH_DELAY = 5.0;
 
     // Members
     ElapsedTime speechDelay = new ElapsedTime();
+
+    @Override
+    public void init() {
+    }
 
     @Override
     public void init_loop() {
