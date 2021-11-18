@@ -131,38 +131,32 @@ public class DistanceTest extends OpMode {
             case 0:
                 sensorTimer.reset();
                 leftSensorAccum = 0;
-                autoStep++;
-                break;
-            case 1:
                 leftSensorAccum = (leftSensorAccum * 0.9) + (0.1 * distanceLeft.getDistance(DistanceUnit.INCH));
                 if (sensorTimer.seconds() > SENSOR_TIME) {
                     autoStep++;
                 }
                 break;
-            case 2:
+            case 1:
                 if (leftSensorAccum <= 19) {
                     leftinRange = true;
                 }
                 autoStep++;
                 break;
-            case 3:
+            case 2:
                 sensorTimer.reset();
                 rightSensorAccum = 0;
-                autoStep++;
-                break;
-            case 4:
                 rightSensorAccum = (rightSensorAccum * 0.9) + (0.1 * distanceRight.getDistance(DistanceUnit.INCH));
                 if (sensorTimer.seconds() > SENSOR_TIME) {
                     autoStep++;
                 }
                 break;
-            case 5:
+            case 3:
                 if (rightSensorAccum <= 19) {
                     rightinRange = true;
                 }
                 autoStep++;
                 break;
-            case 6:
+            case 4:
                 if (leftinRange && !rightinRange) {
                     objectPos = 1;
                     telemetry.addData("Position: ", objectPos);

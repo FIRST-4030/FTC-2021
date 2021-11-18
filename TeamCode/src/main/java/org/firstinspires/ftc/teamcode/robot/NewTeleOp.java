@@ -58,6 +58,7 @@ public class NewTeleOp extends OpMode {
     //private Servo capstoneHook = null;
     private DistanceSensor distanceLeft = null;
     private DistanceSensor distanceRight = null;
+    private DistanceSensor distanceCollector = null;
 
     // Constants used for hardware
     private static double DUCK_POWER = 0.0;
@@ -68,16 +69,16 @@ public class NewTeleOp extends OpMode {
     private static double LOW_CLOSE = 0.56;
     private static double MID_OPEN = 0.9;
     private static double MID_CLOSE = 0.47;
-    private static double COLLECTOR_UP = 0.96;
-    private static double COLLECTOR_DOWN = 0.23;
+    private static double COLLECTOR_UP = 0.98;
+    private static double COLLECTOR_DOWN = 0.19;
     private static double COLLECTOR_POWER = -1;
     private static double timerRatio = 0.0;
     private static double duckPowerMin = 0.21;  // min duck spinner speed (0 - 1.0)
     private static double duckPowerMax = 0.46;  // max duck spinner speed (0 - 1.0)
     private static double duckRampTime = 1.25;  // duck spinner ramp time (seconds, >0)
     private static double CAP_IN = 0;
-    private static double CAP_UP = 0.35;
-    private static double CAP_MID = 0.52;
+    //private static double CAP_UP = 0.35;
+    private static double CAP_MID = 0.5;
     private static double CAP_DOWN = 0.87;
     //private static double CAP_HOOK_DOWN = 0.75;
     //private static double CAP_HOOK_UP = 0.25;
@@ -152,6 +153,7 @@ public class NewTeleOp extends OpMode {
         try {
             distanceLeft = hardwareMap.get(DistanceSensor.class, "DL");
             distanceRight = hardwareMap.get(DistanceSensor.class, "DR");
+            distanceCollector = hardwareMap.get(DistanceSensor.class, "DC");
         } catch (Exception e) {
             telemetry.log().add("Could not find range sensors");
             error = true;
@@ -181,7 +183,7 @@ public class NewTeleOp extends OpMode {
         depTilt.setPosition(DEP_DOWN);
         depLow.setPosition(LOW_CLOSE);
         depMid.setPosition(MID_CLOSE);
-        capstoneArm.setPosition(0.5);
+        capstoneArm.setPosition(CAP_MID);
         collectorArm.setPosition(COLLECTOR_UP);
     }
 
@@ -248,7 +250,7 @@ public class NewTeleOp extends OpMode {
             depMid.setPosition(MID_CLOSE);
         }
 
-        if (gamepad2.dpad_down) {
+        if (gamepad2.dpad_right) {
             depTilt.setPosition(DEP_UP);
         } else {
             depTilt.setPosition(DEP_DOWN);
@@ -257,27 +259,17 @@ public class NewTeleOp extends OpMode {
         // Collector
         double spin = -gamepad2.left_stick_y;
         collector.setPower(Range.clip(spin, COLLECTOR_POWER, -COLLECTOR_POWER));
-        if (gamepad2.right_bumper) {
+        telemetry.addData("DC range: ", distanceCollector.getDistance(DistanceUnit.MM));
+        if (distanceCollector.getDistance(DistanceUnit.MM) <= 55) {
+            collectorArm.setPosition(COLLECTOR_UP);
+        } else if (gamepad2.right_bumper) {
             collectorArm.setPosition(COLLECTOR_DOWN);
         } else {
             collectorArm.setPosition(COLLECTOR_UP);
         }
 
         // Capstone
-        /* if (gamepad2.dpad_up) {
-            capstoneArm.setPosition(CAP_IN);
-        }
-        if (gamepad2.dpad_right) {
-            capstoneArm.setPosition(CAP_UP);
-        }
-        if (gamepad2.dpad_left) {
-            capstoneArm.setPosition(CAP_DOWN);
-        } */
-
-
-        if (gamepad2.dpad_right) {
-            capstoneTarget = CAP_UP;
-        } else if (gamepad2.dpad_left) {
+        if (gamepad2.dpad_down) {
             capstoneTarget = CAP_DOWN;
         } else if (gamepad2.dpad_up) {
             capstoneTarget = CAP_MID;
@@ -316,8 +308,8 @@ public class NewTeleOp extends OpMode {
                 duckSpinner.getPower(), collector.getPower());
         telemetry.addData("Depositor", "B %.2f, L %.2f, M %.2f",
                 depBelt.getPower(), depLow.getPosition(), depMid.getPosition());
-
         telemetry.addData("Spin", spin);
+        telemetry.addData("Dep Belt Pos: ", depBelt.getCurrentPosition());
 
         // Shows number of servoPos
         telemetry.addData("Pos:", servoPos);
@@ -331,7 +323,7 @@ public class NewTeleOp extends OpMode {
             servoPos = Math.max(0.0f, servoPos);
         }
         // Set position of desired servo
-        //capstoneArm.setPosition(servoPos);
+        //collectorArm.setPosition(servoPos);
     }
 
     @Override
