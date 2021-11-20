@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.actuators;
 
-import org.firstinspires.ftc.teamcode.config.Config;
-
-public class ServoConfig implements Config {
+public class ServoConfig {
     public final String name;
     public final boolean reverse;
     public final float min;

@@ -2,12 +2,11 @@ package org.firstinspires.ftc.teamcode.actuators;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.config.Config;
 import org.firstinspires.ftc.teamcode.driveto.PIDParams;
 
 import java.security.InvalidParameterException;
 
-public class MotorConfig implements Config {
+public class MotorConfig {
     public final String name;
     public final boolean reverse;
     public final boolean brake;

@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.sensors.switches;
 
-import org.firstinspires.ftc.teamcode.config.Config;
-
-public class SwitchConfig implements Config {
+public class SwitchConfig {
     public final String name;
     public final SWITCH_TYPES type;
 

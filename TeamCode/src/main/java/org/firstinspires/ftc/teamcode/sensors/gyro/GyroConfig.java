@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.sensors.gyro;
 
-import org.firstinspires.ftc.teamcode.config.Config;
-
-public class GyroConfig implements Config {
+public class GyroConfig {
     public final String name;
     public final GYRO_TYPES type;
 

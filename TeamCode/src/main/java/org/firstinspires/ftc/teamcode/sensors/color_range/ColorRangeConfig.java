@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.sensors.color_range;
 
-import org.firstinspires.ftc.teamcode.config.Config;
-
-public class ColorRangeConfig implements Config {
+public class ColorRangeConfig {
     public final String name;
     public final COLOR_RANGE_TYPES type;
 
