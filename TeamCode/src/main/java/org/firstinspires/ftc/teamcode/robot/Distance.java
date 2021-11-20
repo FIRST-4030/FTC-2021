@@ -56,6 +56,8 @@ public class Distance extends OpMode {
     private ElapsedTime timer = new ElapsedTime();
     private AUTO_STATE state = AUTO_STATE.IDLE;
     private BARCODE position = BARCODE.NONE;
+
+    // Intermediates
     private double leftLast = 0;
     private double rightLast = 0;
     private double leftAccum = 0;
@@ -79,7 +81,7 @@ public class Distance extends OpMode {
                     "Could not initialize");
         }
 
-        // Set all pre-scan conditions
+        // Known initial conditions
         reset();
     }
 
@@ -107,25 +109,22 @@ public class Distance extends OpMode {
             case IDLE:
                 // Never advance
                 break;
-            case START_LEFT:
+            case START_LEFT: // This works like (START_LEFT || START_RIGHT)
+            case START_RIGHT:
                 timer.reset();
-                leftAccum = 0;
+                // This will advance to SAMPLE_LEFT or SAMPLE_RIGHT automatically
+                // State order is defined by position the Enum, not by the position here in switch()
                 state = state.next();
                 break;
-            case SAMPLE_LEFT:
+            case SAMPLE_LEFT: // Could merge with SAMPLE_RIGHT
                 leftLast = left.getDistance(DistanceUnit.INCH);
                 leftAccum = (leftAccum * 0.9) + (0.1 * leftLast);
                 if (timer.seconds() > SENSOR_TIME) {
                     state = state.next();
                 }
                 break;
-            case PARSE_LEFT:
+            case PARSE_LEFT: // Could merge with PARSE_RIGHT
                 leftinRange = (leftAccum <= DISTANCE);
-                state = state.next();
-                break;
-            case START_RIGHT:
-                timer.reset();
-                rightAccum = 0;
                 state = state.next();
                 break;
             case SAMPLE_RIGHT:
@@ -178,9 +177,17 @@ public class Distance extends OpMode {
         return position;
     }
 
+    // Return everything to known starting conditions
     public void reset() {
         state = AUTO_STATE.IDLE;
         position = BARCODE.NONE;
+
+        leftLast = 0;
+        rightLast = 0;
+        leftAccum = 0;
+        rightAccum = 0;
+        leftinRange = false;
+        rightinRange = false;
     }
 
     // Export the scan status
