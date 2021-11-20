@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.momm.sample;
+package org.firstinspires.ftc.teamcode.robot;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -6,20 +6,15 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.teamcode.robot.Globals;
-
-// Extend OpMode as usual
-// If you must extend MultiOpModeManger be sure to @override all of the standard methods (or else)
-//
-// Register with @TeleOp or @Autonomous if you want to expose this OpMode independently
-// It will still work as a sub-mode in MOMM even if it is not registered for independent use
-//@TeleOp(name = "MOMM_Drive", group = "Test")
 @Config
-public class MOMM_Drive extends OpMode {
+//@TeleOp(name = "Drive", group = "Test")
+public class Drive extends OpMode {
     // Config
     public static boolean DEBUG = false;
-    private static final double LOW_SPEED_DEFAULT = 0.7;
+    public static final double LOW_SPEED_OFFSET = 0.7;
     private static final int INPUT_SCALING_EXPONENT = 3;
+    public static double TICKS_PER_INCH = 43.24;
+    public static double TURN_RATIO = 7;
 
     // Hardware
     private DcMotor driveLeft;
@@ -27,12 +22,6 @@ public class MOMM_Drive extends OpMode {
 
     // Members
     private boolean enabled = false;
-    private double LOW_SPEED_OFFSET = LOW_SPEED_DEFAULT;
-
-    // Custom methods
-    public void lowSpeed(double speed) {
-        LOW_SPEED_OFFSET = speed;
-    }
 
     // Standard methods
     @Override
@@ -42,15 +31,13 @@ public class MOMM_Drive extends OpMode {
 
         // Drive wheels
         try {
-            // TODO: Map to actual hardware
-            driveLeft = hardwareMap.get(driveLeft.getClass(), "DL");
+            driveLeft = hardwareMap.get(driveLeft.getClass(), "BL");
             driveLeft.setDirection(DcMotorSimple.Direction.FORWARD);
             driveLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             driveLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            // TODO: Map to actual hardware
-            driveRight = hardwareMap.get(driveRight.getClass(), "DR");
-            driveRight.setDirection(DcMotorSimple.Direction.REVERSE);
+            driveRight = hardwareMap.get(driveRight.getClass(), "BR");
+            driveRight.setDirection(DcMotorSimple.Direction.FORWARD);
             driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             driveRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -67,7 +54,6 @@ public class MOMM_Drive extends OpMode {
 
     @Override
     public void start() {
-        telemetry.log().add(getClass().getSimpleName() + ": start()");
     }
 
     @Override
@@ -113,5 +99,51 @@ public class MOMM_Drive extends OpMode {
         // Stop the drive motors
         driveLeft.setPower(0);
         driveRight.setPower(0);
+    }
+
+    // Custom methods
+    public boolean isBusy() {
+        return driveLeft.isBusy() || driveRight.isBusy();
+    }
+
+    public void driveTo(float speed, float distance) {
+        // Don't allow new moves if we're still busy
+        if (isBusy()) {
+            telemetry.log().add(getClass().getSimpleName() + "::driveTo(): Motors in use");
+            return;
+        }
+
+        // Set a target, translated from inches to encoder ticks
+        int leftTarget = driveLeft.getCurrentPosition();
+        int rightTarget = driveRight.getCurrentPosition();
+        leftTarget += distance * TICKS_PER_INCH;
+        rightTarget += distance * TICKS_PER_INCH;
+        driveLeft.setTargetPosition(leftTarget);
+        driveRight.setTargetPosition(rightTarget);
+
+        // Start the motors
+        driveLeft.setPower(speed);
+        driveRight.setPower(speed);
+    }
+
+    public void turnTo(float speed, int angle) {
+        // Don't allow new moves if we're still busy
+        if (isBusy()) {
+            telemetry.log().add(getClass().getSimpleName() + "::driveTo(): Motors in use");
+            return;
+        }
+
+        // Fake turns using a distance translation
+        // We have a gyro but let's start with just one control mode
+        int leftTarget = driveLeft.getCurrentPosition();
+        int rightTarget = driveRight.getCurrentPosition();
+        leftTarget += angle * TURN_RATIO;
+        rightTarget -= angle * TURN_RATIO;
+        driveLeft.setTargetPosition(leftTarget);
+        driveRight.setTargetPosition(rightTarget);
+
+        // Start the motors
+        driveLeft.setPower(speed);
+        driveRight.setPower(-speed);
     }
 }

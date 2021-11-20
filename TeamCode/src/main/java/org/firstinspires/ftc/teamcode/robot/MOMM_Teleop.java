@@ -4,18 +4,17 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
-import org.firstinspires.ftc.teamcode.momm.sample.MOMM_Drive;
-import org.firstinspires.ftc.teamcode.momm.sample.MOMM_Speech;
 
 // Extend MultiOpModeManager instead of OpMode
 // Register with @TeleOp or @Autonomous as with any other OpMode
-@TeleOp(name = "MOMM_Sample", group = "MOMM")
+@TeleOp(name = "MOMM_Teleop", group = "MOMM")
 @Disabled
 public class MOMM_Teleop extends MultiOpModeManager {
     // External OMs
     // OMs that you will call directly should have members
     // OMs that are complete independent can be defined in-line (see init())
-    private MOMM_Drive drive;
+    private Drive drive;
+    private DuckSpin duck;
 
     /*
      * Standard OM methods
@@ -29,11 +28,12 @@ public class MOMM_Teleop extends MultiOpModeManager {
     @Override
     public void init() {
         // Register the drive OM
-        drive = new MOMM_Drive();
+        drive = new Drive();
         super.register(drive);
 
         // Register the duck spinner OM
-        super.register(new DUCK_());
+        duck = new DuckSpin();
+        super.register(duck);
 
         // Be sure to register other OMs before this line or they won't get an init() call
         super.init();
@@ -51,11 +51,13 @@ public class MOMM_Teleop extends MultiOpModeManager {
 
     @Override
     public void loop() {
-        // Adjust the drive power from outside the OM
-        if ((int) time % 2 == 0) {
-            drive.lowSpeed(0.5);
-        } else {
-            drive.lowSpeed(1.0);
+        // Start the auto method for the duck spinner
+        if (duck.isDone()) {
+            if (gamepad2.left_stick_button) {
+                duck.auto(true);
+            } else if (gamepad2.right_stick_button) {
+                duck.auto(false);
+            }
         }
 
         super.loop();
