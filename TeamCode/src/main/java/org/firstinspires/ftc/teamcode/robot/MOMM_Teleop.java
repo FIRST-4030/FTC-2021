@@ -1,40 +1,29 @@
 package org.firstinspires.ftc.teamcode.robot;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import android.database.StaleDataException;
+
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 
-// Extend MultiOpModeManager instead of OpMode
-// Register with @TeleOp or @Autonomous as with any other OpMode
 @TeleOp(name = "MOMM_Teleop", group = "MOMM")
 public class MOMM_Teleop extends MultiOpModeManager {
-    // External OMs
-    // OMs that you will call directly should have members
-    // OMs that are complete independent can be defined in-line (see init())
-    private Drive drive;
     private DuckSpin duck;
-
-    /*
-     * Standard OM methods
-     *
-     * All of the standard OM methods are available to @override
-     * It is acceptable to exclude a method; for example, if init_loop is empty it can be excluded
-     * If you define one of the standard methods it must call the same method's super()
-     * super() can be called anywhere within the method; first or last is often easiest to grok
-     */
+    private Distance distance;
 
     @Override
     public void init() {
-        // Register the drive OM
-        drive = new Drive();
-        super.register(drive);
+        super.register(new Drive());
+        super.register(new Depositor());
+        super.register(new Capstone());
+        super.register(new Collector());
 
-        // Register the duck spinner OM
         duck = new DuckSpin();
         super.register(duck);
 
-        // Be sure to register other OMs before this line or they won't get an init() call
+        distance = new Distance();
+        super.register(distance);
+
         super.init();
     }
 
@@ -57,6 +46,17 @@ public class MOMM_Teleop extends MultiOpModeManager {
             } else if (gamepad2.right_stick_button) {
                 duck.auto(false);
             }
+        }
+
+        // Trigger a distance scan, but only once
+        if (gamepad2.guide && distance.state() == Distance.AUTO_STATE.IDLE) {
+            distance.startScan();
+        }
+        // Distance scan status or result, when available
+        if (distance.state() == Distance.AUTO_STATE.DONE) {
+            telemetry.addData("Barcode", distance.position());
+        } else {
+            telemetry.addData("Barcode", distance.state());
         }
 
         super.loop();
