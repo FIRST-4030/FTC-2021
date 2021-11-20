@@ -73,8 +73,8 @@ public class NewTeleOp extends OpMode{
     private static double COLLECTOR_DOWN = 0.19;
     private static double COLLECTOR_POWER = -1;
     private static double timerRatio = 0.0;
-    private static double duckPowerMin = 0.21;  // min duck spinner speed (0 - 1.0)
-    private static double duckPowerMax = 0.46;  // max duck spinner speed (0 - 1.0)
+    private static double duckPowerMin = 0.215;  // min duck spinner speed (0 - 1.0)
+    private static double duckPowerMax = 0.465;  // max duck spinner speed (0 - 1.0)
     private static double duckRampTime = 1.25;  // duck spinner ramp time (seconds, >0)
     private static double CAP_IN = 0;
     //private static double CAP_UP = 0.35;
@@ -114,6 +114,7 @@ public class NewTeleOp extends OpMode{
         // Duck Spinner
         try {
             duckSpinner = hardwareMap.get(DcMotor.class, "duck");
+            duckSpinner.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         } catch (Exception e) {
             telemetry.log().add("Could not find duck spinner");
             error = true;
@@ -122,6 +123,7 @@ public class NewTeleOp extends OpMode{
         // Depositor
         try {
             depBelt = hardwareMap.get(DcMotor.class, "Depbelt");
+            //depBelt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             depLow = hardwareMap.get(Servo.class, "Deplow");
             depMid = hardwareMap.get(Servo.class, "Depmid");
             depTilt = hardwareMap.get(Servo.class, "Deptilt");

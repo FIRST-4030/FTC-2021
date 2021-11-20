@@ -49,8 +49,8 @@ public class DUCK_SPIN extends OpMode {
     // Constants used for hardware
     private static double DUCK_POWER = 0.0;
     private static double timerRatio = 0.0;
-    private static double duckPowerMin = 0.21;  // min duck spinner speed (0 - 1.0)
-    private static double duckPowerMax = 0.46;  // max duck spinner speed (0 - 1.0)
+    private static double duckPowerMin = 0.215;  // min duck spinner speed (0 - 1.0)
+    private static double duckPowerMax = 0.465;  // max duck spinner speed (0 - 1.0)
     private static double duckRampTime = 1.25;  // duck spinner ramp time (seconds, >0)
 
     // Members
@@ -67,6 +67,7 @@ public class DUCK_SPIN extends OpMode {
         // Duck Spinner
         try {
             duckSpinner = hardwareMap.get(DcMotor.class, "duck");
+            duckSpinner.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         } catch (Exception e) {
             telemetry.log().add("Could not find duck spinner");
             error = true;
@@ -137,13 +138,6 @@ public class DUCK_SPIN extends OpMode {
         }
         duckSpinner.setPower(DUCK_POWER);
 
-        /* timerRatio = Math.max(Math.min(duckTimer.seconds() / duckRampTime, 1.0), 0);
-        if (timerRatio != 0.0 && timerRatio != 1.0) {
-            DUCK_POWER = duckPowerMin + timerRatio * (duckPowerMax - duckPowerMin);
-        } else {
-            DUCK_POWER = 0.0;
-        }
-        duckSpinner.setPower(DUCK_POWER); */
     }
 
     @Override
