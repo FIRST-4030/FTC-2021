@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 public class MOMM_Teleop extends MultiOpModeManager {
     private DuckSpin duck;
     private Distance distance;
+    private Depositor depositor;
 
     @Override
     public void init() {
@@ -23,6 +24,9 @@ public class MOMM_Teleop extends MultiOpModeManager {
 
         distance = new Distance();
         super.register(distance);
+
+        depositor = new Depositor();
+        super.register(depositor);
 
         super.init();
     }

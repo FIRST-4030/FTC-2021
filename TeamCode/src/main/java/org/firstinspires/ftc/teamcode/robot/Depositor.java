@@ -33,6 +33,10 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
+import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
 //@TeleOp(name = "Depositor", group = "Test")
@@ -52,9 +56,31 @@ public class Depositor extends OpMode {
     public static double LOW_CLOSE = 0.56;
     public static double MID_OPEN = 0.9;
     public static double MID_CLOSE = 0.47;
+    public static double LOW_DOOR_FLIPPER_MOVE_TIME = 0.25;
+    public static double MID_DOOR_FLIPPER_MOVE_TIME = 0.5;
+    public static double HIGH_DOOR_FLIPPER_MOVE_TIME = 0.75;
+    public static double BLOCK_SHOVE_TIME = 0.25;
+    public static double FLIPPER_MOVE_TIME_INITIAL = 1.0;   // REMOVE THIS when the magnetic sensor is installed
+    public static double REVERSE_BELT_TIME = 1.0;           // for TeleOp only
+    public static double DOUBLE_PRESS_TIME = 0.5;
 
     // Members
     private boolean enabled = false;
+    private AUTO_STATE state = AUTO_STATE.DONE;
+    private AUTO_STATE oldState = AUTO_STATE.DONE;
+    private DOOR_USED required_Door = DOOR_USED.NONE;
+    private ElapsedTime timer1 = new ElapsedTime();
+    private ElapsedTime timer2 = new ElapsedTime();
+    private ElapsedTime timer3 = new ElapsedTime();
+    private ElapsedTime timer4 = new ElapsedTime();
+    private ElapsedTime timerX = new ElapsedTime();
+    private ElapsedTime timerY = new ElapsedTime();
+    private ElapsedTime timerB = new ElapsedTime();
+    private boolean timer1Started = false;
+    private boolean timer2Started = false;
+    private boolean timer3Started = false;
+    private boolean timer4Started = false;
+    private double FLIPPER_MOVE_TIME = 1.0;
 
     @Override
     public void init() {
@@ -90,7 +116,7 @@ public class Depositor extends OpMode {
         if (!enabled) {
             return;
         }
-
+        state = AUTO_STATE.DONE;
         low.setPosition(LOW_CLOSE);
         mid.setPosition(MID_CLOSE);
         tilt.setPosition(TILT_DOWN);
@@ -103,30 +129,107 @@ public class Depositor extends OpMode {
             return;
         }
 
-        // Belt and doors
-        if (gamepad2.a || gamepad2.b || gamepad2.x) {
-            belt.setPower(BELT_SPEED);
-        } else if (gamepad2.y) {
-            belt.setPower(-BELT_SPEED);
-        } else {
-            belt.setPower(0);
+        // if the state changed, set ModeComplete to false
+        if (state != oldState) {
+            oldState = state;
+            timer1Started = timer2Started = timer3Started = timer4Started = false;
         }
-        if (gamepad2.a) {
-            low.setPosition(LOW_OPEN);
-        } else {
-            low.setPosition(LOW_CLOSE);
-        }
-        if (gamepad2.b) {
-            mid.setPosition(MID_OPEN);
-        } else {
-            mid.setPosition(MID_CLOSE);
-        }
+        switch (state) {
+            // Tilt forward, move flipper to start position
+            case TILTED_FORWARD:
+                low.setPosition(LOW_CLOSE);
+                mid.setPosition(MID_CLOSE);
+                tilt.setPosition(TILT_DOWN);
 
-        // Tilt
-        if (gamepad2.dpad_right) {
-            tilt.setPosition(TILT_UP);
-        } else {
-            tilt.setPosition(TILT_DOWN);
+                belt.setPower(BELT_SPEED);
+                // start the timer
+                if (!timer3Started) {
+                    timer3.reset();
+                    timer3Started = true;
+                }
+                // once the belt has been going for time required for the selected door, stop the belt
+                if (timer3.seconds() >= FLIPPER_MOVE_TIME_INITIAL) {
+                    belt.setPower(0);
+                    state = AUTO_STATE.DONE;
+                }
+                break;
+            case DOOR_PREP:      // Move the flipper to below the required door
+                belt.setPower(BELT_SPEED);
+                // start the timer
+                if (!timer1Started) {
+                    timer1.reset();
+                    timer1Started = true;
+                }
+                // once the belt has been going for time required for the selected door, stop the belt
+                if (timer1.seconds() >= FLIPPER_MOVE_TIME) {
+                    belt.setPower(0);
+                    state = AUTO_STATE.DONE;
+                }
+                break;
+            case DOOR_OPEN:      // Open required door and run conveyor for the BLOCK_SHOVE_TIME
+                switch (required_Door) {
+                    case LOW_DOOR:
+                        low.setPosition((LOW_OPEN));
+                        break;
+                    case MID_DOOR:
+                        mid.setPosition(MID_OPEN);
+                        break;
+                    case HIGH_DOOR:
+                        // this will be implemented later if they add a door
+                        break;
+                }
+                belt.setPower(BELT_SPEED);
+                if (!timer2Started) {
+                    timer2.reset();
+                    timer2Started = true;
+                }
+                // once the belt has been going for the BLOCK_SHOVE_TIME, stop the belt
+                if (timer2.seconds() >= BLOCK_SHOVE_TIME) {
+                    belt.setPower(0);
+                    state = AUTO_STATE.DONE;
+                }
+                break;
+            case TILTED_BACK:
+                tilt.setPosition(TILT_UP);
+                state = AUTO_STATE.DONE;
+                break;
+            case REVERSE_RUN:      // Run the belt in reverse for a set time (for TeleOp only)
+                belt.setPower(-BELT_SPEED);
+                if (!timer4Started) {
+                    timer4.reset();
+                    timer4Started = true;
+                }
+                // once the belt has been going for the BLOCK_SHOVE_TIME, stop the belt
+                if (timer4.seconds() >= REVERSE_BELT_TIME) {
+                    belt.setPower(0);
+                    state = AUTO_STATE.DONE;
+                }
+                break;
+            case DONE:
+                tilt.setPosition(tilt.getPosition());
+                low.setPosition(low.getPosition());
+                mid.setPosition(low.getPosition());
+                belt.setPower(0);
+                break;
+        }
+        if (state != AUTO_STATE.DONE) {
+            if (gamepad2.x && timerX.seconds() < DOUBLE_PRESS_TIME) setDoor(DOOR_USED.LOW_DOOR);
+            if (gamepad2.y && timerY.seconds() < DOUBLE_PRESS_TIME) setDoor(DOOR_USED.MID_DOOR);
+            if (gamepad2.b && timerB.seconds() < DOUBLE_PRESS_TIME) setDoor(DOOR_USED.HIGH_DOOR);
+
+            if (gamepad2.a) state = AUTO_STATE.TILTED_FORWARD;
+            if (gamepad2.b) {
+                timerB.reset();
+                state = AUTO_STATE.DOOR_PREP;
+            }
+            if (gamepad2.x) {
+                timerX.reset();
+                state = AUTO_STATE.DOOR_OPEN;
+            }
+            if (gamepad2.y) {
+                timerY.reset();
+                state = AUTO_STATE.TILTED_BACK;
+            }
         }
 
         // Debug when requested
@@ -135,10 +238,51 @@ public class Depositor extends OpMode {
                     "B %.2f/%d, L %.2f, M %.2f, T %.2f",
                     belt.getPower(), belt.getCurrentPosition(),
                     low.getPosition(), mid.getPosition(), tilt.getPosition());
+            telemetry.addData("mode", state);
         }
+    }
+
+    enum AUTO_STATE implements OrderedEnum {
+        TILTED_FORWARD,     // Tilt forward, move flipper to start position
+        DOOR_PREP,          // Move the flipper to below the required door
+        DOOR_OPEN,          // Open the required door and run conveyor a small amount
+        TILTED_BACK,        // Tilt back
+        REVERSE_RUN,        // Run the belt in reverse for a set time (for TeleOp only)
+        DONE;               // Power down all servos
+
+        public AUTO_STATE prev() {
+            return OrderedEnumHelper.prev(this);
+        }
+
+        public AUTO_STATE next() {
+            return OrderedEnumHelper.next(this);
+        }
+    }
+
+    enum DOOR_USED {
+        LOW_DOOR,
+        MID_DOOR,
+        HIGH_DOOR,
+        NONE
     }
 
     @Override
     public void stop() {
+        state = AUTO_STATE.DONE;
+    }
+
+    public void setDoor(DOOR_USED newDoor) {
+        required_Door = newDoor;
+        switch (required_Door) {
+            case LOW_DOOR:
+                FLIPPER_MOVE_TIME = LOW_DOOR_FLIPPER_MOVE_TIME;
+                break;
+            case MID_DOOR:
+                FLIPPER_MOVE_TIME = MID_DOOR_FLIPPER_MOVE_TIME;
+                break;
+            case HIGH_DOOR:
+                FLIPPER_MOVE_TIME = HIGH_DOOR_FLIPPER_MOVE_TIME;
+                break;
+        }
     }
 }
