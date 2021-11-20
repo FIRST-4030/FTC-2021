@@ -41,11 +41,6 @@ public class Drive extends OpMode {
             driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             driveRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            // Don't enable this OM unless we find the necessary hardware
-            // This avoids null-pointer exceptions and allows other code
-            // to run normally even while this OM fails
-            //
-            // Be sure to protect methods that use drive hardware by checking this flag
             enabled = true;
         } catch (Exception e) {
             telemetry.log().add(getClass().getSimpleName() + ": Could not initialize");

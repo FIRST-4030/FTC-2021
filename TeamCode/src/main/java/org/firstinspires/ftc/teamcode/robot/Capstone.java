@@ -76,6 +76,11 @@ public class Capstone extends OpMode {
 
     @Override
     public void start() {
+        // Skip processing if we're disabled
+        if (!enabled) {
+            return;
+        }
+        
         arm.setPosition(CAP_MID);
     }
 

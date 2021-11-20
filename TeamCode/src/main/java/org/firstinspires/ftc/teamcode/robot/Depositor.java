@@ -86,6 +86,11 @@ public class Depositor extends OpMode {
 
     @Override
     public void start() {
+        // Skip processing if we're disabled
+        if (!enabled) {
+            return;
+        }
+
         low.setPosition(LOW_CLOSE);
         mid.setPosition(MID_CLOSE);
         tilt.setPosition(TILT_DOWN);

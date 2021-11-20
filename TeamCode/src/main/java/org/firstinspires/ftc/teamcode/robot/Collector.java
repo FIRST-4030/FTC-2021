@@ -84,6 +84,11 @@ public class Collector extends OpMode {
 
     @Override
     public void start() {
+        // Skip processing if we're disabled
+        if (!enabled) {
+            return;
+        }
+
         arm.setPosition(ARM_UP);
     }
 
