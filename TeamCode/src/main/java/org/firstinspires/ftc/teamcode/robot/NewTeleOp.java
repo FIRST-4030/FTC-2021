@@ -43,7 +43,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
 @TeleOp(name = "NewTeleOp", group = "Test")
-public class NewTeleOp extends OpMode {
+public class NewTeleOp extends OpMode{
     // Hardware
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;

@@ -21,14 +21,6 @@ public class DistanceTest extends OpMode {
     // Hardware
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
-    private DcMotor duckSpinner = null;
-    private DcMotor depBelt = null;
-    private Servo depLow = null;
-    private Servo depMid = null;
-    private Servo depTilt = null;
-    private DcMotor collector = null;
-    private Servo collectorArm = null;
-    private Servo capstoneArm = null;
     private DistanceSensor distanceLeft = null;
     private DistanceSensor distanceRight = null;
 
@@ -36,8 +28,7 @@ public class DistanceTest extends OpMode {
     private static float DRIVE_POWER = 0.375f;
     private static double TICKS_PER_INCH = 43.24;
     private static double TURN_RATIO = 8;
-    private static double ANGLE_CONST = 1.23;
-    private static double SENSOR_TIME = 1;
+    private static double SENSOR_TIME = 0.5;
     private static double leftSensorAccum = 0;
     private static double rightSensorAccum = 0;
     private static int objectPos = 0;
