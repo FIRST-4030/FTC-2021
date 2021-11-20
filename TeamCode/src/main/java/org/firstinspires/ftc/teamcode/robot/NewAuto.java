@@ -37,7 +37,8 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.buttons.ButtonHandler;
+import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
+import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
 @Autonomous(name = "NewAuto", group = "Test")
@@ -85,10 +86,8 @@ public class NewAuto extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     // Members
-    private boolean done = false;
     private boolean driveCmdRunning = false;
-    private int autoStep = 0;
-    private ButtonHandler buttons;
+    private AUTO_STATE state = AUTO_STATE.DONE;
     private boolean redAlliance = false;
     private boolean duckSide = false;
 
@@ -179,8 +178,7 @@ public class NewAuto extends OpMode {
     @Override
     public void start() {
         driveStop();
-        done = false;
-        autoStep = 0;
+        state = AUTO_STATE.OUT_FROM_WALL;
         depTilt.setPosition(DEP_DOWN);
         depLow.setPosition(LOW_CLOSE);
         depMid.setPosition(MID_CLOSE);
@@ -191,7 +189,7 @@ public class NewAuto extends OpMode {
     @Override
     public void loop() {
         // Stop when the autoSteps are complete
-        if (done) {
+        if (state == AUTO_STATE.DONE) {
             requestOpModeStop();
             return;
         }
@@ -208,7 +206,7 @@ public class NewAuto extends OpMode {
                 // Clear the running flag
                 driveCmdRunning = false;
                 // Advance to the next autoStep
-                autoStep++;
+                state = state.next();
             }
             // Continue from the top of loop()
             return;
@@ -219,9 +217,9 @@ public class NewAuto extends OpMode {
         //
 
         // Step through the auto commands
-        switch (autoStep) {
+        switch (state) {
             // Forward 16
-            case 0:
+            case OUT_FROM_WALL:
                 if (!duckSide) {
                     driveTo(DRIVE_POWER, 15f);
                 } else {
@@ -229,7 +227,7 @@ public class NewAuto extends OpMode {
                 }
                 break;
             // Counter-clockwise 90
-            case 1:
+            case TURN_TO_PARKING:
                 if ((redAlliance && !duckSide) || (!redAlliance && duckSide)) {
                     turnTo(DRIVE_POWER, -90);
                 } else {
@@ -237,33 +235,16 @@ public class NewAuto extends OpMode {
                 }
                 break;
             // Backwards 32
-            case 2:
+            case PARK:
                 if (!duckSide) {
                     driveTo(-DRIVE_POWER, -40);
                 } else {
                     driveTo(-DRIVE_POWER, -24.8f);
                 }
                 break;
-            /* // Backward 35
-            case 3:
-                driveTo(DRIVE_POWER, 35);
-                break;
-            // Forward 3
-            case 4:
-                driveTo(DRIVE_POWER, 3);
-                break;
-            // Clockwise 45
-            case 5:
-                turnTo(DRIVE_POWER, 45);
-                break;
-            // Forward 31
-            case 6:
-                driveTo(DRIVE_POWER, 31);
-                break; */
-            // If we get past the end stop and end the loop
-            default:
+            // Stop processing
+            case DONE:
                 driveStop();
-                done = true;
                 break;
         }
     }
@@ -275,6 +256,21 @@ public class NewAuto extends OpMode {
         leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    enum AUTO_STATE implements OrderedEnum {
+        OUT_FROM_WALL,
+        TURN_TO_PARKING,
+        PARK,
+        DONE;
+
+        public NewAuto.AUTO_STATE prev() {
+            return OrderedEnumHelper.prev(this);
+        }
+
+        public NewAuto.AUTO_STATE next() {
+            return OrderedEnumHelper.next(this);
+        }
     }
 
     public void driveStop() {

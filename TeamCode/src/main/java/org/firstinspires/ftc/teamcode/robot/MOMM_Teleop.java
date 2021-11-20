@@ -8,7 +8,6 @@ import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 // Extend MultiOpModeManager instead of OpMode
 // Register with @TeleOp or @Autonomous as with any other OpMode
 @TeleOp(name = "MOMM_Teleop", group = "MOMM")
-@Disabled
 public class MOMM_Teleop extends MultiOpModeManager {
     // External OMs
     // OMs that you will call directly should have members
