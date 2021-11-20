@@ -13,7 +13,6 @@ public class MOMM_Teleop extends MultiOpModeManager {
     private DuckSpin duck;
     private Distance distance;
     private Depositor depositor;
-    private InputHandler in;
 
     @Override
     public void init() {
@@ -24,15 +23,12 @@ public class MOMM_Teleop extends MultiOpModeManager {
 
         duck = new DuckSpin();
         super.register(duck);
-
         distance = new Distance();
         super.register(distance);
-
         depositor = new Depositor();
         super.register(depositor);
 
-        in = Globals.input;
-        in.register("BARCODE", gamepad2, PAD_KEY.guide);
+        input.register("BARCODE", gamepad2, PAD_KEY.guide);
 
         super.init();
     }
@@ -59,7 +55,7 @@ public class MOMM_Teleop extends MultiOpModeManager {
         }
 
         // Trigger a distance scan, but only once
-        if (in.down("BARCODE") && distance.state() == Distance.AUTO_STATE.IDLE) {
+        if (input.down("BARCODE") && distance.state() == Distance.AUTO_STATE.IDLE) {
             distance.startScan();
         }
         // Distance scan status or result, when available

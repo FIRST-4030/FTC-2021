@@ -10,7 +10,7 @@ import java.util.Vector;
 public class MultiOpModeManager extends OpMode {
 
     private final Vector<OpMode> opmodes;
-    private final InputHandler input;
+    public final InputHandler input;
 
     // Init the list and Globals
     public MultiOpModeManager() {
