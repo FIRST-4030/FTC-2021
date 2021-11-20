@@ -59,7 +59,7 @@ public class NewAuto extends OpMode {
     // Consts
     private static float DRIVE_POWER = 0.375f;
     private static double TICKS_PER_INCH = 43.24;
-    private static double TURN_RATIO = 8;
+    private static double TURN_RATIO = 7;
     private static double ANGLE_CONST = 1.23;
     private static double DUCK_POWER = 0.0;
     private static double DEP_BELT_POWER = 0.9;
@@ -220,17 +220,6 @@ public class NewAuto extends OpMode {
 
         // Step through the auto commands
         switch (autoStep) {
-            /*case -2:
-                sensorTimer.reset();
-                leftSensorAccum = 0;
-                autoStep++;
-                break;
-            case -1 :
-                leftSensorAccum = (leftSensorAccum * 0.9) + (0.1 * distanceLeft.getDistance());
-                if (sensorTimer.seconds() > SENSOR_TIME) {
-                    autoStep++;
-                }
-                break;*/
             // Forward 16
             case 0:
                 if (!duckSide) {
