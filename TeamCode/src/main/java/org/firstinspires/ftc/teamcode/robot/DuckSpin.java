@@ -96,6 +96,7 @@ public class DuckSpin extends OpMode {
         }
 
         // Override the current auto state with driver commands
+        // Technically we should only trigger on button-down, not repeatedly while held
         if (gamepad1.a) {
             auto(true);
         } else if (gamepad1.b) {

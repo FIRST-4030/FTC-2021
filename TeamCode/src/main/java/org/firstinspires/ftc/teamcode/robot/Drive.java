@@ -129,7 +129,7 @@ public class Drive extends OpMode {
     public void turnTo(float speed, int angle) {
         // Don't allow new moves if we're still busy
         if (isBusy()) {
-            telemetry.log().add(getClass().getSimpleName() + "::driveTo(): Motors in use");
+            telemetry.log().add(getClass().getSimpleName() + "::turnTo(): Motors in use");
             return;
         }
 
