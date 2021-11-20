@@ -73,8 +73,8 @@ public class NewTeleOp extends OpMode{
     private static double COLLECTOR_DOWN = 0.19;
     private static double COLLECTOR_POWER = -1;
     private static double timerRatio = 0.0;
-    private static double duckPowerMin = 0.215;  // min duck spinner speed (0 - 1.0)
-    private static double duckPowerMax = 0.465;  // max duck spinner speed (0 - 1.0)
+    private static double duckPowerMin = 0.63;  // min duck spinner speed (0 - 1.0)
+    private static double duckPowerMax = 0.88;  // max duck spinner speed (0 - 1.0)
     private static double duckRampTime = 1.25;  // duck spinner ramp time (seconds, >0)
     private static double CAP_IN = 0;
     //private static double CAP_UP = 0.35;
@@ -85,6 +85,10 @@ public class NewTeleOp extends OpMode{
     private static double CAPSTONE_DELTA = 0.01;
     private static double delayTime = 0.1;
     private static double capstoneTarget = 0;
+    private double LEFT_DRIVE_POW = 0;
+    private double RIGHT_DRIVE_POW = 0;
+    private static double ACCEL_CONSTANT = 0.4;
+    private static double fastFactor = 0;
 
     // Servo position test constants
     private float servoPos = 0.5f;
@@ -192,21 +196,19 @@ public class NewTeleOp extends OpMode{
     @Override
     public void loop() {
         // PoV drive
-        double drive = Math.pow(-gamepad1.left_stick_y, 3);
+        /* double drive = Math.pow(-gamepad1.left_stick_y, 3);
         double turn = gamepad1.right_stick_x;
-        //leftDrive.setPower(Range.clip(drive + turn, -1.0, 1.0));
-        //rightDrive.setPower(Range.clip(drive - turn, -1.0, 1.0));
-        leftDrive.setPower(Math.pow(-gamepad1.left_stick_y, 3));
-        rightDrive.setPower(Math.pow(-gamepad1.right_stick_y, 3));
-
-        if (gamepad1.right_trigger != 0) {
-            double speed = 1 - gamepad1.right_trigger;
-            if (gamepad1.right_trigger >= 0.7) {
-                speed = 1 - 0.7;
-            }
-            leftDrive.setPower(Range.clip(drive + turn, -speed, speed));
-            rightDrive.setPower(Range.clip(drive - turn, -speed, speed));
+        leftDrive.setPower(Range.clip(drive + turn, -1.0, 1.0));
+        rightDrive.setPower(Range.clip(drive - turn, -1.0, 1.0)); */
+        if (gamepad1.right_trigger > ACCEL_CONSTANT) {
+            fastFactor = gamepad1.right_trigger;
+        } else {
+            fastFactor = ACCEL_CONSTANT;
         }
+        LEFT_DRIVE_POW = Math.pow(-gamepad1.left_stick_y, 3);
+        RIGHT_DRIVE_POW = Math.pow(-gamepad1.right_stick_y, 3);
+        leftDrive.setPower(LEFT_DRIVE_POW * fastFactor);
+        rightDrive.setPower(RIGHT_DRIVE_POW * fastFactor);
 
         // Duck spinner
         if (gamepad1.a) {

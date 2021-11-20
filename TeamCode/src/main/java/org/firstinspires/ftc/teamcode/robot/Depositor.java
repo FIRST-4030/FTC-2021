@@ -50,8 +50,8 @@ public class Depositor extends OpMode {
     // Config
     public static boolean DEBUG = false;
     public static double BELT_SPEED = 0.9;
-    public static double TILT_UP = 0.6;
-    public static double TILT_DOWN = 0.44;
+    public static double TILT_BACK = 0.6;
+    public static double TILT_FORWARD = 0.44;
     public static double LOW_OPEN = 0.98;
     public static double LOW_CLOSE = 0.56;
     public static double MID_OPEN = 0.9;
@@ -119,7 +119,7 @@ public class Depositor extends OpMode {
         state = AUTO_STATE.DONE;
         low.setPosition(LOW_CLOSE);
         mid.setPosition(MID_CLOSE);
-        tilt.setPosition(TILT_DOWN);
+        tilt.setPosition(TILT_FORWARD);
     }
 
     @Override
@@ -139,7 +139,7 @@ public class Depositor extends OpMode {
             case TILTED_FORWARD:
                 low.setPosition(LOW_CLOSE);
                 mid.setPosition(MID_CLOSE);
-                tilt.setPosition(TILT_DOWN);
+                tilt.setPosition(TILT_FORWARD);
 
                 belt.setPower(BELT_SPEED);
                 // start the timer
@@ -190,7 +190,7 @@ public class Depositor extends OpMode {
                 }
                 break;
             case TILTED_BACK:
-                tilt.setPosition(TILT_UP);
+                tilt.setPosition(TILT_BACK);
                 state = AUTO_STATE.DONE;
                 break;
             case REVERSE_RUN:      // Run the belt in reverse for a set time (for TeleOp only)
