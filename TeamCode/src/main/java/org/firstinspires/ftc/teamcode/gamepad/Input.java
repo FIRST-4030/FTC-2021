@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.gamepad;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad2;
-
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import java.lang.reflect.Field;

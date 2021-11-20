@@ -61,6 +61,12 @@ public class InputHandler {
         inputs.remove(name);
     }
 
+    // Update all inputs once per loop
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void loop() {
+        inputs.forEach((k, v) -> v.update());
+    }
+
     // Grab the listener for direct access
     @NonNull
     public Input get(String name) {
@@ -76,7 +82,14 @@ public class InputHandler {
         return input;
     }
 
-    // Convenience wrappers
+    /*
+     * Convenience wrappers
+     *
+     * Instead of this:
+     *     inputs.get("Foo").down();
+     * You can use this:
+     *     inputs.down("Foo");
+     */
     public boolean active(String name) {
         return get(name).active();
     }
@@ -107,11 +120,5 @@ public class InputHandler {
 
     public float value(String name) {
         return get(name).value();
-    }
-
-    // Update all inputs once per loop
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    public void loop() {
-        inputs.forEach((k, v) -> v.update());
     }
 }

@@ -1,10 +1,7 @@
 package org.firstinspires.ftc.teamcode.robot;
 
-import android.database.StaleDataException;
-
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 

@@ -1,5 +1,10 @@
 package org.firstinspires.ftc.teamcode.roadrunner.drive.opmode;
 
+import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.RUN_USING_ENCODER;
+import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kA;
+import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kStatic;
+import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kV;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -10,20 +15,13 @@ import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
 import com.acmerobotics.roadrunner.profile.MotionState;
 import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.roadrunner.drive.DriveConstants;
-//import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleTankDrive;
 
 import java.util.Objects;
-
-import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.RUN_USING_ENCODER;
-import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kA;
-import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kStatic;
-import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kV;
 
 /*
  * This routine is designed to tune the open-loop feedforward coefficients. Although it may seem unnecessary,

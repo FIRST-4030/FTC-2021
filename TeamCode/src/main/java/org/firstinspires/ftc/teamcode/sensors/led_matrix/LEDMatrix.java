@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.sensors.led_matrix;
 
 import org.firstinspires.ftc.teamcode.sensors.led_matrix.driver.BLINKING_MODE;
-import org.firstinspires.ftc.teamcode.sensors.led_matrix.driver.HT16K33;
 import org.firstinspires.ftc.teamcode.utils.Available;
 
 public interface LEDMatrix extends Available {

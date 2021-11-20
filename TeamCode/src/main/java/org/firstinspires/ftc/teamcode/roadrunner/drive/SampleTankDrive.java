@@ -1,5 +1,14 @@
 package org.firstinspires.ftc.teamcode.roadrunner.drive;
 
+import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.BASE_CONSTRAINTS;
+import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.MOTOR_VELO_PID;
+import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.RUN_USING_ENCODER;
+import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.TRACK_WIDTH;
+import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.encoderTicksToInches;
+import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kA;
+import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kStatic;
+import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kV;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -37,15 +46,6 @@ import org.firstinspires.ftc.teamcode.roadrunner.util.LynxModuleUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.BASE_CONSTRAINTS;
-import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.MOTOR_VELO_PID;
-import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.RUN_USING_ENCODER;
-import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.TRACK_WIDTH;
-import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.encoderTicksToInches;
-import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kA;
-import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kStatic;
-import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kV;
 
 /*
  * Simple tank drive hardware implementation for REV hardware.
