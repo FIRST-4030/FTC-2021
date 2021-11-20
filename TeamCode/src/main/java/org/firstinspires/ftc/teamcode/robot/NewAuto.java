@@ -291,12 +291,12 @@ public class NewAuto extends OpMode {
     public void driveStop() {
         // Zero the drive encoders, and enable RUN_TO_POSITION
         leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftDrive.setTargetPosition(0);
+        leftDrive.setTargetPosition(leftDrive.getCurrentPosition());
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftDrive.setPower(0);
 
         rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightDrive.setTargetPosition(0);
+        rightDrive.setTargetPosition(leftDrive.getCurrentPosition());
         rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightDrive.setPower(0);
     }
