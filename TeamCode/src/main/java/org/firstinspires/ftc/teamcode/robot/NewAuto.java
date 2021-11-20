@@ -32,17 +32,12 @@ package org.firstinspires.ftc.teamcode.robot;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.buttons.BUTTON_TYPE;
 import org.firstinspires.ftc.teamcode.buttons.ButtonHandler;
-import org.firstinspires.ftc.teamcode.buttons.PAD_BUTTON;
 
 @Config
 @Autonomous(name = "NewAuto", group = "Test")
@@ -294,14 +289,14 @@ public class NewAuto extends OpMode {
     }
 
     public void driveStop() {
-        // Stop, zero the drive encoders, and enable RUN_TO_POSITION
+        // Zero the drive encoders, and enable RUN_TO_POSITION
         leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftDrive.setTargetPosition(leftDrive.getTargetPosition());
+        leftDrive.setTargetPosition(0);
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftDrive.setPower(0);
 
         rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightDrive.setTargetPosition(rightDrive.getTargetPosition());
+        rightDrive.setTargetPosition(0);
         rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightDrive.setPower(0);
     }
