@@ -2,14 +2,17 @@ package org.firstinspires.ftc.teamcode.momm;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.teamcode.robot.Globals;
+
 import java.util.Vector;
 
 public class MultiOpModeManager extends OpMode {
 
     private final Vector<OpMode> opmodes;
 
-    // Init the list
+    // Init the list and Globals
     public MultiOpModeManager() {
+        Globals.opmode = this;
         opmodes = new Vector<>();
     }
 

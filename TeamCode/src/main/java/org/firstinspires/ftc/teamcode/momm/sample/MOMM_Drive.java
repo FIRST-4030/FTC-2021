@@ -1,10 +1,12 @@
-package org.firstinspires.ftc.teamcode.momm;
+package org.firstinspires.ftc.teamcode.momm.sample;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.teamcode.robot.Globals;
 
 // Extend OpMode as usual
 // If you must extend MultiOpModeManger be sure to @override all of the standard methods (or else)
@@ -35,17 +37,18 @@ public class MOMM_Drive extends OpMode {
     // Standard methods
     @Override
     public void init() {
+        // Pull in Globals
+        telemetry = Globals.opmode(this).telemetry;
+
         // Drive wheels
         try {
-            // TODO: Configure the actual drive hardware instead of this example
-            driveLeft = hardwareMap.get(driveLeft.getClass(), "DL");
+            driveLeft = hardwareMap.get(driveLeft.getClass(), "BL");
             driveLeft.setDirection(DcMotorSimple.Direction.FORWARD);
             driveLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             driveLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            // TODO: Configure the actual drive hardware instead of this example
-            driveRight = hardwareMap.get(driveRight.getClass(), "DR");
-            driveRight.setDirection(DcMotorSimple.Direction.REVERSE);
+            driveRight = hardwareMap.get(driveRight.getClass(), "BR");
+            driveRight.setDirection(DcMotorSimple.Direction.FORWARD);
             driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             driveRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 

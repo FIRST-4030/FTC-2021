@@ -1,8 +1,10 @@
-package org.firstinspires.ftc.teamcode.momm;
+package org.firstinspires.ftc.teamcode.momm.sample;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.teamcode.robot.Globals;
 
 @Config
 public class MOMM_Speech extends OpMode {
@@ -14,11 +16,13 @@ public class MOMM_Speech extends OpMode {
 
     @Override
     public void init() {
+        // Pull in Globals
+        telemetry = Globals.opmode(this).telemetry;
     }
 
     @Override
     public void init_loop() {
-        telemetry.addData("Init Time", "%.2f", time);
+        telemetry.addData("Init Time", "%.2f", getRuntime());
     }
 
     @Override
@@ -32,6 +36,6 @@ public class MOMM_Speech extends OpMode {
             speechDelay.reset();
             telemetry.speak("Speak");
         }
-        telemetry.addData("Loop Time", "%.2f", time);
+        telemetry.addData("Delay Time", "%.2f", getRuntime());
     }
 }

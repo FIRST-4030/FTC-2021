@@ -1,10 +1,14 @@
-package org.firstinspires.ftc.teamcode.momm;
+package org.firstinspires.ftc.teamcode.momm.sample;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 
 // Extend MultiOpModeManager instead of OpMode
 // Register with @TeleOp or @Autonomous as with any other OpMode
 @TeleOp(name = "MOMM_Sample", group = "MOMM")
+@Disabled
 public class MOMM_Sample extends MultiOpModeManager {
     // External OMs
     // OMs that you will call directly should have members
