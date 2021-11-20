@@ -4,6 +4,8 @@ import android.database.StaleDataException;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
+import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 
 @TeleOp(name = "MOMM_Teleop", group = "MOMM")
@@ -11,6 +13,7 @@ public class MOMM_Teleop extends MultiOpModeManager {
     private DuckSpin duck;
     private Distance distance;
     private Depositor depositor;
+    private InputHandler in;
 
     @Override
     public void init() {
@@ -27,6 +30,9 @@ public class MOMM_Teleop extends MultiOpModeManager {
 
         depositor = new Depositor();
         super.register(depositor);
+
+        in = Globals.input;
+        in.register("BARCODE", gamepad2, PAD_KEY.guide);
 
         super.init();
     }
@@ -53,7 +59,7 @@ public class MOMM_Teleop extends MultiOpModeManager {
         }
 
         // Trigger a distance scan, but only once
-        if (gamepad2.guide && distance.state() == Distance.AUTO_STATE.IDLE) {
+        if (in.down("BARCODE") && distance.state() == Distance.AUTO_STATE.IDLE) {
             distance.startScan();
         }
         // Distance scan status or result, when available

@@ -35,6 +35,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
+import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
@@ -51,6 +53,7 @@ public class DuckSpin extends OpMode {
 
     // Members
     public static boolean DEBUG = false;
+    private InputHandler in = null;
     private boolean enabled = false;
     private double speed = 0.0;
     private ElapsedTime timer = new ElapsedTime();
@@ -60,6 +63,7 @@ public class DuckSpin extends OpMode {
     public void init() {
         // Pull in Globals
         telemetry = Globals.opmode(this).telemetry;
+        in = Globals.input();
 
         // Duck spinner
         try {
@@ -70,6 +74,10 @@ public class DuckSpin extends OpMode {
             telemetry.log().add(getClass().getSimpleName() + ": " +
                     "Could not initialize");
         }
+
+        // Inputs
+        in.register("DUCK_RED", gamepad1, PAD_KEY.a);
+        in.register("DUCK_BLUE", gamepad1, PAD_KEY.b);
     }
 
     @Override
@@ -97,9 +105,9 @@ public class DuckSpin extends OpMode {
 
         // Override the current auto state with driver commands
         // Technically we should only trigger on button-down, not repeatedly while held
-        if (gamepad1.a) {
+        if (in.down("DUCK_RED")) {
             auto(true);
-        } else if (gamepad1.b) {
+        } else if (in.down("DUCK_BLUE")) {
             auto(false);
         }
 
