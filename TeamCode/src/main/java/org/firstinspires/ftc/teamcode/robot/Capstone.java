@@ -80,7 +80,7 @@ public class Capstone extends OpMode {
         if (!enabled) {
             return;
         }
-        
+
         arm.setPosition(CAP_MID);
     }
 
