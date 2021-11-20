@@ -3,17 +3,10 @@ package org.firstinspires.ftc.teamcode.roadrunner.drive.opmode;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.buttons.BUTTON_TYPE;
-import org.firstinspires.ftc.teamcode.buttons.ButtonHandler;
-import org.firstinspires.ftc.teamcode.buttons.PAD_BUTTON;
 
 @Config
 @Autonomous(name = "DistanceTest", group = "Test")
