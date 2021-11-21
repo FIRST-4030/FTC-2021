@@ -22,6 +22,7 @@ public class Input {
     private boolean auto = false;
     private boolean toggle = false;
     private boolean held = false;
+    private boolean heldFired = false;
 
     // Raw state
     private boolean active;
@@ -73,9 +74,15 @@ public class Input {
         }
 
         // Held fires heldDelay ms after down(), if nothing has changed since then
-        held = (active && now > heldTime);
-        if (changed()) {
+        if (active && now > heldTime && !heldFired) {
+            held = true;
+            heldFired = true;
+        }
+        if (down()) {
             heldTime = now + heldDelay;
+        }
+        if (up()) {
+            heldFired = false;
         }
     }
 
