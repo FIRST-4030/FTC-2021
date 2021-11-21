@@ -42,6 +42,8 @@ public class MOMM_Teleop extends MultiOpModeManager {
 
     @Override
     public void loop() {
+        super.loop();
+
         // Start the auto method for the duck spinner
         if (duck.isDone()) {
             if (gamepad2.left_stick_button) {
@@ -61,8 +63,6 @@ public class MOMM_Teleop extends MultiOpModeManager {
         } else {
             telemetry.addData("Barcode", distance.state());
         }
-
-        super.loop();
     }
 
     @Override

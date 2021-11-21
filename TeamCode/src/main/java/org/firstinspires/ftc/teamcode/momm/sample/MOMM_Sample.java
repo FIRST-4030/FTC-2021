@@ -21,7 +21,7 @@ public class MOMM_Sample extends MultiOpModeManager {
      * All of the standard OM methods are available to @override
      * It is acceptable to exclude a method; for example, if init_loop is empty it can be excluded
      * If you define one of the standard methods it must call the same method's super()
-     * super() can be called anywhere within the method; first or last is often easiest to grok
+     * super() can be called anywhere within the method; first is often best
      */
 
     @Override
@@ -49,14 +49,14 @@ public class MOMM_Sample extends MultiOpModeManager {
 
     @Override
     public void loop() {
+        super.loop();
+
         // Adjust the drive power from outside the OM
         if ((int) time % 2 == 0) {
             drive.lowSpeed(0.5);
         } else {
             drive.lowSpeed(1.0);
         }
-
-        super.loop();
     }
 
     @Override

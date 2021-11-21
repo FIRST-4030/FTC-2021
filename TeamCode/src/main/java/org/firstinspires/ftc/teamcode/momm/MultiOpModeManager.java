@@ -57,6 +57,7 @@ public class MultiOpModeManager extends OpMode {
 
     @Override
     public void init_loop() {
+        input.loop();
         for (OpMode om : opmodes) {
             om.init_loop();
         }
@@ -71,6 +72,7 @@ public class MultiOpModeManager extends OpMode {
 
     @Override
     public void loop() {
+        input.loop();
         for (OpMode om : opmodes) {
             om.loop();
         }

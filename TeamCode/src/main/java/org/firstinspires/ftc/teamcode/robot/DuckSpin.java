@@ -102,6 +102,9 @@ public class DuckSpin extends OpMode {
             return;
         }
 
+        // Inputs
+        in.loop();
+
         // Override the current auto state with driver commands
         // Technically we should only trigger on button-down, not repeatedly while held
         if (in.down("DUCK_RED")) {

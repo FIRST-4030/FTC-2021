@@ -1,9 +1,6 @@
 package org.firstinspires.ftc.teamcode.gamepad;
 
-import android.os.Build;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -15,6 +12,7 @@ import java.util.Map;
 public class InputHandler {
     private final HashMap<String, Input> inputs;
     private final OpMode opmode;
+    private double lastLoop;
 
     public InputHandler(OpMode opMode) {
         inputs = new HashMap<>();
@@ -61,10 +59,17 @@ public class InputHandler {
         inputs.remove(name);
     }
 
-    // Update all inputs once per loop
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    // Update all inputs
     public void loop() {
-        inputs.forEach((k, v) -> v.update());
+        // Skip processing if we already ran this loop
+        if (opmode.time == lastLoop) {
+            return;
+        }
+        lastLoop = opmode.time;
+
+        for (Map.Entry<String, Input> e : inputs.entrySet()) {
+            e.getValue().update();
+        }
     }
 
     // Grab the listener for direct access

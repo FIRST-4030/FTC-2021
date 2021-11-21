@@ -36,8 +36,8 @@ public class Input {
 
     // Grab the input state
     public void update() {
-        boolean a = false;
-        float v = 0.0f;
+        boolean a;
+        float v;
         try {
             Field field = gamepad.getClass().getField(padkey.name());
             if (boolean.class.isAssignableFrom((field.getType()))) {
