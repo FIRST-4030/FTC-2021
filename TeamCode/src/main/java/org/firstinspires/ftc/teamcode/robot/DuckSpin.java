@@ -160,10 +160,6 @@ public class DuckSpin extends OpMode {
         SPIN,
         DONE;
 
-        public AUTO_STATE prev() {
-            return OrderedEnumHelper.prev(this);
-        }
-
         public AUTO_STATE next() {
             return OrderedEnumHelper.next(this);
         }

@@ -250,10 +250,6 @@ public class Depositor extends OpMode {
         REVERSE_RUN,        // Run the belt in reverse for a set time (for TeleOp only)
         DONE;               // Power down all servos
 
-        public AUTO_STATE prev() {
-            return OrderedEnumHelper.prev(this);
-        }
-
         public AUTO_STATE next() {
             return OrderedEnumHelper.next(this);
         }

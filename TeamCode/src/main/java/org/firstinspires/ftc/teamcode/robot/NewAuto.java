@@ -264,10 +264,6 @@ public class NewAuto extends OpMode {
         PARK,
         DONE;
 
-        public NewAuto.AUTO_STATE prev() {
-            return OrderedEnumHelper.prev(this);
-        }
-
         public NewAuto.AUTO_STATE next() {
             return OrderedEnumHelper.next(this);
         }

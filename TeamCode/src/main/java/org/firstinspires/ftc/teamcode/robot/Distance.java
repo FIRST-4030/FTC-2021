@@ -205,10 +205,6 @@ public class Distance extends OpMode {
         CALCULATE,
         DONE;
 
-        public Distance.AUTO_STATE prev() {
-            return OrderedEnumHelper.prev(this);
-        }
-
         public Distance.AUTO_STATE next() {
             return OrderedEnumHelper.next(this);
         }

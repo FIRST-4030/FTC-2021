@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.utils;
 
 public class OrderedEnumHelper {
+    /* Disabled until someone uses it
     public static <E extends Enum<E> & OrderedEnum> E prev(E e) {
         Enum<E>[] values = e.getClass().getEnumConstants();
         int i = e.ordinal() - 1;
@@ -9,6 +10,7 @@ public class OrderedEnumHelper {
         }
         return (E)(values[i]);
     }
+     */
 
     public static <E extends Enum<E> & OrderedEnum> E next(E e) {
         Enum<E>[] values = e.getClass().getEnumConstants();
@@ -16,6 +18,6 @@ public class OrderedEnumHelper {
         if (i >= values.length) {
             i = values.length - 1;
         }
-        return (E)(values[i]);
+        return (E) (values[i]);
     }
 }
