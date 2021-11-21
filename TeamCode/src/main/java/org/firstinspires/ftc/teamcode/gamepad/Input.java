@@ -74,15 +74,14 @@ public class Input {
         }
 
         // Held fires heldDelay ms after down(), if nothing has changed since then
-        if (active && now > heldTime && !heldFired) {
-            held = true;
+        held = (active && now > heldTime && !heldFired);
+        if (held) {
             heldFired = true;
+        } else if (up()) {
+            heldFired = false;
         }
         if (down()) {
             heldTime = now + heldDelay;
-        }
-        if (up()) {
-            heldFired = false;
         }
     }
 
