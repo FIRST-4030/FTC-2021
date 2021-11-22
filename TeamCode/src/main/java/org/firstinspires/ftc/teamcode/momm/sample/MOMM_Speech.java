@@ -12,17 +12,20 @@ public class MOMM_Speech extends OpMode {
     private static final double SPEECH_DELAY = 5.0;
 
     // Members
+    OpMode om;
     ElapsedTime speechDelay = new ElapsedTime();
 
     @Override
     public void init() {
         // Pull in Globals
-        telemetry = Globals.opmode(this).telemetry;
+        om = Globals.opmode(this);
+        telemetry = om.telemetry;
     }
 
     @Override
     public void init_loop() {
-        telemetry.addData("Init Time", "%.2f", getRuntime());
+        // Use om.time, in case we aren't the primary OpMode
+        telemetry.addData("Init Time", "%.2f", om.time);
     }
 
     @Override
@@ -33,9 +36,9 @@ public class MOMM_Speech extends OpMode {
     @Override
     public void loop() {
         if (speechDelay.seconds() > SPEECH_DELAY) {
-            speechDelay.reset();
             telemetry.speak("Speak");
+            speechDelay.reset();
         }
-        telemetry.addData("Delay Time", "%.2f", getRuntime());
+        telemetry.addData("Loop Time", "%.2f", om.time);
     }
 }
