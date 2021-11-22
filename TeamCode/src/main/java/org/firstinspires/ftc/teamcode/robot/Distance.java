@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode.robot;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.ftccommon.configuration.EditDigitalDevicesActivityLynx;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -55,6 +56,7 @@ public class Distance extends OpMode {
     private ElapsedTime timer = new ElapsedTime();
     private AUTO_STATE state = AUTO_STATE.IDLE;
     private BARCODE position = BARCODE.NONE;
+    private ElapsedTime age = new ElapsedTime(0); // Start=0 to make age start high
 
     // Intermediates
     private double leftLast = 0;
@@ -81,6 +83,7 @@ public class Distance extends OpMode {
         }
 
         // Known initial conditions
+        clear();
         reset();
     }
 
@@ -138,6 +141,8 @@ public class Distance extends OpMode {
                 state = state.next();
                 break;
             case CALCULATE:
+                // Be sure this is done atomically
+                // We want the reading transitions directly from one valid state the next
                 if (leftinRange && !rightinRange) {
                     position = BARCODE.LEFT;
                 } else if (!leftinRange && rightinRange) {
@@ -147,6 +152,7 @@ public class Distance extends OpMode {
                 } else {
                     position = BARCODE.NONE;
                 }
+                age.reset();
                 break;
             case DONE:
                 break;
@@ -168,6 +174,7 @@ public class Distance extends OpMode {
 
     // Fire off a scan sequence
     public void startScan() {
+        reset();
         state = AUTO_STATE.START_LEFT;
     }
 
@@ -176,11 +183,22 @@ public class Distance extends OpMode {
         return position;
     }
 
-    // Return everything to known starting conditions
+    // Export the age of the last valid reading
+    public double age() {
+        return age.seconds();
+    }
+
+    // Clear the last scan result, if any
+    // Keeping this separate from reset() allows the last reading
+    // to remain available while the next scan runs
+    public void clear() {
+        position = BARCODE.NONE;
+        age = new ElapsedTime(0);
+    }
+
+    // Return the state machine to starting conditions to allow a new scan
     public void reset() {
         state = AUTO_STATE.IDLE;
-        position = BARCODE.NONE;
-
         leftLast = 0;
         rightLast = 0;
         leftAccum = 0;

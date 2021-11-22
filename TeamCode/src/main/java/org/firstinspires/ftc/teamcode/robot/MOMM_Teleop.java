@@ -53,16 +53,17 @@ public class MOMM_Teleop extends MultiOpModeManager {
             }
         }
 
-        // Trigger a distance scan, but only once
-        if (input.down("BARCODE") && distance.state() == Distance.AUTO_STATE.IDLE) {
+        // Trigger a distance scan manually at any time
+        if (input.down("BARCODE")) {
             distance.startScan();
         }
-        // Distance scan status or result, when available
-        if (distance.state() == Distance.AUTO_STATE.DONE) {
-            telemetry.addData("Barcode", distance.position());
-        } else {
-            telemetry.addData("Barcode", distance.state());
+        // Trigger updates every 10 seconds, but not until the scan has run at least once
+        if (distance.age() > 10 && distance.state() != Distance.AUTO_STATE.IDLE) {
+            distance.startScan();
         }
+        // Distance scan status and result
+        telemetry.addData("Barcode", "P %s, A %.2f, S %s",
+                distance.position(), distance.age(), distance.state());
     }
 
     @Override
