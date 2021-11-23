@@ -70,6 +70,7 @@ public class Distance extends OpMode {
     public void init() {
         // Pull in Globals
         telemetry = Globals.opmode(this).telemetry;
+        hardwareMap = Globals.opmode(this).hardwareMap;
 
         // Distance
         try {

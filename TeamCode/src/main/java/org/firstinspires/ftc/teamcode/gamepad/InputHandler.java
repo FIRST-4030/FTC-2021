@@ -27,12 +27,12 @@ public class InputHandler {
                     "Null or empty name, gamepad or padkey");
         }
 
-        // Translate gp to a hardware gamepad
-        Gamepad ftcGP = (gamepad == GAMEPAD.driver1 ? opmode.gamepad1 : opmode.gamepad2);
+        // Translate the logical gamepad to a hardware gamepad using our local opmode
+        Gamepad hardwareGP = (gamepad == GAMEPAD.driver1 ? opmode.gamepad1 : opmode.gamepad2);
 
         // Ensure the named button exists, since the compiler can't check
         try {
-            Field field = ftcGP.getClass().getField(padkey.name());
+            Field field = hardwareGP.getClass().getField(padkey.name());
         } catch (NoSuchFieldException e) {
             throw new IllegalArgumentException(getClass().getSimpleName() + ": " +
                     "Invalid padkey: " + padkey);
@@ -41,7 +41,7 @@ public class InputHandler {
         // Warn if this pad-key tuple already exists
         for (Map.Entry<String, Input> k : inputs.entrySet()) {
             Input key = k.getValue();
-            if (key.gamepad == ftcGP && key.padkey == padkey) {
+            if (key.gamepad == hardwareGP && key.padkey == padkey) {
                 opmode.telemetry.log().add(getClass().getSimpleName() + ": " +
                         "Duplicate gamepad-padkey: " + gamepad + "-" + padkey);
             }
@@ -54,7 +54,7 @@ public class InputHandler {
         }
 
         // Register the key
-        inputs.put(name, new Input(ftcGP, padkey));
+        inputs.put(name, new Input(hardwareGP, padkey));
     }
 
     // Remove named button from the handler

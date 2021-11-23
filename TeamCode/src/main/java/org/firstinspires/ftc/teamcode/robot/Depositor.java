@@ -86,6 +86,7 @@ public class Depositor extends OpMode {
     public void init() {
         // Pull in Globals
         telemetry = Globals.opmode(this).telemetry;
+        hardwareMap = Globals.opmode(this).hardwareMap;
 
         // Depositor
         try {

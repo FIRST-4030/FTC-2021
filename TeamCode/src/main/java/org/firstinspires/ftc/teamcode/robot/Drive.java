@@ -34,17 +34,17 @@ public class Drive extends OpMode {
     public void init() {
         // Pull in Globals
         telemetry = Globals.opmode(this).telemetry;
-        gamepad1 = Globals.opmode(this).gamepad1;
+        hardwareMap = Globals.opmode(this).hardwareMap;
         in = Globals.input();
 
         // Drive wheels
         try {
-            driveLeft = hardwareMap.get(driveLeft.getClass(), "BL");
+            driveLeft = hardwareMap.get(DcMotor.class, "BL");
             driveLeft.setDirection(DcMotorSimple.Direction.FORWARD);
             driveLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             driveLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            driveRight = hardwareMap.get(driveRight.getClass(), "BR");
+            driveRight = hardwareMap.get(DcMotor.class, "BR");
             driveRight.setDirection(DcMotorSimple.Direction.FORWARD);
             driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             driveRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -84,7 +84,7 @@ public class Drive extends OpMode {
         double drive = Math.pow(-in.value("DRIVE_FORWARD"), INPUT_SCALING_EXPONENT);
         double turn = in.value("DRIVE_TURN");
         driveLeft.setPower(Math.pow(-in.value("DRIVE_FORWARD"), INPUT_SCALING_EXPONENT));
-        driveRight.setPower(Math.pow(-gamepad1.right_stick_y, INPUT_SCALING_EXPONENT));
+        driveRight.setPower(Math.pow(-in.value("DRIVE_FORWARD"), INPUT_SCALING_EXPONENT));
 
         // Low-speed PoV drive
         if (in.value("DRIVE_SLOW") != 0) {
@@ -121,6 +121,11 @@ public class Drive extends OpMode {
 
     // Custom methods
     public boolean isBusy() {
+        // Skip processing if we're disabled
+        if (!enabled) {
+            return false;
+        }
+
         return driveLeft.isBusy() || driveRight.isBusy();
     }
 

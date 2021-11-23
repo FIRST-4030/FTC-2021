@@ -57,6 +57,9 @@ public class Capstone extends OpMode {
     public void init() {
         // Pull in Globals
         telemetry = Globals.opmode(this).telemetry;
+        hardwareMap = Globals.opmode(this).hardwareMap;
+        gamepad1 = Globals.opmode(this).gamepad1;
+        gamepad2 = Globals.opmode(this).gamepad2;
 
         // Capstone
         try {
