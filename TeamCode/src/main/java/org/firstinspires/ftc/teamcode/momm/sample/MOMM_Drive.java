@@ -21,8 +21,8 @@ import org.firstinspires.ftc.teamcode.robot.Globals;
 public class MOMM_Drive extends OpMode {
     // Config
     public static boolean DEBUG = false;
-    private static final double LOW_SPEED_DEFAULT = 0.7;
     private static final int INPUT_SCALING_EXPONENT = 3;
+    public static double ACCEL_CONSTANT = 0.4;
 
     // Hardware
     private DcMotor driveLeft;
@@ -31,18 +31,11 @@ public class MOMM_Drive extends OpMode {
     // Members
     private boolean enabled = false;
     private InputHandler in;
-    private double LOW_SPEED_OFFSET = LOW_SPEED_DEFAULT;
-
-    // Custom methods
-    public void lowSpeed(double speed) {
-        LOW_SPEED_OFFSET = speed;
-    }
 
     // Standard methods
     @Override
     public void init() {
         // Pull in Globals
-        telemetry = Globals.opmode(this).telemetry;
         in = Globals.input();
 
         // Drive wheels
@@ -59,9 +52,9 @@ public class MOMM_Drive extends OpMode {
             driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             driveRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            in.register("DRIVE_FORWARD", GAMEPAD.driver1, PAD_KEY.left_stick_y);
-            in.register("DRIVE_TURN", GAMEPAD.driver1, PAD_KEY.right_stick_x);
-            in.register("DRIVE_SLOW", GAMEPAD.driver1, PAD_KEY.right_trigger);
+            in.register("DRIVE_LEFT", GAMEPAD.driver1, PAD_KEY.left_stick_y);
+            in.register("DRIVE_RIGHT", GAMEPAD.driver1, PAD_KEY.right_stick_y);
+            in.register("DRIVE_ACCEL", GAMEPAD.driver1, PAD_KEY.right_trigger);
 
             // Don't enable this OM unless we find the necessary hardware
             // This avoids null-pointer exceptions and allows other code
@@ -88,27 +81,21 @@ public class MOMM_Drive extends OpMode {
         // Input
         in.loop();
 
-        // PoV drive
-        double drive = Math.pow(-in.value("DRIVE_FORWARD"), INPUT_SCALING_EXPONENT);
-        double turn = in.value("DRIVE_TURN");
-        driveLeft.setPower(Math.pow(-in.value("DRIVE_FORWARD"), INPUT_SCALING_EXPONENT));
-        driveRight.setPower(Math.pow(-gamepad1.right_stick_y, INPUT_SCALING_EXPONENT));
-
-        // Low-speed PoV drive
-        if (in.value("DRIVE_SLOW") != 0) {
-            double speed = 1 - in.value("DRIVE_SLOW");
-            if (in.value("DRIVE_SLOW") >= LOW_SPEED_OFFSET) {
-                speed = 1 - LOW_SPEED_OFFSET;
-            }
-            driveLeft.setPower(Range.clip(drive + turn, -speed, speed));
-            driveRight.setPower(Range.clip(drive - turn, -speed, speed));
+        // Tank drive
+        double fastFactor = ACCEL_CONSTANT;
+        if (in.value("DRIVE_ACCEL") > ACCEL_CONSTANT) {
+            fastFactor = in.value("DRIVE_ACCEL");
         }
+        double LEFT_DRIVE_POW = Math.pow(-in.value("DRIVE_LEFT"), INPUT_SCALING_EXPONENT);
+        double RIGHT_DRIVE_POW = Math.pow(-in.value("DRIVE_RIGHT"), INPUT_SCALING_EXPONENT);
+        driveLeft.setPower(LEFT_DRIVE_POW * fastFactor);
+        driveRight.setPower(RIGHT_DRIVE_POW * fastFactor);
 
         // Debug when requested
         if (DEBUG) {
-            telemetry.addData("Drive Input", "LY %.2f, RX %.2f, RT %.2f",
-                    in.value("DRIVE_FORWARD"), in.value("DRIVE_TURN"),
-                    in.value("DRIVE_SLOW"));
+            telemetry.addData("Drive Input", "L %.2f, R %.2f, A %.2f",
+                    in.value("DRIVE_LEFT"), in.value("DRIVE_RIGHT"),
+                    in.value("DRIVE_ACCEL"));
             telemetry.addData("Drive Output", "L %.2f/%d, R %.2f/%d",
                     driveLeft.getPower(), driveLeft.getCurrentPosition(),
                     driveRight.getPower(), driveRight.getCurrentPosition());

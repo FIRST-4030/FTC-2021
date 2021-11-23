@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.momm.sample;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
+import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 
 // Extend MultiOpModeManager instead of OpMode
@@ -13,7 +15,7 @@ public class MOMM_Sample extends MultiOpModeManager {
     // External OMs
     // OMs that you will call directly should have members
     // OMs that are complete independent can be defined in-line (see init())
-    private MOMM_Drive drive;
+    private MOMM_Speech speech;
 
     /*
      * Standard OM methods
@@ -26,14 +28,17 @@ public class MOMM_Sample extends MultiOpModeManager {
 
     @Override
     public void init() {
-        // Register the drive OM
-        drive = new MOMM_Drive();
-        super.register(drive);
+        // Register the Drive and Speech OMs
+        super.register(new MOMM_Drive());
 
         // Register the speech OM
-        super.register(new MOMM_Speech());
+        speech = new MOMM_Speech();
+        super.register(speech);
 
-        // Be sure to register other OMs before this line or they won't get an init() call
+        // Register a button for testing
+        input.register("SPEAK", GAMEPAD.driver1, PAD_KEY.a);
+
+        // Be sure to register OMs before this line or they won't get an init() call
         super.init();
     }
 
@@ -51,11 +56,9 @@ public class MOMM_Sample extends MultiOpModeManager {
     public void loop() {
         super.loop();
 
-        // Adjust the drive power from outside the OM
-        if ((int) time % 2 == 0) {
-            drive.lowSpeed(0.5);
-        } else {
-            drive.lowSpeed(1.0);
+        // Speak when requested
+        if (input.down("SPEAK")) {
+            speech.speak("Time: " + (int) time);
         }
     }
 
