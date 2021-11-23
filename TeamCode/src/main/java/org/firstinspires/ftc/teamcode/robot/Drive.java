@@ -89,7 +89,7 @@ public class Drive extends OpMode {
 
         // Debug when requested
         if (DEBUG) {
-            telemetry.addData("Drive Input", "LY %.2f, RY %.2f, RT %.2f",
+            telemetry.addData("Drive Input", "L %.2f, R %.2f, A %.2f",
                     in.value("DRIVE_LEFT"), in.value("DRIVE_RIGHT"),
                     in.value("DRIVE_ACCEL"));
             telemetry.addData("Drive Output", "L %.2f/%d, R %.2f/%d",
