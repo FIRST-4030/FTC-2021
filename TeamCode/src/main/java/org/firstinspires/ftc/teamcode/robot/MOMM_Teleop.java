@@ -7,17 +7,22 @@ import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 
 @TeleOp(name = "MOMM_Teleop", group = "MOMM")
 public class MOMM_Teleop extends MultiOpModeManager {
+    private Drive drive;
     private DuckSpin duck;
     private Distance distance;
     private Depositor depositor;
 
+    public static int TURN_SMALL = 5;
+    public static float TURN_SPEED = 0.4f;
+
     @Override
     public void init() {
-        super.register(new Drive());
         super.register(new Depositor());
         super.register(new Capstone());
         super.register(new Collector());
 
+        drive = new Drive();
+        super.register(drive);
         duck = new DuckSpin();
         super.register(duck);
         distance = new Distance();
@@ -51,6 +56,14 @@ public class MOMM_Teleop extends MultiOpModeManager {
             } else if (gamepad2.right_stick_button) {
                 duck.auto(false);
             }
+        }
+
+        // Small angle turns
+        if (input.down("TURN_LEFT")) {
+            drive.turnTo(TURN_SPEED, TURN_SMALL);
+        }
+        if (input.down("TURN_LEFT")) {
+            drive.turnTo(-TURN_SPEED, -TURN_SMALL);
         }
 
         // Trigger a distance scan manually at any time
