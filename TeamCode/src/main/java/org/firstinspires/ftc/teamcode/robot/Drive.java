@@ -26,6 +26,7 @@ public class Drive extends OpMode {
 
     // Members
     private boolean enabled = false;
+    private boolean auto = false;
     private InputHandler in;
 
     // Standard methods
@@ -70,6 +71,14 @@ public class Drive extends OpMode {
         }
         // Input
         in.loop();
+
+        // Skip driver control while there's an active auto command
+        if (auto) {
+            if (!isBusy()) {
+                auto = false;
+            }
+            return;
+        }
 
         // PoV drive
         double drive = Math.pow(-in.value("DRIVE_FORWARD"), INPUT_SCALING_EXPONENT);
@@ -131,6 +140,7 @@ public class Drive extends OpMode {
         driveRight.setTargetPosition(rightTarget);
 
         // Start the motors
+        auto = true;
         driveLeft.setPower(speed);
         driveRight.setPower(speed);
     }
@@ -152,6 +162,7 @@ public class Drive extends OpMode {
         driveRight.setTargetPosition(rightTarget);
 
         // Start the motors
+        auto = true;
         driveLeft.setPower(speed);
         driveRight.setPower(-speed);
     }
