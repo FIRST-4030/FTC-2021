@@ -116,7 +116,7 @@ public class InputHandler {
     }
 
     public boolean toggle(String name) {
-        return get(name).auto();
+        return get(name).toggle();
     }
 
     public boolean held(String name) {

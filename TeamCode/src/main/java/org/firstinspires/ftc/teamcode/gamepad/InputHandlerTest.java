@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.robot.Globals;
+
 @Disabled
 @TeleOp(name = "InputHandlerTest", group = "Test")
 public class InputHandlerTest extends OpMode {
@@ -30,6 +32,8 @@ public class InputHandlerTest extends OpMode {
 
     @Override
     public void init() {
+        Globals.opmode(this); // Just in case someone calls Globals
+
         in = new InputHandler(this);
         in.register("BINARY", gamepad1, PAD_KEY.a);
         in.register("ANALOG", gamepad1, PAD_KEY.left_stick_x);
@@ -39,9 +43,13 @@ public class InputHandlerTest extends OpMode {
 
     @Override
     public void init_loop() {
+        in.loop();
         telemetry.addData(getClass().getSimpleName(), "Ready");
+        telemetry.addData("A", gamepad1.a);
+        telemetry.addData("LX", gamepad1.left_stick_x);
         telemetry.addData("BINARY", in.active("BINARY"));
         telemetry.addData("ANALOG", in.value("ANALOG"));
+        telemetry.update();
     }
 
     @Override
@@ -94,22 +102,22 @@ public class InputHandlerTest extends OpMode {
         lastAnalog = in.value("ANALOG");
 
         // Print the current value and the time of last change [relative to down(D) and now(N)]
-        telemetry.addData("active", "%d: D %d, N %d",
-                in.active("BINARY"), active - down, now - active);
-        telemetry.addData("down", "%d: D %d, N %d",
-                in.down("BINARY"), 0, now - down);
-        telemetry.addData("up", "%d: D %d, N %d",
-                in.up("BINARY"), up - down, now - up);
-        telemetry.addData("changed", "%d: D %d, N %d",
-                in.changed("BINARY"), changed - down, now - changed);
-        telemetry.addData("auto", "%d: D %d, N %d",
-                in.auto("BINARY"), auto - down, now - auto);
-        telemetry.addData("toggle", "%d: D %d, N %d",
-                in.toggle("BINARY"), toggle - down, now - toggle);
-        telemetry.addData("held", "%d: D %d, N %d",
-                in.held("BINARY"), held - down, now - held);
-        telemetry.addData("analog", "%.2f: D %d, N %d",
-                in.value("BINARY"), analog - down, now - analog);
+        telemetry.addData("active", "%d\tD %d\tN %d",
+                in.active("BINARY") ? 1 : 0, active - down, now - active);
+        telemetry.addData("down", "%d\tD %d\tN %d",
+                in.down("BINARY") ? 1 : 0, 0, now - down);
+        telemetry.addData("up", "%d\tD %d\tN %d",
+                in.up("BINARY") ? 1 : 0, up - down, now - up);
+        telemetry.addData("changed", "%d\tD %d\tN %d",
+                in.changed("BINARY") ? 1 : 0, changed - down, now - changed);
+        telemetry.addData("auto", "%d\tD %d\tN %d",
+                in.auto("BINARY") ? 1 : 0, auto - down, now - auto);
+        telemetry.addData("toggle", "%d\tD %d\tN %d",
+                in.toggle("BINARY") ? 1 : 0, toggle - down, now - toggle);
+        telemetry.addData("held", "%d\tD %d\tN %d",
+                in.held("BINARY") ? 1 : 0, held - down, now - held);
+        telemetry.addData("analog", "%.2f\tD %d\tN %d",
+                in.value("ANALOG"), analog - down, now - analog);
         telemetry.update();
     }
 }
