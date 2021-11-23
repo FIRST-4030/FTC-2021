@@ -4,7 +4,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
@@ -15,10 +14,10 @@ import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 public class Drive extends OpMode {
     // Config
     public static boolean DEBUG = false;
-    public static final double LOW_SPEED_OFFSET = 0.7;
     private static final int INPUT_SCALING_EXPONENT = 3;
     public static double TICKS_PER_INCH = 43.24;
     public static double TURN_RATIO = 7;
+    public static double ACCEL_CONSTANT = 0.4;
 
     // Hardware
     private DcMotor driveLeft;
@@ -49,9 +48,9 @@ public class Drive extends OpMode {
             driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             driveRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            in.register("DRIVE_FORWARD", GAMEPAD.driver1, PAD_KEY.left_stick_y);
-            in.register("DRIVE_TURN", GAMEPAD.driver1, PAD_KEY.right_stick_x);
-            in.register("DRIVE_SLOW", GAMEPAD.driver1, PAD_KEY.right_trigger);
+            in.register("DRIVE_LEFT", GAMEPAD.driver1, PAD_KEY.left_stick_y);
+            in.register("DRIVE_RIGHT", GAMEPAD.driver1, PAD_KEY.right_stick_y);
+            in.register("DRIVE_ACCEL", GAMEPAD.driver1, PAD_KEY.right_trigger);
 
             enabled = true;
         } catch (Exception e) {
@@ -80,27 +79,21 @@ public class Drive extends OpMode {
             return;
         }
 
-        // PoV drive
-        double drive = Math.pow(-in.value("DRIVE_FORWARD"), INPUT_SCALING_EXPONENT);
-        double turn = in.value("DRIVE_TURN");
-        driveLeft.setPower(Math.pow(-in.value("DRIVE_FORWARD"), INPUT_SCALING_EXPONENT));
-        driveRight.setPower(Math.pow(-in.value("DRIVE_FORWARD"), INPUT_SCALING_EXPONENT));
-
-        // Low-speed PoV drive
-        if (in.value("DRIVE_SLOW") != 0) {
-            double speed = 1 - in.value("DRIVE_SLOW");
-            if (in.value("DRIVE_SLOW") >= LOW_SPEED_OFFSET) {
-                speed = 1 - LOW_SPEED_OFFSET;
-            }
-            driveLeft.setPower(Range.clip(drive + turn, -speed, speed));
-            driveRight.setPower(Range.clip(drive - turn, -speed, speed));
+        // Tank drive
+        double fastFactor = ACCEL_CONSTANT;
+        if (in.value("DRIVE_ACCEL") > ACCEL_CONSTANT) {
+            fastFactor = in.value("DRIVE_ACCEL");
         }
+        double LEFT_DRIVE_POW = Math.pow(-in.value("DRIVE_LEFT"), INPUT_SCALING_EXPONENT);
+        double RIGHT_DRIVE_POW = Math.pow(-in.value("DRIVE_RIGHT"), INPUT_SCALING_EXPONENT);
+        driveLeft.setPower(LEFT_DRIVE_POW * fastFactor);
+        driveRight.setPower(RIGHT_DRIVE_POW * fastFactor);
 
         // Debug when requested
         if (DEBUG) {
-            telemetry.addData("Drive Input", "LY %.2f, RX %.2f, RT %.2f",
-                    in.value("DRIVE_FORWARD"), in.value("DRIVE_TURN"),
-                    in.value("DRIVE_SLOW"));
+            telemetry.addData("Drive Input", "LY %.2f, RY %.2f, RT %.2f",
+                    in.value("DRIVE_LEFT"), in.value("DRIVE_RIGHT"),
+                    in.value("DRIVE_ACCEL"));
             telemetry.addData("Drive Output", "L %.2f/%d, R %.2f/%d",
                     driveLeft.getPower(), driveLeft.getCurrentPosition(),
                     driveRight.getPower(), driveRight.getCurrentPosition());
