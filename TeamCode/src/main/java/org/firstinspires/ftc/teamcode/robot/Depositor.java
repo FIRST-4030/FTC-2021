@@ -33,6 +33,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
@@ -46,10 +47,11 @@ public class Depositor extends OpMode {
     private Servo low = null;
     private Servo mid = null;
     private Servo tilt = null;
+    private TouchSensor sensor = null;
 
     // Config
     public static boolean DEBUG = false;
-    public static double BELT_SPEED = 0.9;
+    public static double BELT_SPEED = 0.85;
     public static double TILT_BACK = 0.6;
     public static double TILT_FORWARD = 0.44;
     public static double LOW_OPEN = 0.98;
@@ -100,6 +102,8 @@ public class Depositor extends OpMode {
 
             tilt = hardwareMap.get(Servo.class, "Deptilt");
 
+            sensor = hardwareMap.get(TouchSensor.class, "DS");
+
             enabled = true;
         } catch (Exception e) {
             telemetry.log().add(getClass().getSimpleName() + ": " +
@@ -109,6 +113,11 @@ public class Depositor extends OpMode {
 
     @Override
     public void init_loop() {
+        if (!sensor.isPressed()) {
+            belt.setPower(1);
+        } else {
+            belt.setPower(0);
+        }
     }
 
     @Override
@@ -142,6 +151,7 @@ public class Depositor extends OpMode {
                 mid.setPosition(MID_CLOSE);
                 tilt.setPosition(TILT_FORWARD);
 
+                belt.setTargetPosition(50);
                 belt.setPower(BELT_SPEED);
                 // start the timer
                 if (!timer3Started) {
@@ -155,6 +165,17 @@ public class Depositor extends OpMode {
                 }
                 break;
             case DOOR_PREP:      // Move the flipper to below the required door
+                switch (required_Door) {
+                    case LOW_DOOR:
+                        belt.setTargetPosition(250);
+                        break;
+                    case MID_DOOR:
+                        belt.setTargetPosition(500);
+                        break;
+                    case HIGH_DOOR:
+                        belt.setTargetPosition(750);
+                        break;
+                }
                 belt.setPower(BELT_SPEED);
                 // start the timer
                 if (!timer1Started) {
@@ -213,8 +234,8 @@ public class Depositor extends OpMode {
                 belt.setPower(0);
                 break;
         }
-        if (state != AUTO_STATE.DONE) {
-            if (gamepad2.x && timerX.seconds() < DOUBLE_PRESS_TIME) setDoor(DOOR_USED.LOW_DOOR);
+        if (state == AUTO_STATE.DONE && !belt.isBusy()) {
+            /* if (gamepad2.x && timerX.seconds() < DOUBLE_PRESS_TIME) setDoor(DOOR_USED.LOW_DOOR);
             if (gamepad2.y && timerY.seconds() < DOUBLE_PRESS_TIME) setDoor(DOOR_USED.MID_DOOR);
             if (gamepad2.b && timerB.seconds() < DOUBLE_PRESS_TIME) setDoor(DOOR_USED.HIGH_DOOR);
 
@@ -230,6 +251,26 @@ public class Depositor extends OpMode {
             if (gamepad2.y) {
                 timerY.reset();
                 state = AUTO_STATE.TILTED_BACK;
+            }
+            */
+            if (gamepad2.a) state = AUTO_STATE.TILTED_FORWARD;
+            if (gamepad2.x && required_Door != DOOR_USED.LOW_DOOR) {
+                setDoor(DOOR_USED.LOW_DOOR);
+                state = AUTO_STATE.DOOR_PREP;
+            } else if (gamepad2.x && required_Door == DOOR_USED.LOW_DOOR) {
+                state = AUTO_STATE.DOOR_OPEN;
+            }
+            if (gamepad2.y && required_Door != DOOR_USED.MID_DOOR) {
+                setDoor(DOOR_USED.MID_DOOR);
+                state = AUTO_STATE.DOOR_PREP;
+            } else if (gamepad2.y && required_Door == DOOR_USED.MID_DOOR) {
+                state = AUTO_STATE.DOOR_OPEN;
+            }
+            if (gamepad2.b && required_Door != DOOR_USED.HIGH_DOOR) {
+                setDoor(DOOR_USED.HIGH_DOOR);
+                state = AUTO_STATE.DOOR_PREP;
+            } else if (gamepad2.b && required_Door == DOOR_USED.HIGH_DOOR) {
+                state = AUTO_STATE.DOOR_OPEN;
             }
         }
 

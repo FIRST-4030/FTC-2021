@@ -58,9 +58,9 @@ public class NewAuto extends OpMode {
     private DistanceSensor distanceRight = null;
 
     // Consts
-    private static float DRIVE_POWER = 0.375f;
+    private static float DRIVE_POWER = 0.4f;
     private static double TICKS_PER_INCH = 43.24;
-    private static double TURN_RATIO = 7;
+    private static double TURN_RATIO = 6.375;
     private static double ANGLE_CONST = 1.23;
     private static double DUCK_POWER = 0.0;
     private static double DEP_BELT_POWER = 0.9;
@@ -178,21 +178,20 @@ public class NewAuto extends OpMode {
     @Override
     public void start() {
         driveStop();
-        state = AUTO_STATE.OUT_FROM_WALL;
+        state = AUTO_STATE.DONE;
         depTilt.setPosition(DEP_DOWN);
         depLow.setPosition(LOW_CLOSE);
         depMid.setPosition(MID_CLOSE);
-        capstoneArm.setPosition(CAP_UP);
         collectorArm.setPosition(COLLECTOR_UP);
     }
 
     @Override
     public void loop() {
         // Stop when the autoSteps are complete
-        if (state == AUTO_STATE.DONE) {
+        /* if (state == AUTO_STATE.DONE) {
             requestOpModeStop();
             return;
-        }
+        } */
 
         // Feedback
         telemetry.addData("Drive", "L %.2f/%d, R %.2f/%d",
@@ -200,7 +199,7 @@ public class NewAuto extends OpMode {
                 rightDrive.getPower(), rightDrive.getCurrentPosition());
 
         // Don't start new commands until the last one is complete
-        if (driveCmdRunning) {
+/*        if (driveCmdRunning) {
             // When the motors are done
             if (!isBusy()) {
                 // Clear the running flag
@@ -210,6 +209,31 @@ public class NewAuto extends OpMode {
             }
             // Continue from the top of loop()
             return;
+        }
+        */
+
+        telemetry.addData("Busy:", isBusy());
+        if (gamepad1.a && !isBusy()) {
+            turnTo(DRIVE_POWER, 180);
+            telemetry.log().add("Pushed A");
+        } else if (gamepad1.y && !isBusy()) {
+            turnTo(DRIVE_POWER, -180);
+            telemetry.log().add("Pushed Y");
+        } else if (gamepad1.x && !isBusy()) {
+            turnTo(DRIVE_POWER, -10);
+            telemetry.log().add("Pushed X");
+        } else if (gamepad1.b && !isBusy()) {
+            turnTo(DRIVE_POWER, 10);
+            telemetry.log().add("Pushed B");
+        }
+
+        telemetry.addData("TURN_RATIO:", TURN_RATIO);
+        // Moving the servo position and number should increase
+        if (gamepad1.dpad_up) {
+            TURN_RATIO += 0.05;
+            // Moving the servo position and number should decrease
+        } else if (gamepad1.dpad_down) {
+            TURN_RATIO -= 0.05;
         }
 
         //
@@ -244,7 +268,7 @@ public class NewAuto extends OpMode {
                 break;
             // Stop processing
             case DONE:
-                driveStop();
+                //driveStop();
                 break;
         }
     }
