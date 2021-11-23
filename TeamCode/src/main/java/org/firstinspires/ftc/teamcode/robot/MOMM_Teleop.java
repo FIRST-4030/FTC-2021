@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.robot;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 
@@ -30,9 +31,9 @@ public class MOMM_Teleop extends MultiOpModeManager {
         depositor = new Depositor();
         super.register(depositor);
 
-        input.register("BARCODE", gamepad2, PAD_KEY.guide);
-        input.register("TURN_CW", gamepad1, PAD_KEY.a);
-        input.register("TURN_CCW", gamepad1, PAD_KEY.b);
+        input.register("BARCODE", GAMEPAD.driver1, PAD_KEY.guide);
+        input.register("TURN_CW", GAMEPAD.driver1, PAD_KEY.a);
+        input.register("TURN_CCW", GAMEPAD.driver1, PAD_KEY.b);
 
         super.init();
     }

@@ -35,8 +35,8 @@ public class InputHandlerTest extends OpMode {
         Globals.opmode(this); // Just in case someone calls Globals
 
         in = new InputHandler(this);
-        in.register("BINARY", gamepad1, PAD_KEY.a);
-        in.register("ANALOG", gamepad1, PAD_KEY.left_stick_x);
+        in.register("BINARY", GAMEPAD.driver1, PAD_KEY.a);
+        in.register("ANALOG", GAMEPAD.driver1, PAD_KEY.left_stick_x);
 
         telemetry.clearAll();
     }

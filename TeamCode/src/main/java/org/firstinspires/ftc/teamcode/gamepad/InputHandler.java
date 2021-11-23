@@ -20,7 +20,7 @@ public class InputHandler {
     }
 
     // Register an input listener
-    public void register(String name, Gamepad gamepad, PAD_KEY padkey) {
+    public void register(String name, GAMEPAD gamepad, PAD_KEY padkey) {
         // Die if we're used poorly
         if (name == null || name.isEmpty() || gamepad == null || padkey == null) {
             throw new NullPointerException(getClass().getSimpleName() + ": " +
@@ -35,10 +35,13 @@ public class InputHandler {
                     "Invalid padkey: " + padkey);
         }
 
+        // Translate to hardware
+        Gamepad gp = gamepad == GAMEPAD.driver1 ? opmode.gamepad1 : opmode.gamepad2;
+
         // Warn if this pad-key tuple already exists
         for (Map.Entry<String, Input> k : inputs.entrySet()) {
             Input key = k.getValue();
-            if (key.gamepad == gamepad && key.padkey == padkey) {
+            if (key.gamepad == gp && key.padkey == padkey) {
                 opmode.telemetry.log().add(getClass().getSimpleName() + ": " +
                         "Duplicate gamepad-padkey: " + gamepad + "-" + padkey);
             }
@@ -51,7 +54,7 @@ public class InputHandler {
         }
 
         // Register the key
-        inputs.put(name, new Input(gamepad, padkey));
+        inputs.put(name, new Input(gp, padkey));
     }
 
     // Remove named button from the handler

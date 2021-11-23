@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 
@@ -32,6 +33,7 @@ public class Drive extends OpMode {
     public void init() {
         // Pull in Globals
         telemetry = Globals.opmode(this).telemetry;
+        gamepad1 = Globals.opmode(this).gamepad1;
         in = Globals.input();
 
         // Drive wheels
@@ -46,9 +48,9 @@ public class Drive extends OpMode {
             driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             driveRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            in.register("DRIVE_FORWARD", gamepad1, PAD_KEY.left_stick_y);
-            in.register("DRIVE_TURN", gamepad1, PAD_KEY.right_stick_x);
-            in.register("DRIVE_SLOW", gamepad1, PAD_KEY.right_trigger);
+            in.register("DRIVE_FORWARD", GAMEPAD.driver1, PAD_KEY.left_stick_y);
+            in.register("DRIVE_TURN", GAMEPAD.driver1, PAD_KEY.right_stick_x);
+            in.register("DRIVE_SLOW", GAMEPAD.driver1, PAD_KEY.right_trigger);
 
             enabled = true;
         } catch (Exception e) {

@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
@@ -75,8 +76,8 @@ public class DuckSpin extends OpMode {
         }
 
         // Inputs
-        in.register("DUCK_RED", gamepad1, PAD_KEY.a);
-        in.register("DUCK_BLUE", gamepad1, PAD_KEY.b);
+        in.register("DUCK_RED", GAMEPAD.driver1, PAD_KEY.a);
+        in.register("DUCK_BLUE", GAMEPAD.driver1, PAD_KEY.b);
     }
 
     @Override
