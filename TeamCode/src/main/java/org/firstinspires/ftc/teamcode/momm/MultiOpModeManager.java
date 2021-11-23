@@ -51,6 +51,14 @@ public class MultiOpModeManager extends OpMode {
     @Override
     public void init() {
         for (OpMode om : opmodes) {
+            // One-time OpMode setup for child opmodes
+            // This lets the built-in vars work normally
+            om.hardwareMap = hardwareMap;
+            om.telemetry = telemetry;
+            om.gamepad1 = gamepad1;
+            om.gamepad2 = gamepad2;
+
+            om.time = time; // Time changes each cycle
             om.init();
         }
     }
@@ -59,6 +67,7 @@ public class MultiOpModeManager extends OpMode {
     public void init_loop() {
         input.loop();
         for (OpMode om : opmodes) {
+            om.time = time;
             om.init_loop();
         }
     }
@@ -66,6 +75,7 @@ public class MultiOpModeManager extends OpMode {
     @Override
     public void start() {
         for (OpMode om : opmodes) {
+            om.time = time;
             om.start();
         }
     }
@@ -74,6 +84,7 @@ public class MultiOpModeManager extends OpMode {
     public void loop() {
         input.loop();
         for (OpMode om : opmodes) {
+            om.time = time;
             om.loop();
         }
     }
@@ -81,6 +92,7 @@ public class MultiOpModeManager extends OpMode {
     @Override
     public void stop() {
         for (OpMode om : opmodes) {
+            om.time = time;
             om.stop();
         }
     }

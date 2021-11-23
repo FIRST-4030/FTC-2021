@@ -68,10 +68,6 @@ public class Distance extends OpMode {
 
     @Override
     public void init() {
-        // Pull in Globals
-        telemetry = Globals.opmode(this).telemetry;
-        hardwareMap = Globals.opmode(this).hardwareMap;
-
         // Distance
         try {
             left = hardwareMap.get(DistanceSensor.class, "DL");

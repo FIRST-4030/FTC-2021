@@ -62,8 +62,6 @@ public class DuckSpin extends OpMode {
     @Override
     public void init() {
         // Pull in Globals
-        telemetry = Globals.opmode(this).telemetry;
-        hardwareMap = Globals.opmode(this).hardwareMap;
         in = Globals.input();
 
         // Duck spinner
