@@ -31,6 +31,8 @@ public class MOMM_Teleop extends MultiOpModeManager {
         super.register(depositor);
 
         input.register("BARCODE", gamepad2, PAD_KEY.guide);
+        input.register("TURN_CW", gamepad1, PAD_KEY.a);
+        input.register("TURN_CCW", gamepad1, PAD_KEY.b);
 
         super.init();
     }
@@ -59,10 +61,10 @@ public class MOMM_Teleop extends MultiOpModeManager {
         }
 
         // Small angle turns
-        if (input.down("TURN_LEFT")) {
+        if (input.down("TURN_CW")) {
             drive.turnTo(TURN_SPEED, TURN_SMALL);
         }
-        if (input.down("TURN_LEFT")) {
+        if (input.down("TURN_CCW")) {
             drive.turnTo(-TURN_SPEED, -TURN_SMALL);
         }
 
