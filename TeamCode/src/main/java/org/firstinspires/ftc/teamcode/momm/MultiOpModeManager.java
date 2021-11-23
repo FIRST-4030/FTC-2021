@@ -21,18 +21,28 @@ public class MultiOpModeManager extends OpMode {
 
     // Add new OMs for concurrent execution
     public void register(OpMode opMode) {
+        // Validate
         if (opMode == null) {
             throw new NullPointerException(getClass().getSimpleName() + ": " +
                     "OpMode not specified");
-        }
-        if (opmodes.contains(opMode)) {
-            throw new IllegalArgumentException(getClass().getSimpleName() + ": " +
-                    "OpMode already registered: " + opMode.getClass().getSimpleName());
         }
         if (opMode.equals(this)) {
             throw new IllegalArgumentException(getClass().getSimpleName() + ": " +
                     "Refusing to re-register the primary OpMode: " + opMode.getClass().getSimpleName());
         }
+        if (opmodes.contains(opMode)) {
+            throw new IllegalArgumentException(getClass().getSimpleName() + ": " +
+                    "OpMode already registered: " + opMode.getClass().getSimpleName());
+        }
+
+        // One-time OpMode setup for child opmodes
+        // This lets the built-in vars work normally in both stand-alone and MOMM modes
+        opMode.hardwareMap = hardwareMap;
+        opMode.telemetry = telemetry;
+        opMode.gamepad1 = gamepad1;
+        opMode.gamepad2 = gamepad2;
+
+        // Enable
         opmodes.add(opMode);
     }
 
@@ -51,13 +61,6 @@ public class MultiOpModeManager extends OpMode {
     @Override
     public void init() {
         for (OpMode om : opmodes) {
-            // One-time OpMode setup for child opmodes
-            // This lets the built-in vars work normally
-            om.hardwareMap = hardwareMap;
-            om.telemetry = telemetry;
-            om.gamepad1 = gamepad1;
-            om.gamepad2 = gamepad2;
-
             om.time = time; // Time changes each cycle
             om.init();
         }
