@@ -48,10 +48,10 @@ public class Collector extends OpMode {
 
     // Config
     public static boolean DEBUG = false;
-    public static double ARM_UP = 0.98;
-    public static double ARM_DOWN = 0.19;
+    public static double ARM_UP = 0.8;
+    public static double ARM_DOWN = 0.24;
     public static double SPEED = -1;
-    public static int DISTANCE = 55;
+    public static int DISTANCE = 45;
 
     // Members
     private boolean enabled = false;

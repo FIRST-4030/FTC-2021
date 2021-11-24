@@ -61,15 +61,15 @@ public class NewTeleOp extends OpMode{
 
     // Constants used for hardware
     private static double DUCK_POWER = 0.0;
-    private static double DEP_BELT_POWER = 0.9;
+    private static double DEP_BELT_POWER = 0.88;
     private static double DEP_UP = 0.6;
     private static double DEP_DOWN = 0.44;
     private static double LOW_OPEN = 0.98;
     private static double LOW_CLOSE = 0.56;
     private static double MID_OPEN = 0.9;
     private static double MID_CLOSE = 0.47;
-    private static double COLLECTOR_UP = 0.98;
-    private static double COLLECTOR_DOWN = 0.19;
+    private static double COLLECTOR_UP = 0.8;
+    private static double COLLECTOR_DOWN = 0.24;
     private static double COLLECTOR_POWER = -1;
     private static double timerRatio = 0.0;
     private static double duckPowerMin = 0.63;  // min duck spinner speed (0 - 1.0)
@@ -263,7 +263,7 @@ public class NewTeleOp extends OpMode{
         double spin = -gamepad2.left_stick_y;
         collector.setPower(Range.clip(spin, COLLECTOR_POWER, -COLLECTOR_POWER));
         telemetry.addData("DC range: ", distanceCollector.getDistance(DistanceUnit.MM));
-        if (distanceCollector.getDistance(DistanceUnit.MM) <= 55) {
+        if (distanceCollector.getDistance(DistanceUnit.MM) <= 45) {
             collectorArm.setPosition(COLLECTOR_UP);
         } else if (gamepad2.right_bumper) {
             collectorArm.setPosition(COLLECTOR_DOWN);

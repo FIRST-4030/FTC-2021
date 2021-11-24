@@ -36,6 +36,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
+import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
+import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
@@ -51,7 +54,7 @@ public class Depositor extends OpMode {
 
     // Config
     public static boolean DEBUG = false;
-    public static double BELT_SPEED = 0.85;
+    public static double BELT_SPEED = 0.88;
     public static double TILT_BACK = 0.6;
     public static double TILT_FORWARD = 0.44;
     public static double LOW_OPEN = 0.98;
@@ -63,7 +66,7 @@ public class Depositor extends OpMode {
     public static double HIGH_DOOR_FLIPPER_MOVE_TIME = 0.75;
     public static double BLOCK_SHOVE_TIME = 0.25;
     public static double FLIPPER_MOVE_TIME_INITIAL = 1.0;   // REMOVE THIS when the magnetic sensor is installed
-    public static double REVERSE_BELT_TIME = 1.0;           // for TeleOp only
+    public static double REVERSE_BELT_TIME = 0.25;           // for TeleOp only
     public static double DOUBLE_PRESS_TIME = 0.5;
 
     // Members
@@ -83,6 +86,7 @@ public class Depositor extends OpMode {
     private boolean timer3Started = false;
     private boolean timer4Started = false;
     private double FLIPPER_MOVE_TIME = 1.0;
+    private InputHandler in;
 
     @Override
     public void init() {
@@ -90,15 +94,18 @@ public class Depositor extends OpMode {
         try {
             belt = hardwareMap.get(DcMotor.class, "Depbelt");
             belt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
             low = hardwareMap.get(Servo.class, "Deplow");
             low.setPosition(LOW_CLOSE);
             mid = hardwareMap.get(Servo.class, "Depmid");
             mid.setPosition(MID_CLOSE);
-
             tilt = hardwareMap.get(Servo.class, "Deptilt");
-
             sensor = hardwareMap.get(TouchSensor.class, "DS");
+            in.register("LOW", GAMEPAD.driver2, PAD_KEY.x);
+            in.register("MID", GAMEPAD.driver2, PAD_KEY.y);
+            in.register("HIGH", GAMEPAD.driver2, PAD_KEY.b);
+            in.register("REVERSE", GAMEPAD.driver2, PAD_KEY.a);
+            in.register("TILT_FORWARD", GAMEPAD.driver2, PAD_KEY.dpad_left);
+            in.register("TILT_BACK", GAMEPAD.driver2, PAD_KEY.dpad_right);
 
             enabled = true;
         } catch (Exception e) {
@@ -113,6 +120,8 @@ public class Depositor extends OpMode {
             belt.setPower(1);
         } else {
             belt.setPower(0);
+            belt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            belt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
     }
 
@@ -149,7 +158,8 @@ public class Depositor extends OpMode {
 
                 belt.setTargetPosition(50);
                 belt.setPower(BELT_SPEED);
-                // start the timer
+                state = AUTO_STATE.DONE;
+                /* // start the timer
                 if (!timer3Started) {
                     timer3.reset();
                     timer3Started = true;
@@ -158,7 +168,7 @@ public class Depositor extends OpMode {
                 if (timer3.seconds() >= FLIPPER_MOVE_TIME_INITIAL) {
                     belt.setPower(0);
                     state = AUTO_STATE.DONE;
-                }
+                } */
                 break;
             case DOOR_PREP:      // Move the flipper to below the required door
                 switch (required_Door) {
@@ -173,7 +183,8 @@ public class Depositor extends OpMode {
                         break;
                 }
                 belt.setPower(BELT_SPEED);
-                // start the timer
+                state = AUTO_STATE.DONE;
+                /* // start the timer
                 if (!timer1Started) {
                     timer1.reset();
                     timer1Started = true;
@@ -182,7 +193,7 @@ public class Depositor extends OpMode {
                 if (timer1.seconds() >= FLIPPER_MOVE_TIME) {
                     belt.setPower(0);
                     state = AUTO_STATE.DONE;
-                }
+                } */
                 break;
             case DOOR_OPEN:      // Open required door and run conveyor for the BLOCK_SHOVE_TIME
                 switch (required_Door) {
@@ -196,8 +207,13 @@ public class Depositor extends OpMode {
                         // this will be implemented later if they add a door
                         break;
                 }
-                belt.setPower(BELT_SPEED);
-                if (!timer2Started) {
+                if (!sensor.isPressed()) {
+                    belt.setPower(BELT_SPEED);
+                } else {
+                    belt.setPower(0);
+                    state = AUTO_STATE.TILTED_FORWARD;
+                }
+                /* if (!timer2Started) {
                     timer2.reset();
                     timer2Started = true;
                 }
@@ -205,7 +221,7 @@ public class Depositor extends OpMode {
                 if (timer2.seconds() >= BLOCK_SHOVE_TIME) {
                     belt.setPower(0);
                     state = AUTO_STATE.DONE;
-                }
+                } */
                 break;
             case TILTED_BACK:
                 tilt.setPosition(TILT_BACK);
@@ -213,7 +229,7 @@ public class Depositor extends OpMode {
                 break;
             case REVERSE_RUN:      // Run the belt in reverse for a set time (for TeleOp only)
                 belt.setPower(-BELT_SPEED);
-                if (!timer4Started) {
+                /* if (!timer4Started) {
                     timer4.reset();
                     timer4Started = true;
                 }
@@ -221,12 +237,12 @@ public class Depositor extends OpMode {
                 if (timer4.seconds() >= REVERSE_BELT_TIME) {
                     belt.setPower(0);
                     state = AUTO_STATE.DONE;
-                }
+                } */
                 break;
             case DONE:
                 tilt.setPosition(tilt.getPosition());
                 low.setPosition(low.getPosition());
-                mid.setPosition(low.getPosition());
+                mid.setPosition(mid.getPosition());
                 belt.setPower(0);
                 break;
         }
@@ -249,25 +265,37 @@ public class Depositor extends OpMode {
                 state = AUTO_STATE.TILTED_BACK;
             }
             */
-            if (gamepad2.a) state = AUTO_STATE.TILTED_FORWARD;
-            if (gamepad2.x && required_Door != DOOR_USED.LOW_DOOR) {
-                setDoor(DOOR_USED.LOW_DOOR);
-                state = AUTO_STATE.DOOR_PREP;
-            } else if (gamepad2.x && required_Door == DOOR_USED.LOW_DOOR) {
-                state = AUTO_STATE.DOOR_OPEN;
+            if (in.down("REVERSE")){
+                state = AUTO_STATE.REVERSE_RUN;
+            } else if (in.up("REVERSE")) {
+                state = AUTO_STATE.DONE;
             }
-            if (gamepad2.y && required_Door != DOOR_USED.MID_DOOR) {
-                setDoor(DOOR_USED.MID_DOOR);
-                state = AUTO_STATE.DOOR_PREP;
-            } else if (gamepad2.y && required_Door == DOOR_USED.MID_DOOR) {
-                state = AUTO_STATE.DOOR_OPEN;
+            if (in.down("LOW")) {
+                if (required_Door == DOOR_USED.LOW_DOOR) {
+                    state = AUTO_STATE.DOOR_OPEN;
+                } else {
+                    setDoor(DOOR_USED.LOW_DOOR);
+                    state = AUTO_STATE.DOOR_PREP;
+                }
             }
-            if (gamepad2.b && required_Door != DOOR_USED.HIGH_DOOR) {
-                setDoor(DOOR_USED.HIGH_DOOR);
-                state = AUTO_STATE.DOOR_PREP;
-            } else if (gamepad2.b && required_Door == DOOR_USED.HIGH_DOOR) {
-                state = AUTO_STATE.DOOR_OPEN;
+            if (in.down("MID")) {
+                if (required_Door == DOOR_USED.MID_DOOR) {
+                    state = AUTO_STATE.DOOR_OPEN;
+                } else {
+                    setDoor(DOOR_USED.MID_DOOR);
+                    state = AUTO_STATE.DOOR_PREP;
+                }
             }
+            if (in.down("HIGH")) {
+                if (required_Door == DOOR_USED.HIGH_DOOR) {
+                    state = AUTO_STATE.DOOR_OPEN;
+                } else {
+                    setDoor(DOOR_USED.HIGH_DOOR);
+                    state = AUTO_STATE.DOOR_PREP;
+                }
+            }
+            if (in.down("TILT_FORWARD")) state = AUTO_STATE.TILTED_FORWARD;
+            if (in.down("TILT_BACK")) state = AUTO_STATE.TILTED_BACK;
         }
 
         // Debug when requested
