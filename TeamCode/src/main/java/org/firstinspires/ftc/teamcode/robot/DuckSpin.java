@@ -143,6 +143,29 @@ public class DuckSpin extends OpMode {
                 }
                 duck.setPower(speed);
                 break;
+            case AUTO_RED:
+                // Start backward
+                speed = -autoSpeedMin;
+                timer.reset();
+                state = AUTO_STATE.AUTO_SPIN; // Jump to a specific state
+                break;
+            case AUTO_BLUE:
+                // Start forward
+                speed = autoSpeedMin;
+                timer.reset();
+                state = AUTO_STATE.AUTO_SPIN; // Jump to a specific state
+                break;
+            case AUTO_SPIN:
+                // Run the spin cycle
+                if (speed != 0 && timer.seconds() < autoRampTime) {
+                    speed = (autoSpeedMin + (timer.seconds() / autoRampTime) *
+                            (autoSpeedMax - autoSpeedMin)) * Math.signum(speed);
+                } else {
+                    speed = 0;
+                    state = state.next(); // Jump to the next state in the enum list
+                }
+                duck.setPower(speed);
+                break;
             case DONE:
                 break;
         }
