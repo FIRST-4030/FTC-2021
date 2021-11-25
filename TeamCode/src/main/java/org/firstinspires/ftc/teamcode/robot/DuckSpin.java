@@ -67,7 +67,7 @@ public class DuckSpin extends OpMode {
     @Override
     public void init() {
         // Pull in Globals
-        in = Globals.input();
+        in = Globals.input(this);
 
         // Duck spinner
         try {

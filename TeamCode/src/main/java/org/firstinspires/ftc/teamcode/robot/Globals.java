@@ -12,14 +12,14 @@ public class Globals {
     // Makes it easy to use in one-liners that may or may not be the parent OpMode
     static public OpMode opmode(OpMode om) {
         if (opmode == null) {
-            opmode = om;
+            Globals.opmode = om;
         }
         return opmode;
     }
 
-    static public InputHandler input() {
+    static public InputHandler input(OpMode om) {
         if (input == null) {
-            input = new InputHandler(opmode);
+            input = new InputHandler(opmode(om));
         }
         return input;
     }
