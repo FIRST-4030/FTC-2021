@@ -33,7 +33,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
@@ -49,18 +48,21 @@ public class DuckSpin extends OpMode {
     private DcMotor duck = null;
 
     // Config
-    public static double speedMin = 0.63;  // min duck spinner speed (0 - 1.0)
-    public static double speedMax = 0.88;  // max duck spinner speed (0 - 1.0)
-    public static double rampTime = 1.25;  // duck spinner ramp time (seconds, >0)
-    public static double autoSpeedMin = 0.46;
-    public static double autoSpeedMax = 0.66;
-    public static double autoRampTime = 1.65;
+    public static double TELEOP_MIN = 0.63;  // min duck spinner speed (0 - 1.0)
+    public static double TELEOP_MAX = 0.88;  // max duck spinner speed (0 - 1.0)
+    public static double TELEOP_RAMP = 1.25;  // duck spinner ramp time (seconds, >0)
+    public static double AUTO_MIN = 0.46;
+    public static double AUTO_MAX = 0.66;
+    public static double AUTO_RAMP = 1.65;
 
     // Members
     public static boolean DEBUG = false;
     private InputHandler in = null;
     private boolean enabled = false;
     private double speed = 0.0;
+    private double speedMin = TELEOP_MIN;
+    private double speedMax = TELEOP_MAX;
+    private double ramp = TELEOP_RAMP;
     private ElapsedTime timer = new ElapsedTime();
     private AUTO_STATE state = AUTO_STATE.DONE;
 
@@ -92,8 +94,18 @@ public class DuckSpin extends OpMode {
     public void start() {
     }
 
+    public void teleop(boolean red) {
+        speedMin = TELEOP_MIN;
+        speedMax = TELEOP_MAX;
+        ramp = TELEOP_RAMP;
+        state = red ? AUTO_STATE.RED : AUTO_STATE.BLUE;
+    }
+
     public void auto(boolean red) {
-        state = red ? AUTO_STATE.TELEOP_RED : AUTO_STATE.TELEOP_BLUE;
+        speedMin = AUTO_MIN;
+        speedMax = AUTO_MAX;
+        ramp = AUTO_RAMP;
+        state = red ? AUTO_STATE.RED : AUTO_STATE.BLUE;
     }
 
     public boolean isDone() {
@@ -111,55 +123,31 @@ public class DuckSpin extends OpMode {
         in.loop();
 
         // Override the current auto state with driver commands
-        // Technically we should only trigger on button-down, not repeatedly while held
         if (in.down("DUCK_RED")) {
-            auto(true);
+            teleop(true);
         } else if (in.down("DUCK_BLUE")) {
-            auto(false);
+            teleop(false);
         }
 
         // Run the auto cycle (including translated driver commands)
         switch (state) {
-            case TELEOP_RED:
+            case RED:
                 // Start backward
                 speed = -speedMin;
                 timer.reset();
-                state = AUTO_STATE.TELEOP_SPIN; // Jump to a specific state
+                state = AUTO_STATE.SPIN; // Jump to a specific state
                 break;
-            case TELEOP_BLUE:
+            case BLUE:
                 // Start forward
                 speed = speedMin;
                 timer.reset();
-                state = AUTO_STATE.TELEOP_SPIN; // Jump to a specific state
+                state = AUTO_STATE.SPIN; // Jump to a specific state
                 break;
-            case TELEOP_SPIN:
+            case SPIN:
                 // Run the spin cycle
-                if (speed != 0 && timer.seconds() < rampTime) {
-                    speed = (speedMin + (timer.seconds() / rampTime) *
+                if (speed != 0 && timer.seconds() < ramp) {
+                    speed = (speedMin + (timer.seconds() / ramp) *
                             (speedMax - speedMin)) * Math.signum(speed);
-                } else {
-                    speed = 0;
-                    state = state.next(); // Jump to the next state in the enum list
-                }
-                duck.setPower(speed);
-                break;
-            case AUTO_RED:
-                // Start backward
-                speed = -autoSpeedMin;
-                timer.reset();
-                state = AUTO_STATE.AUTO_SPIN; // Jump to a specific state
-                break;
-            case AUTO_BLUE:
-                // Start forward
-                speed = autoSpeedMin;
-                timer.reset();
-                state = AUTO_STATE.AUTO_SPIN; // Jump to a specific state
-                break;
-            case AUTO_SPIN:
-                // Run the spin cycle
-                if (speed != 0 && timer.seconds() < autoRampTime) {
-                    speed = (autoSpeedMin + (timer.seconds() / autoRampTime) *
-                            (autoSpeedMax - autoSpeedMin)) * Math.signum(speed);
                 } else {
                     speed = 0;
                     state = state.next(); // Jump to the next state in the enum list
@@ -172,13 +160,14 @@ public class DuckSpin extends OpMode {
 
         // Debug when requested
         if (DEBUG) {
-            telemetry.addData("Duck State", state);
+            telemetry.addData("Duck State", "%s, MMR %.2f/%.2f/%.2f",
+                    state.toString(), speedMin, speedMax, ramp);
             telemetry.addData("Duck Output", "%.2f/%d",
                     duck.getPower(), duck.getCurrentPosition());
         }
 
-        telemetry.addData("speedMin:", speedMin);
-        telemetry.addData("speedMax:", speedMax);
+        telemetry.addData("speedMin:", TELEOP_MIN);
+        telemetry.addData("speedMax:", TELEOP_MAX);
         /*
          * TODO: This is a great place to use the InputHandler.auto() method
          ** It's specifically meant for this sort of incremental manual control
@@ -196,16 +185,16 @@ public class DuckSpin extends OpMode {
          */
         // Moving the servo position and number should increase
         if (gamepad1.dpad_up) {
-            speedMin += 0.01;
-            speedMin = Math.min(1.0f, speedMin);
-            speedMax += 0.01;
-            speedMax = Math.min(1.0f, speedMax);
+            TELEOP_MIN += 0.01;
+            TELEOP_MIN = Math.min(1.0f, TELEOP_MIN);
+            TELEOP_MAX += 0.01;
+            TELEOP_MAX = Math.min(1.0f, TELEOP_MAX);
             // Moving the servo position and number should decrease
         } else if (gamepad1.dpad_down) {
-            speedMin -= 0.01;
-            speedMin = Math.max(0.0f, speedMin);
-            speedMax -= 0.01;
-            speedMax = Math.max(0.0f, speedMax);
+            TELEOP_MIN -= 0.01;
+            TELEOP_MIN = Math.max(0.0f, TELEOP_MIN);
+            TELEOP_MAX -= 0.01;
+            TELEOP_MAX = Math.max(0.0f, TELEOP_MAX);
         }
     }
 
@@ -214,12 +203,9 @@ public class DuckSpin extends OpMode {
     }
 
     enum AUTO_STATE implements OrderedEnum {
-        AUTO_RED,
-        AUTO_BLUE,
-        AUTO_SPIN,
-        TELEOP_RED,
-        TELEOP_BLUE,
-        TELEOP_SPIN,
+        RED,
+        BLUE,
+        SPIN,
         DONE;
 
         public AUTO_STATE next() {
