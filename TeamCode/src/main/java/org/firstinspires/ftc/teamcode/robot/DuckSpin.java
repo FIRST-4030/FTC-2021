@@ -179,6 +179,21 @@ public class DuckSpin extends OpMode {
 
         telemetry.addData("speedMin:", speedMin);
         telemetry.addData("speedMax:", speedMax);
+        /*
+         * TODO: This is a great place to use the InputHandler.auto() method
+         ** It's specifically meant for this sort of incremental manual control
+         ** auto() lets this bit of code trigger repeatedly while the key is held
+         ** but also limits the repeat rate so it doesn't go too fast
+         ** if (in.auto("SPEED_UP")) {
+         **   speedMax = Math.min(1.0f, speedMax + 0.01);
+         **   speedMin = Math.min(1.0f, speedMin + 0.01);
+         ** }
+         ** You can adjust the key-repeat rate with a call like this:
+         ** in.get("SPEED_UP").setAutoDelay(50);
+         *
+         * You should also be able to adjust speedMax/speedMin directly in the dashboard
+         * Tuning controls on the gamepad can be useful, but the dashboard requires less code
+         */
         // Moving the servo position and number should increase
         if (gamepad1.dpad_up) {
             speedMin += 0.01;
