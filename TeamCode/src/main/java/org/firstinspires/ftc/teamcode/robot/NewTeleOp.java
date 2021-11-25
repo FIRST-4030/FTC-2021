@@ -88,6 +88,9 @@ public class NewTeleOp extends OpMode{
     private double RIGHT_DRIVE_POW = 0;
     private static double ACCEL_CONSTANT = 0.4;
     private static double fastFactor = 0;
+    private static double duckPowerAutoMin = 0.46;
+    private static double duckPowerAutoMax = 0.66;
+    private static double autoDuckRampTime = 1.65;
 
     // Servo position test constants
     private float servoPos = 0.5f;
@@ -225,6 +228,13 @@ public class NewTeleOp extends OpMode{
             DUCK_POWER = 0.0;
         }
         duckSpinner.setPower(DUCK_POWER);
+        /* if (DUCK_POWER != 0 && duckTimer.seconds() < autoDuckRampTime) {
+            DUCK_POWER = (duckPowerAutoMin + (duckTimer.seconds() / autoDuckRampTime) *
+                    (duckPowerAutoMax - duckPowerAutoMin)) * Math.signum(DUCK_POWER);
+        } else {
+            DUCK_POWER = 0.0;
+        }
+        duckSpinner.setPower(DUCK_POWER); */
 
         /* timerRatio = Math.max(Math.min(duckTimer.seconds() / duckRampTime, 1.0), 0);
         if (timerRatio != 0.0 && timerRatio != 1.0) {
@@ -314,7 +324,7 @@ public class NewTeleOp extends OpMode{
         telemetry.addData("Spin", spin);
         telemetry.addData("Dep Belt Pos: ", depBelt.getCurrentPosition());
 
-        // Shows number of servoPos
+        /* // Shows number of servoPos
         telemetry.addData("Pos:", servoPos);
         // Moving the servo position and number should increase
         if (gamepad1.dpad_up) {
@@ -326,7 +336,7 @@ public class NewTeleOp extends OpMode{
             servoPos = Math.max(0.0f, servoPos);
         }
         // Set position of desired servo
-        //collectorArm.setPosition(servoPos);
+        //collectorArm.setPosition(servoPos); */
     }
 
     @Override

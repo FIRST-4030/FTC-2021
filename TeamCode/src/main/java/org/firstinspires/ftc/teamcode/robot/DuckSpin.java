@@ -31,7 +31,9 @@ package org.firstinspires.ftc.teamcode.robot;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
@@ -41,15 +43,18 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
-//@TeleOp(name = "DuckSpin", group = "Test")
+@TeleOp(name = "DuckSpin", group = "Test")
 public class DuckSpin extends OpMode {
     // Hardware
     private DcMotor duck = null;
 
     // Config
-    public static double speedMin = 0.215;  // min duck spinner speed (0 - 1.0)
-    public static double speedMax = 0.465;  // max duck spinner speed (0 - 1.0)
+    public static double speedMin = 0.63;  // min duck spinner speed (0 - 1.0)
+    public static double speedMax = 0.88;  // max duck spinner speed (0 - 1.0)
     public static double rampTime = 1.25;  // duck spinner ramp time (seconds, >0)
+    public static double autoSpeedMin = 0.46;
+    public static double autoSpeedMax = 0.66;
+    public static double autoRampTime = 1.65;
 
     // Members
     public static boolean DEBUG = false;
@@ -75,8 +80,8 @@ public class DuckSpin extends OpMode {
         }
 
         // Inputs
-        in.register("DUCK_RED", GAMEPAD.driver1, PAD_KEY.a);
-        in.register("DUCK_BLUE", GAMEPAD.driver1, PAD_KEY.b);
+        in.register("DUCK_RED", GAMEPAD.driver1, PAD_KEY.b);
+        in.register("DUCK_BLUE", GAMEPAD.driver1, PAD_KEY.a);
     }
 
     @Override
@@ -88,7 +93,7 @@ public class DuckSpin extends OpMode {
     }
 
     public void auto(boolean red) {
-        state = red ? AUTO_STATE.RED : AUTO_STATE.BLUE;
+        state = red ? AUTO_STATE.TELEOP_RED : AUTO_STATE.TELEOP_BLUE;
     }
 
     public boolean isDone() {
@@ -115,19 +120,19 @@ public class DuckSpin extends OpMode {
 
         // Run the auto cycle (including translated driver commands)
         switch (state) {
-            case RED:
+            case TELEOP_RED:
                 // Start backward
                 speed = -speedMin;
                 timer.reset();
-                state = AUTO_STATE.SPIN; // Jump to a specific state
+                state = AUTO_STATE.TELEOP_SPIN; // Jump to a specific state
                 break;
-            case BLUE:
+            case TELEOP_BLUE:
                 // Start forward
                 speed = speedMin;
                 timer.reset();
-                state = AUTO_STATE.SPIN; // Jump to a specific state
+                state = AUTO_STATE.TELEOP_SPIN; // Jump to a specific state
                 break;
-            case SPIN:
+            case TELEOP_SPIN:
                 // Run the spin cycle
                 if (speed != 0 && timer.seconds() < rampTime) {
                     speed = (speedMin + (timer.seconds() / rampTime) *
@@ -148,6 +153,22 @@ public class DuckSpin extends OpMode {
             telemetry.addData("Duck Output", "%.2f/%d",
                     duck.getPower(), duck.getCurrentPosition());
         }
+
+        telemetry.addData("speedMin:", speedMin);
+        telemetry.addData("speedMax:", speedMax);
+        // Moving the servo position and number should increase
+        if (gamepad1.dpad_up) {
+            speedMin += 0.01;
+            speedMin = Math.min(1.0f, speedMin);
+            speedMax += 0.01;
+            speedMax = Math.min(1.0f, speedMax);
+            // Moving the servo position and number should decrease
+        } else if (gamepad1.dpad_down) {
+            speedMin -= 0.01;
+            speedMin = Math.max(0.0f, speedMin);
+            speedMax -= 0.01;
+            speedMax = Math.max(0.0f, speedMax);
+        }
     }
 
     @Override
@@ -155,9 +176,12 @@ public class DuckSpin extends OpMode {
     }
 
     enum AUTO_STATE implements OrderedEnum {
-        RED,
-        BLUE,
-        SPIN,
+        AUTO_RED,
+        AUTO_BLUE,
+        AUTO_SPIN,
+        TELEOP_RED,
+        TELEOP_BLUE,
+        TELEOP_SPIN,
         DONE;
 
         public AUTO_STATE next() {
