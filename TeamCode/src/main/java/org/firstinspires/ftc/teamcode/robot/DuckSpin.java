@@ -49,18 +49,21 @@ public class DuckSpin extends OpMode {
     private DcMotor duck = null;
 
     // Config
-    public static double speedMin = 0.63;  // min duck spinner speed (0 - 1.0)
-    public static double speedMax = 0.88;  // max duck spinner speed (0 - 1.0)
-    public static double rampTime = 1.25;  // duck spinner ramp time (seconds, >0)
-    public static double autoSpeedMin = 0.46;
-    public static double autoSpeedMax = 0.66;
-    public static double autoRampTime = 1.65;
+    public static double teleopMin = 0.63;
+    public static double teleopMax = 0.88;
+    public static double teleopRamp = 1.25;
+    public static double autoMin = 0.46;
+    public static double autoMax = 0.66;
+    public static double autoRamp = 1.65;
 
     // Members
     public static boolean DEBUG = false;
     private InputHandler in = null;
     private boolean enabled = false;
     private double speed = 0.0;
+    public static double speedMin = teleopMin;  // min duck spinner speed (0 - 1.0)
+    public static double speedMax = teleopMax;  // max duck spinner speed (0 - 1.0)
+    public static double rampTime = teleopRamp;  // duck spinner ramp time (seconds, >0)
     private ElapsedTime timer = new ElapsedTime();
     private AUTO_STATE state = AUTO_STATE.DONE;
 
@@ -92,8 +95,18 @@ public class DuckSpin extends OpMode {
     public void start() {
     }
 
+    public void teleop(boolean red) {
+        speedMin = teleopMin;
+        speedMax = teleopMax;
+        rampTime = teleopRamp;
+        state = red ? AUTO_STATE.RED : AUTO_STATE.BLUE;
+    }
+
     public void auto(boolean red) {
-        state = red ? AUTO_STATE.TELEOP_RED : AUTO_STATE.TELEOP_BLUE;
+        speedMin = autoMin;
+        speedMax = autoMax;
+        rampTime = autoRamp;
+        state = red ? AUTO_STATE.RED : AUTO_STATE.BLUE;
     }
 
     public boolean isDone() {
@@ -113,53 +126,30 @@ public class DuckSpin extends OpMode {
         // Override the current auto state with driver commands
         // Technically we should only trigger on button-down, not repeatedly while held
         if (in.down("DUCK_RED")) {
-            auto(true);
+            teleop(true);
         } else if (in.down("DUCK_BLUE")) {
-            auto(false);
+            teleop(false);
         }
 
         // Run the auto cycle (including translated driver commands)
         switch (state) {
-            case TELEOP_RED:
+            case RED:
                 // Start backward
                 speed = -speedMin;
                 timer.reset();
-                state = AUTO_STATE.TELEOP_SPIN; // Jump to a specific state
+                state = AUTO_STATE.SPIN; // Jump to a specific state
                 break;
-            case TELEOP_BLUE:
+            case BLUE:
                 // Start forward
                 speed = speedMin;
                 timer.reset();
-                state = AUTO_STATE.TELEOP_SPIN; // Jump to a specific state
+                state = AUTO_STATE.SPIN; // Jump to a specific state
                 break;
-            case TELEOP_SPIN:
+            case SPIN:
                 // Run the spin cycle
                 if (speed != 0 && timer.seconds() < rampTime) {
                     speed = (speedMin + (timer.seconds() / rampTime) *
                             (speedMax - speedMin)) * Math.signum(speed);
-                } else {
-                    speed = 0;
-                    state = state.next(); // Jump to the next state in the enum list
-                }
-                duck.setPower(speed);
-                break;
-            case AUTO_RED:
-                // Start backward
-                speed = -autoSpeedMin;
-                timer.reset();
-                state = AUTO_STATE.AUTO_SPIN; // Jump to a specific state
-                break;
-            case AUTO_BLUE:
-                // Start forward
-                speed = autoSpeedMin;
-                timer.reset();
-                state = AUTO_STATE.AUTO_SPIN; // Jump to a specific state
-                break;
-            case AUTO_SPIN:
-                // Run the spin cycle
-                if (speed != 0 && timer.seconds() < autoRampTime) {
-                    speed = (autoSpeedMin + (timer.seconds() / autoRampTime) *
-                            (autoSpeedMax - autoSpeedMin)) * Math.signum(speed);
                 } else {
                     speed = 0;
                     state = state.next(); // Jump to the next state in the enum list
@@ -214,12 +204,9 @@ public class DuckSpin extends OpMode {
     }
 
     enum AUTO_STATE implements OrderedEnum {
-        AUTO_RED,
-        AUTO_BLUE,
-        AUTO_SPIN,
-        TELEOP_RED,
-        TELEOP_BLUE,
-        TELEOP_SPIN,
+        RED,
+        BLUE,
+        SPIN,
         DONE;
 
         public AUTO_STATE next() {

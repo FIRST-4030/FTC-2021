@@ -62,8 +62,8 @@ public class NewTeleOp extends OpMode{
     // Constants used for hardware
     private static double DUCK_POWER = 0.0;
     private static double DEP_BELT_POWER = 0.88;
-    private static double DEP_UP = 0.6;
-    private static double DEP_DOWN = 0.44;
+    private static double DEP_UP = 0.58;
+    private static double DEP_DOWN = 0.2;
     private static double LOW_OPEN = 0.98;
     private static double LOW_CLOSE = 0.56;
     private static double MID_OPEN = 0.9;
@@ -263,11 +263,11 @@ public class NewTeleOp extends OpMode{
             depMid.setPosition(MID_CLOSE);
         }
 
-        if (gamepad2.dpad_right) {
+        /* if (gamepad2.dpad_right) {
             depTilt.setPosition(DEP_UP);
         } else {
             depTilt.setPosition(DEP_DOWN);
-        }
+        } */
 
         // Collector
         double spin = -gamepad2.left_stick_y;
@@ -324,7 +324,7 @@ public class NewTeleOp extends OpMode{
         telemetry.addData("Spin", spin);
         telemetry.addData("Dep Belt Pos: ", depBelt.getCurrentPosition());
 
-        /* // Shows number of servoPos
+        // Shows number of servoPos
         telemetry.addData("Pos:", servoPos);
         // Moving the servo position and number should increase
         if (gamepad1.dpad_up) {
@@ -336,7 +336,7 @@ public class NewTeleOp extends OpMode{
             servoPos = Math.max(0.0f, servoPos);
         }
         // Set position of desired servo
-        //collectorArm.setPosition(servoPos); */
+        depTilt.setPosition(servoPos);
     }
 
     @Override
