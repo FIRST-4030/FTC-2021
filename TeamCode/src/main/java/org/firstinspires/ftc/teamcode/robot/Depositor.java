@@ -50,17 +50,20 @@ public class Depositor extends OpMode {
     private Servo low = null;
     private Servo mid = null;
     private Servo tilt = null;
+    private Servo high = null;
     private TouchSensor sensor = null;
 
     // Config
     public static boolean DEBUG = false;
     public static double BELT_SPEED = 0.88;
-    public static double TILT_BACK = 0.58;
+    public static double TILT_BACK = 0.42;
     public static double TILT_FORWARD = 0.2;
     public static double LOW_OPEN = 0.98;
     public static double LOW_CLOSE = 0.56;
     public static double MID_OPEN = 0.9;
     public static double MID_CLOSE = 0.47;
+    public static double HIGH_OPEN;
+    public static double HIGH_CLOSE;
     public static double LOW_DOOR_FLIPPER_MOVE_TIME = 0.25;
     public static double MID_DOOR_FLIPPER_MOVE_TIME = 0.5;
     public static double HIGH_DOOR_FLIPPER_MOVE_TIME = 0.75;
@@ -98,6 +101,8 @@ public class Depositor extends OpMode {
             low.setPosition(LOW_CLOSE);
             mid = hardwareMap.get(Servo.class, "Depmid");
             mid.setPosition(MID_CLOSE);
+            high = hardwareMap.get(Servo.class, "Dephigh");
+            high.setPosition(HIGH_CLOSE);
             tilt = hardwareMap.get(Servo.class, "Deptilt");
             sensor = hardwareMap.get(TouchSensor.class, "DS");
             in.register("LOW", GAMEPAD.driver2, PAD_KEY.x);
@@ -134,6 +139,7 @@ public class Depositor extends OpMode {
         state = AUTO_STATE.DONE;
         low.setPosition(LOW_CLOSE);
         mid.setPosition(MID_CLOSE);
+        high.setPosition(HIGH_CLOSE);
         tilt.setPosition(TILT_FORWARD);
     }
 
@@ -204,7 +210,7 @@ public class Depositor extends OpMode {
                         mid.setPosition(MID_OPEN);
                         break;
                     case HIGH_DOOR:
-                        // this will be implemented later if they add a door
+                        high.setPosition(HIGH_OPEN);
                         break;
                 }
                 if (!sensor.isPressed()) {
@@ -243,6 +249,7 @@ public class Depositor extends OpMode {
                 tilt.setPosition(tilt.getPosition());
                 low.setPosition(low.getPosition());
                 mid.setPosition(mid.getPosition());
+                high.setPosition(high.getPosition());
                 belt.setPower(0);
                 break;
         }
