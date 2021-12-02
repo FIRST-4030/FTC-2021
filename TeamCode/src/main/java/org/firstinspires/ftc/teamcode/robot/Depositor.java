@@ -62,8 +62,8 @@ public class Depositor extends OpMode {
     public static double LOW_CLOSE = 0.56;
     public static double MID_OPEN = 0.9;
     public static double MID_CLOSE = 0.47;
-    public static double HIGH_OPEN;
-    public static double HIGH_CLOSE;
+    public static double HIGH_OPEN = 0.13;
+    public static double HIGH_INIT = 0.55;
     public static double LOW_DOOR_FLIPPER_MOVE_TIME = 0.25;
     public static double MID_DOOR_FLIPPER_MOVE_TIME = 0.5;
     public static double HIGH_DOOR_FLIPPER_MOVE_TIME = 0.75;
@@ -102,7 +102,7 @@ public class Depositor extends OpMode {
             mid = hardwareMap.get(Servo.class, "Depmid");
             mid.setPosition(MID_CLOSE);
             high = hardwareMap.get(Servo.class, "Dephigh");
-            high.setPosition(HIGH_CLOSE);
+            high.setPosition(HIGH_INIT);
             tilt = hardwareMap.get(Servo.class, "Deptilt");
             sensor = hardwareMap.get(TouchSensor.class, "DS");
             in.register("LOW", GAMEPAD.driver2, PAD_KEY.x);
@@ -139,7 +139,7 @@ public class Depositor extends OpMode {
         state = AUTO_STATE.DONE;
         low.setPosition(LOW_CLOSE);
         mid.setPosition(MID_CLOSE);
-        high.setPosition(HIGH_CLOSE);
+        high.setPosition(HIGH_OPEN);
         tilt.setPosition(TILT_FORWARD);
     }
 
@@ -160,6 +160,7 @@ public class Depositor extends OpMode {
             case TILTED_FORWARD:
                 low.setPosition(LOW_CLOSE);
                 mid.setPosition(MID_CLOSE);
+                high.setPosition(HIGH_OPEN);
                 tilt.setPosition(TILT_FORWARD);
 
                 belt.setTargetPosition(50);
