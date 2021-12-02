@@ -69,8 +69,8 @@ public class NewTeleOp extends OpMode{
     private static double LOW_CLOSE = 0.56;
     private static double MID_OPEN = 0.9;
     private static double MID_CLOSE = 0.47;
-    private static double HIGH_OPEN;
-    private static double HIGH_CLOSE;
+    private static double HIGH_OPEN = 0.13;
+    private static double HIGH_OUT = 0.55;
     private static double COLLECTOR_UP = 0.8;
     private static double COLLECTOR_DOWN = 0.24;
     private static double COLLECTOR_POWER = -1;
@@ -96,7 +96,7 @@ public class NewTeleOp extends OpMode{
     private static double autoDuckRampTime = 1.65;
 
     // Servo position test constants
-    private float servoPos = 0.5f;
+    private float servoPos = 0.4f;
     private static final float INCREMENT = 0.01f;
 
     // Members
@@ -135,6 +135,7 @@ public class NewTeleOp extends OpMode{
             //depBelt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             depLow = hardwareMap.get(Servo.class, "Deplow");
             depMid = hardwareMap.get(Servo.class, "Depmid");
+            depHigh = hardwareMap.get(Servo.class, "Dephigh");
             depTilt = hardwareMap.get(Servo.class, "Deptilt");
         } catch (Exception e) {
             telemetry.log().add("Could not find depositor");
@@ -194,6 +195,7 @@ public class NewTeleOp extends OpMode{
         depTilt.setPosition(DEP_DOWN);
         depLow.setPosition(LOW_CLOSE);
         depMid.setPosition(MID_CLOSE);
+        depHigh.setPosition(HIGH_OPEN);
         capstoneArm.setPosition(CAP_MID);
         collectorArm.setPosition(COLLECTOR_UP);
     }
@@ -264,6 +266,9 @@ public class NewTeleOp extends OpMode{
             depMid.setPosition(MID_OPEN);
         } else {
             depMid.setPosition(MID_CLOSE);
+        }
+        if (gamepad2.x) {
+            depHigh.setPosition(HIGH_OPEN);
         }
 
         if (gamepad2.dpad_right) {
@@ -339,7 +344,7 @@ public class NewTeleOp extends OpMode{
             servoPos = Math.max(0.0f, servoPos);
         }
         // Set position of desired servo
-        //depLow.setPosition(servoPos);
+        //depTilt.setPosition(servoPos);
     }
 
     @Override
