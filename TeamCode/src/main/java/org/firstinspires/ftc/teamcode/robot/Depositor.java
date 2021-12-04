@@ -34,7 +34,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
@@ -64,37 +63,20 @@ public class Depositor extends OpMode {
     public static double MID_CLOSE = 0.47;
     public static double HIGH_OPEN = 0.13;
     public static double HIGH_INIT = 0.55;
-    public static double LOW_DOOR_FLIPPER_MOVE_TIME = 0.25;
-    public static double MID_DOOR_FLIPPER_MOVE_TIME = 0.5;
-    public static double HIGH_DOOR_FLIPPER_MOVE_TIME = 0.75;
-    public static double BLOCK_SHOVE_TIME = 0.25;
-    public static double FLIPPER_MOVE_TIME_INITIAL = 1.0;   // REMOVE THIS when the magnetic sensor is installed
-    public static double REVERSE_BELT_TIME = 0.25;           // for TeleOp only
-    public static double DOUBLE_PRESS_TIME = 0.5;
 
     // Members
     private boolean enabled = false;
     private AUTO_STATE state = AUTO_STATE.DONE;
     private AUTO_STATE oldState = AUTO_STATE.DONE;
     private DOOR_USED required_Door = DOOR_USED.NONE;
-    private ElapsedTime timer1 = new ElapsedTime();
-    private ElapsedTime timer2 = new ElapsedTime();
-    private ElapsedTime timer3 = new ElapsedTime();
-    private ElapsedTime timer4 = new ElapsedTime();
-    private ElapsedTime timerX = new ElapsedTime();
-    private ElapsedTime timerY = new ElapsedTime();
-    private ElapsedTime timerB = new ElapsedTime();
-    private boolean timer1Started = false;
-    private boolean timer2Started = false;
-    private boolean timer3Started = false;
-    private boolean timer4Started = false;
-    private double FLIPPER_MOVE_TIME = 1.0;
     private InputHandler in;
 
     @Override
     public void init() {
         // Depositor
         try {
+            in = Globals.input(this);
+
             belt = hardwareMap.get(DcMotor.class, "Depbelt");
             belt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             low = hardwareMap.get(Servo.class, "Deplow");
@@ -153,7 +135,6 @@ public class Depositor extends OpMode {
         // if the state changed, set ModeComplete to false
         if (state != oldState) {
             oldState = state;
-            timer1Started = timer2Started = timer3Started = timer4Started = false;
         }
         switch (state) {
             // Tilt forward, move flipper to start position
@@ -166,16 +147,6 @@ public class Depositor extends OpMode {
                 belt.setTargetPosition(50);
                 belt.setPower(BELT_SPEED);
                 state = AUTO_STATE.DONE;
-                /* // start the timer
-                if (!timer3Started) {
-                    timer3.reset();
-                    timer3Started = true;
-                }
-                // once the belt has been going for time required for the selected door, stop the belt
-                if (timer3.seconds() >= FLIPPER_MOVE_TIME_INITIAL) {
-                    belt.setPower(0);
-                    state = AUTO_STATE.DONE;
-                } */
                 break;
             case DOOR_PREP:      // Move the flipper to below the required door
                 switch (required_Door) {
@@ -191,18 +162,8 @@ public class Depositor extends OpMode {
                 }
                 belt.setPower(BELT_SPEED);
                 state = AUTO_STATE.DONE;
-                /* // start the timer
-                if (!timer1Started) {
-                    timer1.reset();
-                    timer1Started = true;
-                }
-                // once the belt has been going for time required for the selected door, stop the belt
-                if (timer1.seconds() >= FLIPPER_MOVE_TIME) {
-                    belt.setPower(0);
-                    state = AUTO_STATE.DONE;
-                } */
                 break;
-            case DOOR_OPEN:      // Open required door and run conveyor for the BLOCK_SHOVE_TIME
+            case DOOR_OPEN:      // Open required door and run conveyor until the magnetic switch is active
                 switch (required_Door) {
                     case LOW_DOOR:
                         low.setPosition((LOW_OPEN));
@@ -220,15 +181,6 @@ public class Depositor extends OpMode {
                     belt.setPower(0);
                     state = AUTO_STATE.TILTED_FORWARD;
                 }
-                /* if (!timer2Started) {
-                    timer2.reset();
-                    timer2Started = true;
-                }
-                // once the belt has been going for the BLOCK_SHOVE_TIME, stop the belt
-                if (timer2.seconds() >= BLOCK_SHOVE_TIME) {
-                    belt.setPower(0);
-                    state = AUTO_STATE.DONE;
-                } */
                 break;
             case TILTED_BACK:
                 tilt.setPosition(TILT_BACK);
@@ -236,15 +188,6 @@ public class Depositor extends OpMode {
                 break;
             case REVERSE_RUN:      // Run the belt in reverse for a set time (for TeleOp only)
                 belt.setPower(-BELT_SPEED);
-                /* if (!timer4Started) {
-                    timer4.reset();
-                    timer4Started = true;
-                }
-                // once the belt has been going for the BLOCK_SHOVE_TIME, stop the belt
-                if (timer4.seconds() >= REVERSE_BELT_TIME) {
-                    belt.setPower(0);
-                    state = AUTO_STATE.DONE;
-                } */
                 break;
             case DONE:
                 tilt.setPosition(TILT_FORWARD);
@@ -347,13 +290,10 @@ public class Depositor extends OpMode {
         required_Door = newDoor;
         switch (required_Door) {
             case LOW_DOOR:
-                FLIPPER_MOVE_TIME = LOW_DOOR_FLIPPER_MOVE_TIME;
                 break;
             case MID_DOOR:
-                FLIPPER_MOVE_TIME = MID_DOOR_FLIPPER_MOVE_TIME;
                 break;
             case HIGH_DOOR:
-                FLIPPER_MOVE_TIME = HIGH_DOOR_FLIPPER_MOVE_TIME;
                 break;
         }
     }
