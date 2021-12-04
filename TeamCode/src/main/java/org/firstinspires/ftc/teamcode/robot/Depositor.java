@@ -55,7 +55,7 @@ public class Depositor extends OpMode {
 
     // Config
     public static boolean DEBUG = false;
-    public static double BELT_SPEED = 0.88;
+    public static double BELT_SPEED = 0.75;
     public static double TILT_BACK = 0.42;
     public static double TILT_FORWARD = 0.2;
     public static double LOW_OPEN = 0.98;
@@ -247,7 +247,7 @@ public class Depositor extends OpMode {
                 } */
                 break;
             case DONE:
-                tilt.setPosition(tilt.getPosition());
+                tilt.setPosition(TILT_FORWARD);
                 low.setPosition(low.getPosition());
                 mid.setPosition(mid.getPosition());
                 high.setPosition(high.getPosition());
@@ -303,7 +303,9 @@ public class Depositor extends OpMode {
                 }
             }
             if (in.down("TILT_FORWARD")) state = AUTO_STATE.TILTED_FORWARD;
-            if (in.down("TILT_BACK")) state = AUTO_STATE.TILTED_BACK;
+            if (in.down("TILT_BACK")) {
+                state = AUTO_STATE.TILTED_BACK;
+            }
         }
 
         // Debug when requested
