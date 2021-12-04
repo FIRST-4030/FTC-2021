@@ -312,7 +312,7 @@ public class NewAuto extends OpMode {
         }
 
         //log what state it currently is in
-        telemetry.addData("Auto Step", state.name());
+        telemetry.addData("Auto Step: ", state.name());
     }
 
     @Override
