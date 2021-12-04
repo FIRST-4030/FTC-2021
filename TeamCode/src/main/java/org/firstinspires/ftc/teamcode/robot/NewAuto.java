@@ -270,7 +270,43 @@ public class NewAuto extends OpMode {
             case DONE:
                 //driveStop();
                 break;
+
+                //added new cases
+            case BARCODE:
+
+                break;
+
+            case ALIGN_TO_CAPSTONE:
+
+                break;
+
+            case PICK_UP_CAPSTONE:
+
+                break;
+
+            case ALIGN_TO_HUB:
+
+                break;
+
+            case DEPOSIT:
+
+                break;
+
+            case ALIGN_TO_DUCK:
+
+                break;
+
+            case DUCK_SPIN:
+
+                break;
+
+            case FINAL_PARK:
+
+                break;
         }
+
+        //log what state it currently is in
+        telemetry.addData("Auto Step", state);
     }
 
     @Override
