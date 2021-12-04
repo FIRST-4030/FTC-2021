@@ -94,16 +94,21 @@ public class Capstone extends OpMode {
 
         switch(state) {
             case ARM_DOWN:
-                target = CAP_DOWN;
+                arm.setPosition(CAP_DOWN);
                 state = AUTO_STATE.DONE;
                 break;
             case ARM_UP:
-                target = CAP_MID;
+                arm.setPosition(CAP_MID);
                 state = AUTO_STATE.DONE;
                 break;
             case ARM_IN:
-                target = CAP_IN;
+                arm.setPosition(CAP_IN);
                 state = AUTO_STATE.DONE;
+                break;
+            case MANUAL:
+                if (target >= 0 && target <= 1) {
+                    target += (gamepad2.right_stick_y * 0.02);
+                }
                 break;
             case DONE:
                 break;
@@ -115,17 +120,15 @@ public class Capstone extends OpMode {
         } else if (gamepad2.dpad_up) {
             state = AUTO_STATE.ARM_UP;
         }
-        if (target >= 0 && target <= 1) {
-            target += (gamepad2.right_stick_y * 0.02);
-        }
 
-        double capError = target - arm.getPosition();
+
+        /* double capError = target - arm.getPosition();
         if (capError != 0 && timer.seconds() > delay) {
             double delta = Math.max(CAPSTONE_DELTA, Math.abs(capError));
             delta *= Math.signum(capError);
             arm.setPosition(arm.getPosition() + delta);
             timer.reset();
-        }
+        } */
 
         // Debug when requested
         if (DEBUG) {
@@ -150,6 +153,7 @@ public class Capstone extends OpMode {
         ARM_DOWN,
         ARM_UP,
         ARM_IN,
+        MANUAL,
         DONE;
 
         public Capstone.AUTO_STATE next() {

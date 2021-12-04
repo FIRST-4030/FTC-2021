@@ -319,6 +319,10 @@ public class Depositor extends OpMode {
         state = AUTO_STATE.DOOR_PREP;
     }
 
+    public boolean isDone() {
+        return (state == AUTO_STATE.DONE);
+    }
+
     @Override
     public void stop() {
         belt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
