@@ -35,7 +35,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
@@ -66,9 +65,6 @@ public class Depositor extends OpMode {
     public static double MID_CLOSE = 0.47;
     public static double HIGH_OPEN = 0.13;
     public static double HIGH_INIT = 0.55;
-    public static double LOW_DOOR_FLIPPER_MOVE_TIME = 0.25;
-    public static double MID_DOOR_FLIPPER_MOVE_TIME = 0.5;
-    public static double HIGH_DOOR_FLIPPER_MOVE_TIME = 0.75;
     public static int INIT_PREP_POS = 400;
     public static int LOW_PREP_POS = 500;
     public static int MID_PREP_POS = 700;
@@ -317,13 +313,5 @@ public class Depositor extends OpMode {
 
     public void setDoor(DOOR_USED newDoor) {
         required_Door = newDoor;
-        switch (required_Door) {
-            case LOW_DOOR:
-                break;
-            case MID_DOOR:
-                break;
-            case HIGH_DOOR:
-                break;
-        }
     }
 }
