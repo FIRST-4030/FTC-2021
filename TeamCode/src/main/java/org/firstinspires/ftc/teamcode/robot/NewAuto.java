@@ -249,6 +249,8 @@ public class NewAuto extends OpMode {
                 } else {
                     driveTo(DRIVE_POWER, 24.5f);
                 }
+                //what the inline boolean op would look like
+                //driveTo(DRIVE_POWER, !duckSide ? 15f : 24.5f);
                 break;
             // Counter-clockwise 90
             case TURN_TO_PARKING:
@@ -257,6 +259,8 @@ public class NewAuto extends OpMode {
                 } else {
                     turnTo(DRIVE_POWER, 90);
                 }
+
+                //turnTo(DRIVE_POWER, (redAlliance && !duckSide) || (!redAlliance && duckSide) ? -90 : 90);
                 break;
             // Backwards 32
             case PARK:
@@ -266,12 +270,14 @@ public class NewAuto extends OpMode {
                     driveTo(-DRIVE_POWER, -24.8f);
                 }
                 break;
+
+                //driveTo(-DRIVE_POWER, !duckSide ? -40f : -24.8f);
             // Stop processing
             case DONE:
                 //driveStop();
                 break;
 
-                //added new cases
+            //added new cases
             case BARCODE:
 
                 break;
@@ -306,7 +312,7 @@ public class NewAuto extends OpMode {
         }
 
         //log what state it currently is in
-        telemetry.addData("Auto Step", state);
+        telemetry.addData("Auto Step: ", state.name());
     }
 
     @Override
