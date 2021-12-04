@@ -233,7 +233,7 @@ public class Depositor extends OpMode {
             } else if (in.up("REVERSE")) {
                 state = AUTO_STATE.DONE;
             }
-            if (gamepad2.x) {
+            if (in.down("LOW")) {
                 if (required_Door == DOOR_USED.LOW_DOOR) {
                     telemetry.addData("action: ", "going to low door open");
                     state = AUTO_STATE.DOOR_OPEN;
