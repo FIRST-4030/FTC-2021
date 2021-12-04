@@ -92,11 +92,28 @@ public class Capstone extends OpMode {
             return;
         }
 
+        switch(state) {
+            case ARM_DOWN:
+                target = CAP_DOWN;
+                state = AUTO_STATE.DONE;
+                break;
+            case ARM_UP:
+                target = CAP_MID;
+                state = AUTO_STATE.DONE;
+                break;
+            case ARM_IN:
+                target = CAP_IN;
+                state = AUTO_STATE.DONE;
+                break;
+            case DONE:
+                break;
+        }
+
         // Capstone
         if (gamepad2.dpad_down) {
-            target = CAP_DOWN;
+            state = AUTO_STATE.ARM_DOWN;
         } else if (gamepad2.dpad_up) {
-            target = CAP_MID;
+            state = AUTO_STATE.ARM_UP;
         }
         if (target >= 0 && target <= 1) {
             target += (gamepad2.right_stick_y * 0.02);
@@ -115,6 +132,14 @@ public class Capstone extends OpMode {
             telemetry.addData("Capstone Output", "%.2f",
                     arm.getPosition());
         }
+    }
+
+    public void armUp() {
+        state = AUTO_STATE.ARM_UP;
+    }
+
+    public void armDown() {
+        state = AUTO_STATE.ARM_DOWN;
     }
 
     @Override
