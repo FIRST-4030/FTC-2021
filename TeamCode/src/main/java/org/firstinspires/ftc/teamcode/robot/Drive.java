@@ -162,4 +162,17 @@ public class Drive extends OpMode {
         driveLeft.setPower(speed);
         driveRight.setPower(-speed);
     }
+
+    public void driveStop() {
+        // Zero the drive encoders, and enable RUN_TO_POSITION
+        driveLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        driveLeft.setTargetPosition(driveLeft.getCurrentPosition());
+        driveLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveLeft.setPower(0);
+
+        driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        driveRight.setTargetPosition(driveRight.getCurrentPosition());
+        driveRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        driveRight.setPower(0);
+    }
 }
