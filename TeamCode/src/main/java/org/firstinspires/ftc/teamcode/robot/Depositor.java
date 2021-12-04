@@ -36,6 +36,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
+import org.apache.commons.math3.analysis.function.Abs;
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
@@ -66,9 +67,10 @@ public class Depositor extends OpMode {
     public static double HIGH_OPEN = 0.13;
     public static double HIGH_INIT = 0.55;
     public static int INIT_PREP_POS = 400;
-    public static int LOW_PREP_POS = 500;
-    public static int MID_PREP_POS = 700;
+    public static int LOW_PREP_POS = 570;
+    public static int MID_PREP_POS = 690;
     public static int HIGH_PREP_POS = 850;
+    public static int BELT_POSITION_DEADBAND = 10;
     public boolean sensorTriggered = false;
 
     // Members
@@ -80,10 +82,10 @@ public class Depositor extends OpMode {
 
     @Override
     public void init() {
+        in = Globals.input(this);
+
         // Depositor
         try {
-            in = Globals.input(this);
-
             belt = hardwareMap.get(DcMotor.class, "Depbelt");
             belt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             low = hardwareMap.get(Servo.class, "Deplow");
@@ -118,8 +120,6 @@ public class Depositor extends OpMode {
         }
         if (sensorTriggered) {
             belt.setPower(0);
-            belt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            belt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         } else {
             belt.setPower(0.3);
         }
@@ -144,14 +144,26 @@ public class Depositor extends OpMode {
             return;
         }
 
-        if (sensor.isPressed()) {
-            telemetry.addData("isPressed? ", "Yes");
-        } else {
-            telemetry.addData("isPressed? ", "No");
-        }
-        telemetry.addData("beltBusy? ", belt.isBusy());
+        // actually process the inputs from the game pads
+        in.loop();
 
-        // if the state changed, set ModeComplete to false
+        telemetry.addData("isPressed?", sensor.isPressed() ? "Yes" : "No" );
+        telemetry.addData("beltBusy? ", belt.isBusy() ? "Yes" : "No");
+        telemetry.addData("state", state);
+        telemetry.addData("required door", required_Door);
+        telemetry.addData("beltPos", belt.getCurrentPosition());
+        telemetry.addData("beltPosCmd", belt.getTargetPosition());
+
+        // this senses the magnetic prox switch, and reinitializes the belt encoder
+        // and sets the flag that the switch has been hit
+        // Note that the flag isn't reset until the state changes
+        if (sensor.isPressed()) {
+            sensorTriggered = true;
+            belt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            belt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
+        // if the state changed, set sensorTriggered to false
         if (state != oldState) {
             oldState = state;
             sensorTriggered = false;
@@ -166,7 +178,7 @@ public class Depositor extends OpMode {
 
                 belt.setTargetPosition(INIT_PREP_POS);
                 belt.setPower(BELT_SPEED);
-                if (!belt.isBusy()) {
+                if (!belt.isBusy() && (tilt.getPosition() == TILT_FORWARD)) {
                     state = AUTO_STATE.DONE;
                 }
                 break;
@@ -183,7 +195,7 @@ public class Depositor extends OpMode {
                         break;
                 }
                 belt.setPower(BELT_SPEED);
-                if (!belt.isBusy()) {
+                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition() - BELT_POSITION_DEADBAND) < BELT_POSITION_DEADBAND) {
                     state = AUTO_STATE.DONE;
                 }
                 break;
@@ -198,9 +210,6 @@ public class Depositor extends OpMode {
                     case HIGH_DOOR:
                         high.setPosition(HIGH_OPEN);
                         break;
-                }
-                if (sensor.isPressed()) {
-                    sensorTriggered = true;
                 }
                 if (sensorTriggered) {
                     belt.setPower(0);
@@ -224,7 +233,6 @@ public class Depositor extends OpMode {
                 belt.setPower(0);
                 break;
         }
-        telemetry.addData("state", state);
 
         if (!belt.isBusy()) {
             if (in.down("REVERSE")){
@@ -272,7 +280,6 @@ public class Depositor extends OpMode {
             }
         }
 
-        telemetry.addData("beltPos", belt.getCurrentPosition());
 
         // Debug when requested
         if (DEBUG) {
