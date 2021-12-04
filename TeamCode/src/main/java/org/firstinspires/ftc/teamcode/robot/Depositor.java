@@ -305,6 +305,14 @@ public class Depositor extends OpMode {
         NONE
     }
 
+    public void deposit() {
+        state = AUTO_STATE.DOOR_OPEN;
+    }
+
+    public void prep() {
+        state = AUTO_STATE.DOOR_PREP;
+    }
+
     @Override
     public void stop() {
         belt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
