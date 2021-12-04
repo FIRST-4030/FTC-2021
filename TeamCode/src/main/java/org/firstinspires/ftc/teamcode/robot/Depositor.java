@@ -131,7 +131,6 @@ public class Depositor extends OpMode {
         if (!enabled) {
             return;
         }
-        state = AUTO_STATE.DONE;
         low.setPosition(LOW_CLOSE);
         mid.setPosition(MID_CLOSE);
         high.setPosition(HIGH_OPEN);

@@ -45,7 +45,7 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 @Autonomous(name = "NewAuto", group = "Test")
 public class NewAuto extends MultiOpModeManager {
     // Hardware
-    private DcMotor leftDrive = null;
+    /* private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
     private DcMotor duckSpinner = null;
     private DcMotor depBelt = null;
@@ -56,7 +56,7 @@ public class NewAuto extends MultiOpModeManager {
     private Servo collectorArm = null;
     private Servo capstoneArm = null;
     private DistanceSensor distanceLeft = null;
-    private DistanceSensor distanceRight = null;
+    private DistanceSensor distanceRight = null; */
     private Drive drive;
     private DuckSpin duck;
     private Distance distance;
@@ -67,6 +67,7 @@ public class NewAuto extends MultiOpModeManager {
     private static float DRIVE_POWER = 0.4f;
     private static double TICKS_PER_INCH = 43.24;
     private static double TURN_RATIO = 6.375;
+    /*
     private static double ANGLE_CONST = 1.23;
     private static double DUCK_POWER = 0.0;
     private static double DEP_BELT_POWER = 0.9;
@@ -86,7 +87,7 @@ public class NewAuto extends MultiOpModeManager {
     private static double CAP_IN = 0;
     private static double CAP_MID = 0.52;
     private static double CAP_UP = 0.35;
-    private static double CAP_DOWN = 0.87;
+    private static double CAP_DOWN = 0.87; */
 
     // Members
     private ElapsedTime runtime = new ElapsedTime();
@@ -117,6 +118,9 @@ public class NewAuto extends MultiOpModeManager {
             super.register(depositor);
             capstone = new Capstone();
             super.register(capstone);
+
+            super.init();
+
         } catch (Exception e) {
             telemetry.log().add(String.valueOf(e));
             error = true;
@@ -179,8 +183,6 @@ public class NewAuto extends MultiOpModeManager {
             error = true;
         } */
 
-        super.init();
-
         // Initialization status
         String status = "Ready";
         if (error) {
@@ -206,13 +208,8 @@ public class NewAuto extends MultiOpModeManager {
 
     @Override
     public void start() {
-        driveStop();
-        state = AUTO_STATE.DONE;
-        /* depTilt.setPosition(DEP_DOWN);
-        depLow.setPosition(LOW_CLOSE);
-        depMid.setPosition(MID_CLOSE);
-        collectorArm.setPosition(COLLECTOR_UP); */
         super.start();
+        distance.startScan();
     }
 
     @Override
@@ -224,9 +221,9 @@ public class NewAuto extends MultiOpModeManager {
         } */
 
         // Feedback
-        telemetry.addData("Drive", "L %.2f/%d, R %.2f/%d",
+        /*telemetry.addData("Drive", "L %.2f/%d, R %.2f/%d",
                 leftDrive.getPower(), leftDrive.getCurrentPosition(),
-                rightDrive.getPower(), rightDrive.getCurrentPosition());
+                rightDrive.getPower(), rightDrive.getCurrentPosition());*/
 
         // Don't start new commands until the last one is complete
 /*        if (driveCmdRunning) {
@@ -243,9 +240,9 @@ public class NewAuto extends MultiOpModeManager {
         */
         super.loop();
 
-        telemetry.addData("Busy:", isBusy());
+        telemetry.addData("driveBusy: ", driveIsBusy());
 
-        telemetry.addData("TURN_RATIO:", TURN_RATIO);
+        telemetry.addData("TURN_RATIO: ", TURN_RATIO);
         // Moving the servo position and number should increase
         if (gamepad1.dpad_up) {
             TURN_RATIO += 0.05;
@@ -292,7 +289,6 @@ public class NewAuto extends MultiOpModeManager {
 
             //new cases
             case BARCODE:
-                distance.startScan();
                 if (distance.position() == Distance.BARCODE.LEFT) {
                     depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
                 } else if (distance.position() == Distance.BARCODE.CENTER) {
@@ -305,9 +301,9 @@ public class NewAuto extends MultiOpModeManager {
             case ALIGN_TO_CAPSTONE:
                 capstone.armDown();
                 if (!duckSide) {
-                    driveTo(DRIVE_POWER, 15f);
+                    drive.driveTo(DRIVE_POWER, 15f);
                 } else {
-                    driveTo(DRIVE_POWER, 24.5f);
+                    drive.driveTo(DRIVE_POWER, 24.5f);
                 }
                 break;
 
@@ -318,9 +314,9 @@ public class NewAuto extends MultiOpModeManager {
 
             case ALIGN_TO_HUB:
                 if (!duckSide) {
-                    driveTo(DRIVE_POWER, 15f);
+                    drive.driveTo(DRIVE_POWER, 15f);
                 } else {
-                    driveTo(DRIVE_POWER, 24.5f);
+                    drive.driveTo(DRIVE_POWER, 24.5f);
                 }
                 break;
 
@@ -356,16 +352,12 @@ public class NewAuto extends MultiOpModeManager {
         }
 
         //log what state it currently is in
-        telemetry.addData("Auto Step: ", state.name());
+        telemetry.addData("Auto Step: ", state);
     }
 
     @Override
     public void stop() {
-        // Reset to the standard drive mode
-        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        super.stop();
     }
 
     enum AUTO_STATE implements OrderedEnum {
@@ -389,61 +381,10 @@ public class NewAuto extends MultiOpModeManager {
 
     public void driveStop() {
         // Zero the drive encoders, and enable RUN_TO_POSITION
-        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftDrive.setTargetPosition(leftDrive.getCurrentPosition());
-        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftDrive.setPower(0);
-
-        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightDrive.setTargetPosition(leftDrive.getCurrentPosition());
-        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightDrive.setPower(0);
+        drive.driveStop();
     }
 
-    public boolean isBusy() {
-        return leftDrive.isBusy() || rightDrive.isBusy();
-    }
-
-    public void driveTo(float speed, float distance) {
-        // Don't allow new moves if we're still busy
-        if (isBusy()) {
-            telemetry.log().add("driveTo(): Motors in use");
-            return;
-        }
-
-        // Set a target, translated from inches to encoder ticks
-        int leftTarget = leftDrive.getCurrentPosition();
-        int rightTarget = rightDrive.getCurrentPosition();
-        leftTarget += distance * TICKS_PER_INCH;
-        rightTarget += distance * TICKS_PER_INCH;
-        leftDrive.setTargetPosition(leftTarget);
-        rightDrive.setTargetPosition(rightTarget);
-
-        // Start the motors
-        driveCmdRunning = true;
-        leftDrive.setPower(speed);
-        rightDrive.setPower(speed);
-    }
-
-    public void turnTo(float speed, int angle) {
-        // Don't allow new moves if we're still busy
-        if (isBusy()) {
-            telemetry.log().add("driveTo(): Motors in use");
-            return;
-        }
-
-        // Fake turns using a distance translation
-        // We have a gyro but let's start with just one control mode
-        int leftTarget = leftDrive.getCurrentPosition();
-        int rightTarget = rightDrive.getCurrentPosition();
-        leftTarget += angle * TURN_RATIO;
-        rightTarget -= angle * TURN_RATIO;
-        leftDrive.setTargetPosition(leftTarget);
-        rightDrive.setTargetPosition(rightTarget);
-
-        // Start the motors
-        driveCmdRunning = true;
-        leftDrive.setPower(speed);
-        rightDrive.setPower(-speed);
+    public boolean driveIsBusy() {
+        return drive.isBusy();
     }
 }
