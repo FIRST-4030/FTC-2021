@@ -286,6 +286,14 @@ public class NewAuto extends OpMode {
         OUT_FROM_WALL,
         TURN_TO_PARKING,
         PARK,
+        BARCODE,
+        ALIGN_TO_CAPSTONE,
+        PICK_UP_CAPSTONE,
+        ALIGN_TO_HUB,
+        DEPOSIT,
+        ALIGN_TO_DUCK,
+        DUCK_SPIN,
+        FINAL_PARK,
         DONE;
 
         public NewAuto.AUTO_STATE next() {

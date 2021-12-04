@@ -105,12 +105,10 @@ public class Collector extends OpMode {
         collector.setPower(Range.clip(spin, SPEED, -SPEED));
 
         // Arm
-        if (inRange) {
+        if (inRange || (gamepad2.right_bumper && arm.getPosition() == ARM_DOWN)) {
             arm.setPosition(ARM_UP);
-        } else if (gamepad2.right_bumper) {
+        } else if (gamepad2.right_bumper && arm.getPosition() == ARM_UP) {
             arm.setPosition(ARM_DOWN);
-        } else {
-            arm.setPosition(ARM_UP);
         }
 
         // Debug when requested

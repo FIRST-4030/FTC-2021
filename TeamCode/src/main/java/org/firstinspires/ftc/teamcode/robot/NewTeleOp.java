@@ -70,7 +70,7 @@ public class NewTeleOp extends OpMode{
     private static double MID_OPEN = 0.9;
     private static double MID_CLOSE = 0.47;
     private static double HIGH_OPEN = 0.13;
-    private static double HIGH_OUT = 0.55;
+    private static double HIGH_INIT = 0.55;
     private static double COLLECTOR_UP = 0.8;
     private static double COLLECTOR_DOWN = 0.24;
     private static double COLLECTOR_POWER = -1;
@@ -281,12 +281,10 @@ public class NewTeleOp extends OpMode{
         double spin = -gamepad2.left_stick_y;
         collector.setPower(Range.clip(spin, COLLECTOR_POWER, -COLLECTOR_POWER));
         telemetry.addData("DC range: ", distanceCollector.getDistance(DistanceUnit.MM));
-        if (distanceCollector.getDistance(DistanceUnit.MM) <= 45) {
+        if (distanceCollector.getDistance(DistanceUnit.MM) <= 45 || (gamepad2.right_bumper && collectorArm.getPosition() == COLLECTOR_DOWN)) {
             collectorArm.setPosition(COLLECTOR_UP);
-        } else if (gamepad2.right_bumper) {
+        } else if (gamepad2.right_bumper && collectorArm.getPosition() == COLLECTOR_UP) {
             collectorArm.setPosition(COLLECTOR_DOWN);
-        } else {
-            collectorArm.setPosition(COLLECTOR_UP);
         }
 
         // Capstone

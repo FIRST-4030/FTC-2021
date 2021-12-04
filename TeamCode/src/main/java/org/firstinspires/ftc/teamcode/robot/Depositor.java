@@ -55,15 +55,15 @@ public class Depositor extends OpMode {
 
     // Config
     public static boolean DEBUG = false;
-    public static double BELT_SPEED = 0.88;
+    public static double BELT_SPEED = 0.75;
     public static double TILT_BACK = 0.42;
     public static double TILT_FORWARD = 0.2;
     public static double LOW_OPEN = 0.98;
     public static double LOW_CLOSE = 0.56;
     public static double MID_OPEN = 0.9;
     public static double MID_CLOSE = 0.47;
-    public static double HIGH_OPEN;
-    public static double HIGH_CLOSE;
+    public static double HIGH_OPEN = 0.13;
+    public static double HIGH_INIT = 0.55;
     public static double LOW_DOOR_FLIPPER_MOVE_TIME = 0.25;
     public static double MID_DOOR_FLIPPER_MOVE_TIME = 0.5;
     public static double HIGH_DOOR_FLIPPER_MOVE_TIME = 0.75;
@@ -102,7 +102,7 @@ public class Depositor extends OpMode {
             mid = hardwareMap.get(Servo.class, "Depmid");
             mid.setPosition(MID_CLOSE);
             high = hardwareMap.get(Servo.class, "Dephigh");
-            high.setPosition(HIGH_CLOSE);
+            high.setPosition(HIGH_INIT);
             tilt = hardwareMap.get(Servo.class, "Deptilt");
             sensor = hardwareMap.get(TouchSensor.class, "DS");
             in.register("LOW", GAMEPAD.driver2, PAD_KEY.x);
@@ -139,7 +139,7 @@ public class Depositor extends OpMode {
         state = AUTO_STATE.DONE;
         low.setPosition(LOW_CLOSE);
         mid.setPosition(MID_CLOSE);
-        high.setPosition(HIGH_CLOSE);
+        high.setPosition(HIGH_OPEN);
         tilt.setPosition(TILT_FORWARD);
     }
 
@@ -160,6 +160,7 @@ public class Depositor extends OpMode {
             case TILTED_FORWARD:
                 low.setPosition(LOW_CLOSE);
                 mid.setPosition(MID_CLOSE);
+                high.setPosition(HIGH_OPEN);
                 tilt.setPosition(TILT_FORWARD);
 
                 belt.setTargetPosition(50);
@@ -246,7 +247,7 @@ public class Depositor extends OpMode {
                 } */
                 break;
             case DONE:
-                tilt.setPosition(tilt.getPosition());
+                tilt.setPosition(TILT_FORWARD);
                 low.setPosition(low.getPosition());
                 mid.setPosition(mid.getPosition());
                 high.setPosition(high.getPosition());
@@ -302,7 +303,9 @@ public class Depositor extends OpMode {
                 }
             }
             if (in.down("TILT_FORWARD")) state = AUTO_STATE.TILTED_FORWARD;
-            if (in.down("TILT_BACK")) state = AUTO_STATE.TILTED_BACK;
+            if (in.down("TILT_BACK")) {
+                state = AUTO_STATE.TILTED_BACK;
+            }
         }
 
         // Debug when requested

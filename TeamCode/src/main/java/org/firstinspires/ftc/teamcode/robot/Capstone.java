@@ -34,6 +34,9 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
+import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
+
 @Config
 //@TeleOp(name = "Capstone", group = "Test")
 public class Capstone extends OpMode {
@@ -51,6 +54,7 @@ public class Capstone extends OpMode {
     private boolean enabled = false;
     private double delay = 0.1;
     private double target = 0;
+    private AUTO_STATE state = AUTO_STATE.DONE;
     private ElapsedTime timer = new ElapsedTime();
 
     @Override
@@ -115,5 +119,16 @@ public class Capstone extends OpMode {
 
     @Override
     public void stop() {
+    }
+
+    enum AUTO_STATE implements OrderedEnum {
+        ARM_DOWN,
+        ARM_UP,
+        ARM_IN,
+        DONE;
+
+        public Capstone.AUTO_STATE next() {
+            return OrderedEnumHelper.next(this);
+        }
     }
 }
