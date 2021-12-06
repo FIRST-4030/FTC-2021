@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.checkerframework.checker.units.qual.A;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
@@ -94,16 +95,25 @@ public class Capstone extends OpMode {
 
         switch(state) {
             case ARM_DOWN:
+                target = CAP_DOWN;
                 arm.setPosition(CAP_DOWN);
-                state = AUTO_STATE.DONE;
+                if (arm.getPosition() == target) {
+                    state = AUTO_STATE.DONE;
+                }
                 break;
             case ARM_UP:
+                target = CAP_MID;
                 arm.setPosition(CAP_MID);
-                state = AUTO_STATE.DONE;
+                if (arm.getPosition() == target) {
+                    state = AUTO_STATE.DONE;
+                }
                 break;
             case ARM_IN:
+                target = CAP_IN;
                 arm.setPosition(CAP_IN);
-                state = AUTO_STATE.DONE;
+                if (arm.getPosition() == target) {
+                    state = AUTO_STATE.DONE;
+                }
                 break;
             case MANUAL:
                 if (target >= 0 && target <= 1) {
@@ -143,6 +153,10 @@ public class Capstone extends OpMode {
 
     public void armDown() {
         state = AUTO_STATE.ARM_DOWN;
+    }
+
+    public boolean isDone() {
+        return state == AUTO_STATE.DONE;
     }
 
     @Override

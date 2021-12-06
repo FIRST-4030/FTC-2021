@@ -184,19 +184,6 @@ public class DuckSpin extends OpMode {
          * You should also be able to adjust speedMax/speedMin directly in the dashboard
          * Tuning controls on the gamepad can be useful, but the dashboard requires less code
          */
-        // Moving the servo position and number should increase
-        if (gamepad1.dpad_up) {
-            speedMin += 0.01;
-            speedMin = Math.min(1.0f, speedMin);
-            speedMax += 0.01;
-            speedMax = Math.min(1.0f, speedMax);
-            // Moving the servo position and number should decrease
-        } else if (gamepad1.dpad_down) {
-            speedMin -= 0.01;
-            speedMin = Math.max(0.0f, speedMin);
-            speedMax -= 0.01;
-            speedMax = Math.max(0.0f, speedMax);
-        }
     }
 
     @Override
