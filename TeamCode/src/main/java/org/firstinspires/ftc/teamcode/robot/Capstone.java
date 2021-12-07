@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.checkerframework.checker.units.qual.A;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
@@ -95,15 +96,29 @@ public class Capstone extends OpMode {
         switch(state) {
             case ARM_DOWN:
                 target = CAP_DOWN;
-                state = AUTO_STATE.DONE;
+                arm.setPosition(CAP_DOWN);
+                if (arm.getPosition() == target) {
+                    state = AUTO_STATE.DONE;
+                }
                 break;
             case ARM_UP:
                 target = CAP_MID;
-                state = AUTO_STATE.DONE;
+                arm.setPosition(CAP_MID);
+                if (arm.getPosition() == target) {
+                    state = AUTO_STATE.DONE;
+                }
                 break;
             case ARM_IN:
                 target = CAP_IN;
-                state = AUTO_STATE.DONE;
+                arm.setPosition(CAP_IN);
+                if (arm.getPosition() == target) {
+                    state = AUTO_STATE.DONE;
+                }
+                break;
+            case MANUAL:
+                if (target >= 0 && target <= 1) {
+                    target += (gamepad2.right_stick_y * 0.02);
+                }
                 break;
             case DONE:
                 break;
@@ -115,17 +130,15 @@ public class Capstone extends OpMode {
         } else if (gamepad2.dpad_up) {
             state = AUTO_STATE.ARM_UP;
         }
-        if (target >= 0 && target <= 1) {
-            target += (gamepad2.right_stick_y * 0.02);
-        }
 
-        double capError = target - arm.getPosition();
+
+        /* double capError = target - arm.getPosition();
         if (capError != 0 && timer.seconds() > delay) {
             double delta = Math.max(CAPSTONE_DELTA, Math.abs(capError));
             delta *= Math.signum(capError);
             arm.setPosition(arm.getPosition() + delta);
             timer.reset();
-        }
+        } */
 
         // Debug when requested
         if (DEBUG) {
@@ -142,6 +155,10 @@ public class Capstone extends OpMode {
         state = AUTO_STATE.ARM_DOWN;
     }
 
+    public boolean isDone() {
+        return state == AUTO_STATE.DONE;
+    }
+
     @Override
     public void stop() {
     }
@@ -150,6 +167,7 @@ public class Capstone extends OpMode {
         ARM_DOWN,
         ARM_UP,
         ARM_IN,
+        MANUAL,
         DONE;
 
         public Capstone.AUTO_STATE next() {

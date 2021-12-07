@@ -115,6 +115,10 @@ public class Depositor extends OpMode {
 
     @Override
     public void init_loop() {
+        if (!enabled) {
+            return;
+        }
+
         if (sensor.isPressed()) {
             sensorTriggered = true;
         }
@@ -211,11 +215,11 @@ public class Depositor extends OpMode {
                         high.setPosition(HIGH_OPEN);
                         break;
                 }
-                if (sensorTriggered) {
+                if (!sensorTriggered) {
+                    belt.setPower(BELT_SPEED);
+                } else {
                     belt.setPower(0);
                     state = AUTO_STATE.TILTED_FORWARD;
-                } else {
-                    belt.setPower(BELT_SPEED);
                 }
                 break;
             case TILTED_BACK:
@@ -319,6 +323,10 @@ public class Depositor extends OpMode {
         state = AUTO_STATE.DOOR_PREP;
     }
 
+    public boolean isDone() {
+        return (state == AUTO_STATE.DONE);
+    }
+
     @Override
     public void stop() {
         belt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -327,5 +335,9 @@ public class Depositor extends OpMode {
 
     public void setDoor(DOOR_USED newDoor) {
         required_Door = newDoor;
+    }
+
+    public DOOR_USED doorUsed() {
+        return required_Door;
     }
 }

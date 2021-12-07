@@ -55,9 +55,9 @@ public class MOMM_Teleop extends MultiOpModeManager {
         // Start the auto method for the duck spinner
         if (duck.isDone()) {
             if (gamepad2.left_stick_button) {
-                duck.auto(true);
+                duck.teleop(true);
             } else if (gamepad2.right_stick_button) {
-                duck.auto(false);
+                duck.teleop(false);
             }
         }
 
