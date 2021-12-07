@@ -31,10 +31,6 @@ package org.firstinspires.ftc.teamcode.robot;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
@@ -45,8 +41,8 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
-@Autonomous(name = "NewAuto", group = "Test")
-public class NewAuto extends MultiOpModeManager {
+@Autonomous(name = "NewNewAuto", group = "Test")
+public class NewNewAuto extends MultiOpModeManager {
     // Hardware
     private Drive drive;
     private DuckSpin duck;
@@ -54,36 +50,14 @@ public class NewAuto extends MultiOpModeManager {
     private Depositor depositor;
     private Capstone capstone;
 
-    // Consts
+    // Constants
     private static float DRIVE_POWER = 0.4f;
     private static double TICKS_PER_INCH = 43.24;
     private static double TURN_RATIO = 6.375;
     private int num = 0;
-    /*
-    private static double ANGLE_CONST = 1.23;
-    private static double DUCK_POWER = 0.0;
-    private static double DEP_BELT_POWER = 0.9;
-    private static double DEP_UP = 0.6;
-    private static double DEP_DOWN = 0.44;
-    private static double LOW_OPEN = 0.98;
-    private static double LOW_CLOSE = 0.56;
-    private static double MID_OPEN = 0.9;
-    private static double MID_CLOSE = 0.48;
-    private static double COLLECTOR_UP = 0.96;
-    private static double COLLECTOR_DOWN = 0.23;
-    private static double COLLECTOR_POWER = -1;
-    private static double timerRatio = 0.0;
-    private static double duckPowerMin = 0.2;  // min duck spinner speed (0 - 1.0)
-    private static double duckPowerMax = 0.45;  // max duck spinner speed (0 - 1.0)
-    private static double duckRampTime = 1.25;  // duck spinner ramp time (seconds, >0)
-    private static double CAP_IN = 0;
-    private static double CAP_MID = 0.52;
-    private static double CAP_UP = 0.35;
-    private static double CAP_DOWN = 0.87; */
 
     // Members
     private ElapsedTime runtime = new ElapsedTime();
-    private boolean driveCmdRunning = false;
     private AUTO_STATE state = AUTO_STATE.DONE;
     private boolean redAlliance = false;
     private boolean duckSide = false;
@@ -111,7 +85,6 @@ public class NewAuto extends MultiOpModeManager {
             super.register(capstone);
 
             in = Globals.input(this);
-            in.register("ADVANCE_STATE", GAMEPAD.driver1, PAD_KEY.x);
 
             distance.startScan();
 
@@ -121,72 +94,11 @@ public class NewAuto extends MultiOpModeManager {
             error = true;
         }
 
-        /* // Drive Motors
-        try {
-            leftDrive = hardwareMap.get(DcMotor.class, "BL");
-            rightDrive = hardwareMap.get(DcMotor.class, "BR");
-            leftDrive.setDirection(DcMotor.Direction.FORWARD);
-            rightDrive.setDirection(DcMotor.Direction.FORWARD);
-        } catch (Exception e) {
-            telemetry.log().add("Could not find drive");
-            error = true;
-        }
-
-        // Duck Spinner
-        try {
-            duckSpinner = hardwareMap.get(DcMotor.class, "duck");
-        } catch (Exception e) {
-            telemetry.log().add("Could not find duck spinner");
-            error = true;
-        }
-
-        // Depositor
-        try {
-            depBelt = hardwareMap.get(DcMotor.class, "Depbelt");
-            depLow = hardwareMap.get(Servo.class, "Deplow");
-            depMid = hardwareMap.get(Servo.class, "Depmid");
-            depTilt = hardwareMap.get(Servo.class, "Deptilt");
-        } catch (Exception e) {
-            telemetry.log().add("Could not find depositor");
-            error = true;
-        }
-
-        // Collector
-        try {
-            collector = hardwareMap.get(DcMotor.class, "Collector");
-            collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
-        } catch (Exception e) {
-            telemetry.log().add("Could not find collector");
-            error = true;
-        }
-
-        // Capstone Grabber
-        try {
-            //capstoneHook = hardwareMap.get(Servo.class, "Caphook");
-            capstoneArm = hardwareMap.get(Servo.class, "Caparm");
-        } catch (Exception e) {
-            telemetry.log().add("Could not find capstone dep");
-            error = true;
-        }
-
-        // Distance Sensors
-        try {
-            distanceLeft = hardwareMap.get(DistanceSensor.class, "DL");
-            distanceRight = hardwareMap.get(DistanceSensor.class, "DR");
-        } catch (Exception e) {
-            telemetry.log().add("Could not find distance sensors");
-            error = true;
-        } */
-
         // Initialization status
         String status = "Ready";
         if (error) {
             status = "Hardware Error";
         }
-        /*depLow.setPosition(LOW_CLOSE);
-        depMid.setPosition(MID_CLOSE);
-        capstoneArm.setPosition(CAP_IN);
-        collectorArm.setPosition(COLLECTOR_UP); */
         telemetry.addData("Status", status);
     }
 
@@ -199,89 +111,35 @@ public class NewAuto extends MultiOpModeManager {
         telemetry.addData("Alliance", redAlliance ? "Red" : "Blue");
         telemetry.addData("Direction", duckSide ? "Duck" : "Warehouse");
         super.init_loop();
+        if (num == 0) {
+            distance.startScan();
+            num++;
+        }
     }
 
     @Override
     public void start() {
         super.start();
+        num = 0;
         state = AUTO_STATE.BARCODE;
     }
 
     @Override
     public void loop() {
         // Stop when the autoSteps are complete
-        /* if (state == AUTO_STATE.DONE) {
+        if (state == AUTO_STATE.DONE) {
             requestOpModeStop();
             return;
-        } */
-
-        // Feedback
-        /*telemetry.addData("Drive", "L %.2f/%d, R %.2f/%d",
-                leftDrive.getPower(), leftDrive.getCurrentPosition(),
-                rightDrive.getPower(), rightDrive.getCurrentPosition());*/
-
-        // Don't start new commands until the last one is complete
-/*        if (driveCmdRunning) {
-            // When the motors are done
-            if (!isBusy()) {
-                // Clear the running flag
-                driveCmdRunning = false;
-                // Advance to the next autoStep
-                state = state.next();
-            }
-            // Continue from the top of loop()
-            return;
         }
-        */
 
         in.loop();
 
         telemetry.addData("TURN_RATIO: ", TURN_RATIO);
         telemetry.addData("LDrive Pos: ", drive.leftDrivePos());
         telemetry.addData("RDrive Pos: ", drive.rightDrivePos());
-        /* if (gamepad1.dpad_up) {
-            TURN_RATIO += 0.05;
-            // Moving the servo position and number should decrease
-        } else if (gamepad1.dpad_down) {
-            TURN_RATIO -= 0.05;
-        } */
-
-        //
-        // Code past here is not run when driveCmdRunning is true
-        //
 
         // Step through the auto commands
         switch (state) {
-            /* // Forward 16
-            case OUT_FROM_WALL:
-                if (!duckSide) {
-                    driveTo(DRIVE_POWER, 15f);
-                } else {
-                    driveTo(DRIVE_POWER, 24.5f);
-                }
-                //what the inline boolean op would look like
-                //driveTo(DRIVE_POWER, !duckSide ? 15f : 24.5f);
-                break;
-            // Counter-clockwise 90
-            case TURN_TO_PARKING1:
-                if ((redAlliance && !duckSide) || (!redAlliance && duckSide)) {
-                    turnTo(DRIVE_POWER, -90);
-                } else {
-                    turnTo(DRIVE_POWER, 90);
-                }
-
-                //turnTo(DRIVE_POWER, (redAlliance && !duckSide) || (!redAlliance && duckSide) ? -90 : 90);
-                break;
-            // Backwards 32
-            case PARK:
-                if (!duckSide) {
-                    driveTo(-DRIVE_POWER, -40);
-                } else {
-                    driveTo(-DRIVE_POWER, -24.8f);
-                }
-                break;
-                //driveTo(-DRIVE_POWER, !duckSide ? -40f : -24.8f); */
-
             // new routine
             case BARCODE:
                 if (distance.position() == Distance.BARCODE.LEFT) {
@@ -296,15 +154,15 @@ public class NewAuto extends MultiOpModeManager {
                 }
                 break;
 
-            case MOVE1:
+            case OUT_FROM_WALL:
                 if (!duckSide) {
                     drive.driveTo(DRIVE_POWER, 15f);
                 } else {
-                    drive.driveTo(DRIVE_POWER, 24.5f);
+                    drive.driveTo(DRIVE_POWER, 17.9f);
                 }
                 num++;
                 telemetry.addData("Times driveTo ran: ", num);
-                if (!drive.isBusy() && num > 0) {
+                if (!drive.isBusy()) {
                     state = state.next();
                 }
                 break;
@@ -324,11 +182,55 @@ public class NewAuto extends MultiOpModeManager {
                 }
                 break;
 
+            case TURN_TO_DUCK:
+                if (duckSide) {
+                    if (redAlliance) {
+                        drive.turnTo(DRIVE_POWER, -135);
+                    } else {
+                        drive.turnTo(DRIVE_POWER, 135);
+                    }
+                }
+                if (!drive.isBusy()) {
+                    state = state.next();
+                }
+                break;
+
+            case ALIGN_TO_DUCK:
+                if (duckSide) {
+                    drive.driveTo(DRIVE_POWER, 21.7f);
+                }
+                if (!drive.isBusy()) {
+                    state = state.next();
+                }
+                break;
+
+            case DUCK_SPIN:
+                if (duckSide) {
+                    duck.auto(redAlliance);
+                }
+                if (!drive.isBusy() && duck.isDone()) {
+                    state = state.next();
+                }
+                break;
+
+            case BACK_UP_FROM_DUCK:
+                if (duckSide) {
+                    drive.driveTo(-DRIVE_POWER, -21.7f);
+                }
+                if (!drive.isBusy()) {
+                    state = state.next();
+                }
+                break;
+
             case TURN_TO_HUB:
-                if (!duckSide) {
-                    drive.turnTo(DRIVE_POWER, -47);
+                if (duckSide) {
+                    drive.turnTo(DRIVE_POWER, 180);
                 } else {
-                    drive.turnTo(DRIVE_POWER, 64);
+                    if (redAlliance) {
+                        drive.turnTo(DRIVE_POWER, -47);
+                    } else {
+                        drive.turnTo(DRIVE_POWER, 47);
+                    }
                 }
                 if (!drive.isBusy()) {
                     state = state.next();
@@ -353,24 +255,6 @@ public class NewAuto extends MultiOpModeManager {
                 }
                 break;
 
-            /* case ALIGN_TO_DUCK:
-                //back up
-
-                //turn
-
-                //move to duck
-                if (!drive.isBusy() && in.down("ADVANCE_STATE")) {
-                    state = state.next();
-                }
-                break;
-
-            case DUCK_SPIN:
-                duck.auto(redAlliance);
-                if (!drive.isBusy() && in.down("ADVANCE_STATE")) {
-                    state = state.next();
-                }
-                break; */
-
             case BACK_UP:
                 if (!duckSide) {
                     drive.driveTo(-DRIVE_POWER, -10.8f);
@@ -382,32 +266,36 @@ public class NewAuto extends MultiOpModeManager {
                 }
                 break;
 
-            case TURN_TO_PARKING2:
+            case TURN_TO_PARK:
                 if (!duckSide) {
-                    drive.turnTo(DRIVE_POWER, 137);
+                    if (redAlliance) {
+                        drive.turnTo(DRIVE_POWER, 137);
+                    } else {
+                        drive.turnTo(DRIVE_POWER, -137);
+                    }
                 } else {
-                    drive.turnTo(DRIVE_POWER, -154);
+                    if (redAlliance) {
+                        drive.turnTo(DRIVE_POWER, -154);
+                    } else {
+                        drive.turnTo(DRIVE_POWER, 154);
+                    }
                 }
                 if (!drive.isBusy()) {
                     state = state.next();
                 }
                 break;
 
-            case FINAL_PARK:
+            case PARK:
                 if (!duckSide) {
                     drive.driveTo(-DRIVE_POWER, -40f);
                 } else {
-                    drive.driveTo(DRIVE_POWER, 24.8f);
+                    drive.driveTo(DRIVE_POWER, 24.7f);
                 }
-                //back up
-
-                //small turn
-
-                //park
                 if (!drive.isBusy()) {
                     state = state.next();
                 }
                 break;
+
             // Stop processing
             case DONE:
                 driveStop();
@@ -424,24 +312,23 @@ public class NewAuto extends MultiOpModeManager {
     }
 
     enum AUTO_STATE implements OrderedEnum {
-        OUT_FROM_WALL,
-        TURN_TO_PARKING1,
-        PARK,
         BARCODE,
-        MOVE1,
+        OUT_FROM_WALL,
         ALIGN_TO_CAPSTONE,
         PICK_UP_CAPSTONE,
+        TURN_TO_DUCK,
+        ALIGN_TO_DUCK,
+        DUCK_SPIN,
+        BACK_UP_FROM_DUCK,
         TURN_TO_HUB,
         ALIGN_TO_HUB,
         DEPOSIT,
-        ALIGN_TO_DUCK,
-        DUCK_SPIN,
         BACK_UP,
-        TURN_TO_PARKING2,
-        FINAL_PARK,
+        TURN_TO_PARK,
+        PARK,
         DONE;
 
-        public NewAuto.AUTO_STATE next() {
+        public NewNewAuto.AUTO_STATE next() {
             return OrderedEnumHelper.next(this);
         }
     }
