@@ -58,6 +58,7 @@ public class NewAuto extends MultiOpModeManager {
     private static float DRIVE_POWER = 0.4f;
     private static double TICKS_PER_INCH = 43.24;
     private static double TURN_RATIO = 6.375;
+    private int num = 0;
     /*
     private static double ANGLE_CONST = 1.23;
     private static double DUCK_POWER = 0.0;
@@ -83,10 +84,10 @@ public class NewAuto extends MultiOpModeManager {
     // Members
     private ElapsedTime runtime = new ElapsedTime();
     private boolean driveCmdRunning = false;
-    private AUTO_STATE state = AUTO_STATE.BARCODE;
+    private AUTO_STATE state = AUTO_STATE.DONE;
     private boolean redAlliance = false;
     private boolean duckSide = false;
-    private InputHandler in = null;
+    private InputHandler in;
 
     @Override
     public void init() {
@@ -203,6 +204,7 @@ public class NewAuto extends MultiOpModeManager {
     @Override
     public void start() {
         super.start();
+        state = AUTO_STATE.BARCODE;
     }
 
     @Override
@@ -231,13 +233,14 @@ public class NewAuto extends MultiOpModeManager {
             return;
         }
         */
-        super.loop();
 
         in.loop();
 
         telemetry.addData("driveBusy: ", drive.isBusy());
 
         telemetry.addData("TURN_RATIO: ", TURN_RATIO);
+        telemetry.addData("LDrive Pos: ", drive.leftDrivePos());
+        telemetry.addData("RDrive Pos: ", drive.rightDrivePos());
         // Moving the servo position and number should increase
         /* if (gamepad1.dpad_up) {
             TURN_RATIO += 0.05;
@@ -263,7 +266,7 @@ public class NewAuto extends MultiOpModeManager {
                 //driveTo(DRIVE_POWER, !duckSide ? 15f : 24.5f);
                 break;
             // Counter-clockwise 90
-            case TURN_TO_PARKING:
+            case TURN_TO_PARKING1:
                 if ((redAlliance && !duckSide) || (!redAlliance && duckSide)) {
                     turnTo(DRIVE_POWER, -90);
                 } else {
@@ -295,19 +298,24 @@ public class NewAuto extends MultiOpModeManager {
                     state = state.next();
                 }
                 break;
-
-            case ALIGN_TO_CAPSTONE:
-                capstone.armDown();
+            case MOVE1:
                 if (!duckSide) {
                     drive.driveTo(DRIVE_POWER, 15f);
                 } else {
                     drive.driveTo(DRIVE_POWER, 24.5f);
                 }
-                if (!drive.isBusy() && capstone.isDone()) {
+                num++;
+                telemetry.addData("Times driveTo ran: ", num);
+                if (!drive.isBusy() && num > 0) {
                     state = state.next();
                 }
                 break;
-
+            case ALIGN_TO_CAPSTONE:
+                capstone.armDown();
+                if (capstone.isDone()) {
+                    state = state.next();
+                }
+                break;
             case PICK_UP_CAPSTONE:
                 capstone.armUp();
                 depositor.prep();
@@ -316,11 +324,22 @@ public class NewAuto extends MultiOpModeManager {
                 }
                 break;
 
+            case TURN_TO_HUB:
+                if (!duckSide) {
+                    drive.turnTo(DRIVE_POWER, -47);
+                } else {
+                    drive.turnTo(DRIVE_POWER, 64);
+                }
+                if (!drive.isBusy()) {
+                    state = state.next();
+                }
+                break;
+
             case ALIGN_TO_HUB:
                 if (!duckSide) {
-                    drive.driveTo(DRIVE_POWER, 15f);
+                    drive.driveTo(DRIVE_POWER, 10.8f);
                 } else {
-                    drive.driveTo(DRIVE_POWER, 24.5f);
+                    drive.driveTo(DRIVE_POWER, 7.6f);
                 }
                 if (!drive.isBusy()) {
                     state = state.next();
@@ -352,7 +371,34 @@ public class NewAuto extends MultiOpModeManager {
                 }
                 break;
 
+            case BACK_UP:
+                if (!duckSide) {
+                    drive.driveTo(-DRIVE_POWER, -10.8f);
+                } else {
+                    drive.driveTo(-DRIVE_POWER, -7.6f);
+                }
+                if (!drive.isBusy()) {
+                    state = state.next();
+                }
+                break;
+
+            case TURN_TO_PARKING2:
+                if (!duckSide) {
+                    drive.turnTo(DRIVE_POWER, 137);
+                } else {
+                    drive.turnTo(DRIVE_POWER, -154);
+                }
+                if (!drive.isBusy()) {
+                    state = state.next();
+                }
+                break;
+
             case FINAL_PARK:
+                if (!duckSide) {
+                    drive.driveTo(-DRIVE_POWER, -40f);
+                } else {
+                    drive.driveTo(-DRIVE_POWER, 24.8f);
+                }
                 //back up
 
                 //small turn
@@ -379,15 +425,19 @@ public class NewAuto extends MultiOpModeManager {
 
     enum AUTO_STATE implements OrderedEnum {
         OUT_FROM_WALL,
-        TURN_TO_PARKING,
+        TURN_TO_PARKING1,
         PARK,
         BARCODE,
+        MOVE1,
         ALIGN_TO_CAPSTONE,
         PICK_UP_CAPSTONE,
+        TURN_TO_HUB,
         ALIGN_TO_HUB,
         DEPOSIT,
         ALIGN_TO_DUCK,
         DUCK_SPIN,
+        BACK_UP,
+        TURN_TO_PARKING2,
         FINAL_PARK,
         DONE;
 
@@ -399,9 +449,5 @@ public class NewAuto extends MultiOpModeManager {
     public void driveStop() {
         // Zero the drive encoders, and enable RUN_TO_POSITION
         drive.driveStop();
-    }
-
-    public boolean driveIsBusy() {
-        return drive.isBusy();
     }
 }

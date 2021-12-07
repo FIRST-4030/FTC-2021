@@ -112,12 +112,15 @@ public class Drive extends OpMode {
 
     // Custom methods
     public boolean isBusy() {
-        // Skip processing if we're disabled
-        if (!enabled) {
-            return false;
-        }
+        return ((driveLeft.getCurrentPosition() != driveLeft.getTargetPosition()) || driveRight.getCurrentPosition() != driveRight.getTargetPosition());
+    }
 
-        return driveLeft.isBusy() || driveRight.isBusy();
+    public double leftDrivePos() {
+        return (driveLeft.getCurrentPosition() / TICKS_PER_INCH);
+    }
+
+    public double rightDrivePos() {
+        return (driveRight.getCurrentPosition() / TICKS_PER_INCH);
     }
 
     public void driveTo(float speed, float distance) {
