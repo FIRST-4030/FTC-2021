@@ -16,7 +16,7 @@ public class NewTestDrive extends OpMode {
     public static double TICKS_PER_INCH = 43.24;
     public static double TURN_RATIO = 7;
     public static double ACCEL_CONSTANT = 0.4;
-    public static double LDThreshold = 1, RDThreshold = 1;
+    public static double LDThreshold = 0.5, RDThreshold = 0.5;
 
     // Hardware
     private DcMotor driveLeft;
@@ -44,9 +44,22 @@ public class NewTestDrive extends OpMode {
     int num = 0;
     @Override
     public void loop() {
-        if (num == 0) {
-            this.driveTo(0.4, 10);
-            num++;
+        telemetry.addData("isBusy(): ", this.isBusy());
+        switch (num){
+            case 1:
+                this.driveTo(0.4, 10);
+                if (!this.isBusy()) {num++;}
+                break;
+            case 2:
+                this.turnTo(0.4, 90);
+                if (!this.isBusy()) {num++;}
+                break;
+            case 3:
+                this.driveTo(0.4, 3);
+                if (!this.isBusy()) {num++;}
+                break;
+            default:
+                break;
         }
     }
 
