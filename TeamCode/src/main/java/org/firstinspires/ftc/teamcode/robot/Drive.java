@@ -16,7 +16,7 @@ public class Drive extends OpMode {
     public static boolean DEBUG = false;
     private static final int INPUT_SCALING_EXPONENT = 3;
     public static double TICKS_PER_INCH = 43.24;
-    public static double TURN_RATIO = 7;
+    public static double TURN_RATIO = 6.375;
     public static double ACCEL_CONSTANT = 0.4;
 
     // Hardware
@@ -112,7 +112,7 @@ public class Drive extends OpMode {
 
     // Custom methods
     public boolean isBusy() {
-        return ((driveLeft.getCurrentPosition() != driveLeft.getTargetPosition()) || driveRight.getCurrentPosition() != driveRight.getTargetPosition());
+        return ((driveLeft.getCurrentPosition() != driveLeft.getTargetPosition()) || (driveRight.getCurrentPosition() != driveRight.getTargetPosition()));
     }
 
     public double leftDrivePos() {
