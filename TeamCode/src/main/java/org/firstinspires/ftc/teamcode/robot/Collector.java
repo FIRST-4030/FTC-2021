@@ -30,16 +30,24 @@
 package org.firstinspires.ftc.teamcode.robot;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.ftccommon.configuration.EditLegacyModuleControllerActivity;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
+import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
+import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
+import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
+import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
-//@TeleOp(name = "Collector", group = "Test")
+@TeleOp(name = "Collector", group = "Test")
 public class Collector extends OpMode {
     // Hardware
     private Servo arm = null;
@@ -48,13 +56,17 @@ public class Collector extends OpMode {
 
     // Config
     public static boolean DEBUG = false;
-    public static double ARM_UP = 0.8;
-    public static double ARM_DOWN = 0.24;
+    public static double ARM_UP = 0.37;
+    public static double ARM_DOWN = 0.9;
     public static double SPEED = -1;
-    public static int DISTANCE = 45;
+    public static int DISTANCE = 7;
+    public static double EJECT_TIME = 2;
 
     // Members
     private boolean enabled = false;
+    private InputHandler in;
+    private ElapsedTime runtime = new ElapsedTime();
+    private AUTO_STATE state = AUTO_STATE.DONE;
 
     @Override
     public void init() {
@@ -67,6 +79,9 @@ public class Collector extends OpMode {
             arm.setPosition(ARM_UP);
 
             distance = hardwareMap.get(DistanceSensor.class, "DC");
+
+            in = Globals.input(this);
+            in.register("COLLECT", GAMEPAD.driver2, PAD_KEY.right_bumper);
 
             enabled = true;
         } catch (Exception e) {
@@ -100,15 +115,36 @@ public class Collector extends OpMode {
         double range = distance.getDistance(DistanceUnit.MM);
         boolean inRange = (range <= DISTANCE);
 
-        // Collector
+        /*// Collector
         double spin = -gamepad2.left_stick_y;
-        collector.setPower(Range.clip(spin, SPEED, -SPEED));
+        collector.setPower(Range.clip(spin, SPEED, -SPEED));*/
 
         // Arm
-        if (inRange || (gamepad2.right_bumper && arm.getPosition() == ARM_DOWN)) {
-            arm.setPosition(ARM_UP);
+        if ((inRange || gamepad2.right_bumper) && arm.getPosition() == ARM_DOWN) {
+            state = AUTO_STATE.UP;
         } else if (gamepad2.right_bumper && arm.getPosition() == ARM_UP) {
-            arm.setPosition(ARM_DOWN);
+            state = AUTO_STATE.DOWN;
+        }
+
+        switch (state) {
+            case DOWN:
+                arm.setPosition(ARM_DOWN);
+                collector.setPower(SPEED);
+                state = AUTO_STATE.DONE;
+                break;
+            case UP:
+                runtime.reset();
+                if (runtime.seconds() < EJECT_TIME) {
+                    arm.setPosition(ARM_UP);
+                    collector.setPower(-SPEED);
+                } else {
+                    arm.setPosition(ARM_UP);
+                    collector.setPower(0);
+                    state = AUTO_STATE.DONE;
+                }
+                break;
+            case DONE:
+                break;
         }
 
         // Debug when requested
@@ -122,5 +158,15 @@ public class Collector extends OpMode {
 
     @Override
     public void stop() {
+    }
+
+    enum AUTO_STATE implements OrderedEnum {
+        DOWN,
+        UP,
+        DONE;
+
+        public AUTO_STATE next() {
+            return OrderedEnumHelper.next(this);
+        }
     }
 }

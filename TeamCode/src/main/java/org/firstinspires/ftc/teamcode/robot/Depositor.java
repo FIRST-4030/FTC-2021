@@ -58,8 +58,8 @@ public class Depositor extends OpMode {
     // Config
     public static boolean DEBUG = false;
     public static double BELT_SPEED = 0.4;
-    public static double TILT_BACK = 0.42;
-    public static double TILT_FORWARD = 0.2;
+    public static double TILT_BACK = 0.47;
+    public static double TILT_FORWARD = 0.18;
     public static double LOW_OPEN = 0.98;
     public static double LOW_CLOSE = 0.56;
     public static double MID_OPEN = 0.9;

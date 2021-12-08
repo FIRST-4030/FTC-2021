@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode.robot;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.ftccommon.configuration.EditDigitalDevicesActivityLynx;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -40,7 +41,7 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
-//@TeleOp(name = "Distance", group = "Test")
+@TeleOp(name = "Distance", group = "Test")
 public class Distance extends OpMode {
     // Hardware
     private DistanceSensor left = null;
@@ -94,6 +95,7 @@ public class Distance extends OpMode {
 
     @Override
     public void start() {
+        startScan();
     }
 
     @Override
@@ -102,6 +104,10 @@ public class Distance extends OpMode {
         if (!enabled) {
             return;
         }
+
+        telemetry.addData("Position: ", position);
+        telemetry.addData("Left in Range: ", leftinRange);
+        telemetry.addData("Right in Range: ", rightinRange);
 
         // Step through the auto commands
         switch (state) {

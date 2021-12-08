@@ -12,30 +12,47 @@ public class MOMM_Teleop extends MultiOpModeManager {
     private DuckSpin duck;
     private Distance distance;
     private Depositor depositor;
+    private Collector collector;
+    private Capstone capstone;
 
     public static int TURN_SMALL = 5;
     public static float TURN_SPEED = 0.4f;
 
     @Override
     public void init() {
-        super.register(new Depositor());
-        super.register(new Capstone());
-        super.register(new Collector());
+        boolean error = false;
+        try {
+            drive = new Drive();
+            super.register(drive);
+            duck = new DuckSpin();
+            super.register(duck);
+            distance = new Distance();
+            super.register(distance);
+            depositor = new Depositor();
+            super.register(depositor);
+            capstone = new Capstone();
+            super.register(capstone);
+            collector = new Collector();
+            super.register(collector);
 
-        drive = new Drive();
-        super.register(drive);
-        duck = new DuckSpin();
-        super.register(duck);
-        distance = new Distance();
-        super.register(distance);
-        depositor = new Depositor();
-        super.register(depositor);
+            input.register("BARCODE", GAMEPAD.driver1, PAD_KEY.guide);
+            input.register("DUCK_RED", GAMEPAD.driver1, PAD_KEY.b);
+            input.register("DUCK_BLUE", GAMEPAD.driver1, PAD_KEY.a);
+            /* input.register("TURN_CW", GAMEPAD.driver1, PAD_KEY.a);
+            input.register("TURN_CCW", GAMEPAD.driver1, PAD_KEY.b); */
 
-        input.register("BARCODE", GAMEPAD.driver1, PAD_KEY.guide);
-        input.register("TURN_CW", GAMEPAD.driver1, PAD_KEY.a);
-        input.register("TURN_CCW", GAMEPAD.driver1, PAD_KEY.b);
+            super.init();
+        } catch (Exception e) {
+            telemetry.log().add(String.valueOf(e));
+            error = true;
+        }
 
-        super.init();
+        // Initialization status
+        String status = "Ready";
+        if (error) {
+            status = "Hardware Error";
+        }
+        telemetry.addData("Status", status);
     }
 
     @Override
@@ -51,23 +68,24 @@ public class MOMM_Teleop extends MultiOpModeManager {
     @Override
     public void loop() {
         super.loop();
+        input.loop();
 
         // Start the auto method for the duck spinner
         if (duck.isDone()) {
-            if (gamepad2.left_stick_button) {
+            if (input.down("DUCK_RED")) {
                 duck.teleop(true);
-            } else if (gamepad2.right_stick_button) {
+            } else if (input.down("DUCK_BLUE")) {
                 duck.teleop(false);
             }
         }
 
-        // Small angle turns
+        /*// Small angle turns
         if (input.down("TURN_CW")) {
             drive.turnTo(TURN_SPEED, TURN_SMALL);
         }
         if (input.down("TURN_CCW")) {
             drive.turnTo(-TURN_SPEED, -TURN_SMALL);
-        }
+        } */
 
         // Trigger a distance scan manually at any time
         if (input.down("BARCODE")) {

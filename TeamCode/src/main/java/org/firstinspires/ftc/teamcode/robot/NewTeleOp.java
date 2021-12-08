@@ -63,16 +63,16 @@ public class NewTeleOp extends OpMode{
     // Constants used for hardware
     private static double DUCK_POWER = 0.0;
     private static double DEP_BELT_POWER = 0.88;
-    private static double DEP_UP = 0.42;
-    private static double DEP_DOWN = 0.2;
+    private static double DEP_UP = 0.47;
+    private static double DEP_DOWN = 0.18;
     private static double LOW_OPEN = 0.98;
     private static double LOW_CLOSE = 0.56;
     private static double MID_OPEN = 0.9;
     private static double MID_CLOSE = 0.47;
     private static double HIGH_OPEN = 0.13;
     private static double HIGH_INIT = 0.55;
-    private static double COLLECTOR_UP = 0.8;
-    private static double COLLECTOR_DOWN = 0.24;
+    private static double COLLECTOR_UP = 0.37;
+    private static double COLLECTOR_DOWN = 0.9;
     private static double COLLECTOR_POWER = -1;
     private static double timerRatio = 0.0;
     private static double duckPowerMin = 0.63;  // min duck spinner speed (0 - 1.0)
@@ -192,12 +192,12 @@ public class NewTeleOp extends OpMode{
         leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        depTilt.setPosition(DEP_DOWN);
+        //depTilt.setPosition(DEP_DOWN);
         depLow.setPosition(LOW_CLOSE);
         depMid.setPosition(MID_CLOSE);
         depHigh.setPosition(HIGH_OPEN);
         capstoneArm.setPosition(CAP_MID);
-        collectorArm.setPosition(COLLECTOR_UP);
+        //collectorArm.setPosition(COLLECTOR_UP);
     }
 
     @Override
@@ -281,7 +281,7 @@ public class NewTeleOp extends OpMode{
         double spin = -gamepad2.left_stick_y;
         collector.setPower(Range.clip(spin, COLLECTOR_POWER, -COLLECTOR_POWER));
         telemetry.addData("DC range: ", distanceCollector.getDistance(DistanceUnit.MM));
-        if (distanceCollector.getDistance(DistanceUnit.MM) <= 45 || (gamepad2.right_bumper && collectorArm.getPosition() == COLLECTOR_DOWN)) {
+        if (distanceCollector.getDistance(DistanceUnit.MM) <= 7 || (gamepad2.right_bumper && collectorArm.getPosition() == COLLECTOR_DOWN)) {
             collectorArm.setPosition(COLLECTOR_UP);
         } else if (gamepad2.right_bumper && collectorArm.getPosition() == COLLECTOR_UP) {
             collectorArm.setPosition(COLLECTOR_DOWN);

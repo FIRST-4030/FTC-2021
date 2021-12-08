@@ -49,6 +49,7 @@ public class NewNewAuto extends MultiOpModeManager {
     private Distance distance;
     private Depositor depositor;
     private Capstone capstone;
+    private Collector collector;
 
     // Constants
     private static float DRIVE_POWER = 0.4f;
@@ -70,7 +71,9 @@ public class NewNewAuto extends MultiOpModeManager {
         try {
             super.register(new Depositor());
             super.register(new Capstone());
-            super.register(new Collector());
+            super.register(new Drive());
+            super.register(new DuckSpin());
+            super.register(new Distance());
 
             drive = new Drive();
             super.register(drive);
@@ -166,7 +169,7 @@ public class NewNewAuto extends MultiOpModeManager {
                 }
                 break;
 
-            case ALIGN_TO_CAPSTONE:
+            /* case ALIGN_TO_CAPSTONE:
                 capstone.armDown();
                 if (capstone.isDone()) {
                     state = state.next();
@@ -179,7 +182,7 @@ public class NewNewAuto extends MultiOpModeManager {
                 if (!drive.isBusy() && capstone.isDone() && depositor.isDone()) {
                     state = state.next();
                 }
-                break;
+                break; */
 
             case TURN_TO_HUB:
                 if (duckSide) {
