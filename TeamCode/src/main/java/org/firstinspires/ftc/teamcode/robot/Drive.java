@@ -115,6 +115,13 @@ public class Drive extends OpMode {
         return ((driveLeft.getCurrentPosition() != driveLeft.getTargetPosition()) || (driveRight.getCurrentPosition() != driveRight.getTargetPosition()));
     }
 
+    public DcMotor.RunMode LdriveMode() {
+        return driveLeft.getMode();
+    }
+    public DcMotor.RunMode RdriveMode() {
+        return driveRight.getMode();
+    }
+
     public double leftDrivePos() {
         return (driveLeft.getCurrentPosition() / TICKS_PER_INCH);
     }

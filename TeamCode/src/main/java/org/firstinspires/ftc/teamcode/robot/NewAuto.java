@@ -239,6 +239,9 @@ public class NewAuto extends MultiOpModeManager {
         telemetry.addData("TURN_RATIO: ", TURN_RATIO);
         telemetry.addData("LDrive Pos: ", drive.leftDrivePos());
         telemetry.addData("RDrive Pos: ", drive.rightDrivePos());
+        // checks drive mode
+        telemetry.addData("LDrive mode: ", drive.LdriveMode());
+        telemetry.addData("RDrive mode: ", drive.RdriveMode());
         /* if (gamepad1.dpad_up) {
             TURN_RATIO += 0.05;
             // Moving the servo position and number should decrease
