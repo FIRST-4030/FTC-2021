@@ -124,6 +124,8 @@ public class Depositor extends OpMode {
         }
         if (sensorTriggered) {
             belt.setPower(0);
+            belt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            belt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         } else {
             belt.setPower(0.3);
         }
@@ -161,11 +163,12 @@ public class Depositor extends OpMode {
         // this senses the magnetic prox switch, and reinitializes the belt encoder
         // and sets the flag that the switch has been hit
         // Note that the flag isn't reset until the state changes
-        if (sensor.isPressed()) {
+        /*if (sensor.isPressed()) {
             sensorTriggered = true;
             belt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             belt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
+            state = AUTO_STATE.TILTED_FORWARD;
+        }*/
 
         // if the state changed, set sensorTriggered to false
         if (state != oldState) {
@@ -180,26 +183,21 @@ public class Depositor extends OpMode {
                 high.setPosition(HIGH_OPEN);
                 tilt.setPosition(TILT_FORWARD);
 
-                belt.setTargetPosition(INIT_PREP_POS);
-                belt.setPower(BELT_SPEED);
-                if (!belt.isBusy() && (tilt.getPosition() == TILT_FORWARD)) {
-                    state = AUTO_STATE.DONE;
-                }
                 break;
             case DOOR_PREP:      // Move the flipper to below the required door
                 switch (required_Door) {
                     case LOW_DOOR:
-                        belt.setTargetPosition(LOW_PREP_POS);
+                        belt.setTargetPosition((belt.getCurrentPosition() / 915 * 915) + LOW_PREP_POS);
                         break;
                     case MID_DOOR:
-                        belt.setTargetPosition(MID_PREP_POS);
+                        belt.setTargetPosition((belt.getCurrentPosition() / 915 * 915) + MID_PREP_POS);
                         break;
                     case HIGH_DOOR:
-                        belt.setTargetPosition(HIGH_PREP_POS);
+                        belt.setTargetPosition((belt.getCurrentPosition() / 915 * 915) + HIGH_PREP_POS);
                         break;
                 }
                 belt.setPower(BELT_SPEED);
-                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition() - BELT_POSITION_DEADBAND) < BELT_POSITION_DEADBAND) {
+                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < BELT_POSITION_DEADBAND) {
                     state = AUTO_STATE.DONE;
                 }
                 break;
@@ -207,18 +205,20 @@ public class Depositor extends OpMode {
                 switch (required_Door) {
                     case LOW_DOOR:
                         low.setPosition((LOW_OPEN));
+                        belt.setTargetPosition((belt.getCurrentPosition() / 915 * 915) + INIT_PREP_POS);
                         break;
                     case MID_DOOR:
                         mid.setPosition(MID_OPEN);
+                        belt.setTargetPosition((belt.getCurrentPosition() / 915 * 915) + INIT_PREP_POS) ;
                         break;
                     case HIGH_DOOR:
                         high.setPosition(HIGH_OPEN);
+                        belt.setTargetPosition((belt.getCurrentPosition() / 915 * 915) + INIT_PREP_POS);
                         break;
                 }
-                if (!sensorTriggered) {
-                    belt.setPower(BELT_SPEED);
-                } else {
-                    belt.setPower(0);
+                belt.setPower(BELT_SPEED);
+                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < BELT_POSITION_DEADBAND) {
+                    required_Door = DOOR_USED.NONE;
                     state = AUTO_STATE.TILTED_FORWARD;
                 }
                 break;
@@ -239,12 +239,10 @@ public class Depositor extends OpMode {
         }
 
         if (!belt.isBusy()) {
-            if (in.down("REVERSE")){
+            /*if (gamepad2.a){
                 state = AUTO_STATE.REVERSE_RUN;
-            } else if (in.up("REVERSE")) {
-                state = AUTO_STATE.DONE;
-            }
-            if (in.down("LOW")) {
+            }*/
+            if (gamepad2.x) {
                 if (required_Door == DOOR_USED.LOW_DOOR) {
                     telemetry.addData("action: ", "going to low door open");
                     state = AUTO_STATE.DOOR_OPEN;
@@ -254,7 +252,7 @@ public class Depositor extends OpMode {
                     state = AUTO_STATE.DOOR_PREP;
                 }
             }
-            if (in.down("MID")) {
+            if (gamepad2.y) {
                 if (required_Door == DOOR_USED.MID_DOOR) {
                     telemetry.addData("action: ", "going to mid door open");
                     state = AUTO_STATE.DOOR_OPEN;
@@ -264,7 +262,7 @@ public class Depositor extends OpMode {
                     state = AUTO_STATE.DOOR_PREP;
                 }
             }
-            if (in.down("HIGH")) {
+            if (gamepad2.b) {
                 if (required_Door == DOOR_USED.HIGH_DOOR) {
                     telemetry.addData("action: ", "going to high door open");
                     state = AUTO_STATE.DOOR_OPEN;
@@ -274,11 +272,11 @@ public class Depositor extends OpMode {
                     state = AUTO_STATE.DOOR_PREP;
                 }
             }
-            if (in.down("TILT_FORWARD")) {
+            if (gamepad2.dpad_left) {
                 telemetry.addData("action: ", "going to tilt forward");
                 state = AUTO_STATE.TILTED_FORWARD;
             }
-            if (in.down("TILT_BACK")) {
+            if (gamepad2.dpad_right) {
                 telemetry.addData("action: ", "going to tilt backward");
                 state = AUTO_STATE.TILTED_BACK;
             }

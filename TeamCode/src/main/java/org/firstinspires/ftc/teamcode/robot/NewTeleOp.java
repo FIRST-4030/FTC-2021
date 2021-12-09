@@ -39,10 +39,11 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 
 @Config
 @TeleOp(name = "NewTeleOp", group = "Test")
-public class NewTeleOp extends OpMode{
+public class NewTeleOp extends MultiOpModeManager {
     // Hardware
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
@@ -52,8 +53,8 @@ public class NewTeleOp extends OpMode{
     private Servo depMid = null;
     private Servo depHigh = null;
     private Servo depTilt = null;
-    private DcMotor collector = null;
-    private Servo collectorArm = null;
+    //private DcMotor collector = null;
+    //private Servo collectorArm = null;
     private Servo capstoneArm = null;
     //private Servo capstoneHook = null;
     private DistanceSensor distanceLeft = null;
@@ -72,8 +73,8 @@ public class NewTeleOp extends OpMode{
     private static double HIGH_OPEN = 0.13;
     private static double HIGH_INIT = 0.55;
     private static double COLLECTOR_UP = 0.37;
-    private static double COLLECTOR_DOWN = 0.9;
-    private static double COLLECTOR_POWER = -1;
+    private static double COLLECTOR_DOWN = 0.90;
+    private static double COLLECTOR_POWER = 1;
     private static double timerRatio = 0.0;
     private static double duckPowerMin = 0.63;  // min duck spinner speed (0 - 1.0)
     private static double duckPowerMax = 0.88;  // max duck spinner speed (0 - 1.0)
@@ -82,8 +83,6 @@ public class NewTeleOp extends OpMode{
     //private static double CAP_UP = 0.35;
     private static double CAP_MID = 0.5;
     private static double CAP_DOWN = 0.87;
-    //private static double CAP_HOOK_DOWN = 0.75;
-    //private static double CAP_HOOK_UP = 0.25;
     private static double CAPSTONE_DELTA = 0.01;
     private static double delayTime = 0.1;
     private static double capstoneTarget = 0;
@@ -103,6 +102,7 @@ public class NewTeleOp extends OpMode{
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime duckTimer = new ElapsedTime();
     private ElapsedTime capTimer = new ElapsedTime();
+    private Collector collector;
 
     @Override
     public void init() {
@@ -145,8 +145,11 @@ public class NewTeleOp extends OpMode{
 
         // Collector
         try {
-            collector = hardwareMap.get(DcMotor.class, "Collector");
-            collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
+            super.register(new Collector());
+            collector = new Collector();
+            super.register(collector);
+
+            super.init();
         } catch (Exception e) {
             telemetry.log().add("Could not find collector");
             error = true;
@@ -181,6 +184,7 @@ public class NewTeleOp extends OpMode{
 
     @Override
     public void init_loop() {
+        super.init_loop();
     }
 
     @Override
@@ -192,21 +196,17 @@ public class NewTeleOp extends OpMode{
         leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //depTilt.setPosition(DEP_DOWN);
+        depTilt.setPosition(DEP_DOWN);
         depLow.setPosition(LOW_CLOSE);
         depMid.setPosition(MID_CLOSE);
         depHigh.setPosition(HIGH_OPEN);
         capstoneArm.setPosition(CAP_MID);
-        //collectorArm.setPosition(COLLECTOR_UP);
+        super.start();
     }
 
     @Override
     public void loop() {
         // PoV drive
-        /* double drive = Math.pow(-gamepad1.left_stick_y, 3);
-        double turn = gamepad1.right_stick_x;
-        leftDrive.setPower(Range.clip(drive + turn, -1.0, 1.0));
-        rightDrive.setPower(Range.clip(drive - turn, -1.0, 1.0)); */
         if (gamepad1.right_trigger > ACCEL_CONSTANT) {
             fastFactor = gamepad1.right_trigger;
         } else {
@@ -233,21 +233,6 @@ public class NewTeleOp extends OpMode{
             DUCK_POWER = 0.0;
         }
         duckSpinner.setPower(DUCK_POWER);
-        /* if (DUCK_POWER != 0 && duckTimer.seconds() < autoDuckRampTime) {
-            DUCK_POWER = (duckPowerAutoMin + (duckTimer.seconds() / autoDuckRampTime) *
-                    (duckPowerAutoMax - duckPowerAutoMin)) * Math.signum(DUCK_POWER);
-        } else {
-            DUCK_POWER = 0.0;
-        }
-        duckSpinner.setPower(DUCK_POWER); */
-
-        /* timerRatio = Math.max(Math.min(duckTimer.seconds() / duckRampTime, 1.0), 0);
-        if (timerRatio != 0.0 && timerRatio != 1.0) {
-            DUCK_POWER = duckPowerMin + timerRatio * (duckPowerMax - duckPowerMin);
-        } else {
-            DUCK_POWER = 0.0;
-        }
-        duckSpinner.setPower(DUCK_POWER); */
 
         // Depositor
         if (gamepad2.a || gamepad2.b || gamepad2.x) {
@@ -279,13 +264,7 @@ public class NewTeleOp extends OpMode{
 
         // Collector
         double spin = -gamepad2.left_stick_y;
-        collector.setPower(Range.clip(spin, COLLECTOR_POWER, -COLLECTOR_POWER));
-        telemetry.addData("DC range: ", distanceCollector.getDistance(DistanceUnit.MM));
-        if (distanceCollector.getDistance(DistanceUnit.MM) <= 7 || (gamepad2.right_bumper && collectorArm.getPosition() == COLLECTOR_DOWN)) {
-            collectorArm.setPosition(COLLECTOR_UP);
-        } else if (gamepad2.right_bumper && collectorArm.getPosition() == COLLECTOR_UP) {
-            collectorArm.setPosition(COLLECTOR_DOWN);
-        }
+        super.loop();
 
         // Capstone
         if (gamepad2.dpad_down) {
@@ -323,8 +302,8 @@ public class NewTeleOp extends OpMode{
         telemetry.addData("Drive", "L %.2f/%d, R %.2f/%d",
                 leftDrive.getPower(), leftDrive.getCurrentPosition(),
                 rightDrive.getPower(), rightDrive.getCurrentPosition());
-        telemetry.addData("Duck/Collector", "D %.2f, C (%.2f)",
-                duckSpinner.getPower(), collector.getPower());
+        /* telemetry.addData("Duck/Collector", "D %.2f, C (%.2f)",
+                duckSpinner.getPower(), collector.getPower()); */
         telemetry.addData("Depositor", "B %.2f, L %.2f, M %.2f",
                 depBelt.getPower(), depLow.getPosition(), depMid.getPosition());
         telemetry.addData("Spin", spin);
@@ -347,5 +326,6 @@ public class NewTeleOp extends OpMode{
 
     @Override
     public void stop() {
+        super.stop();
     }
 }

@@ -57,10 +57,10 @@ public class Collector extends OpMode {
     // Config
     public static boolean DEBUG = false;
     public static double ARM_UP = 0.37;
-    public static double ARM_DOWN = 0.9;
-    public static double SPEED = -1;
-    public static int DISTANCE = 7;
-    public static double EJECT_TIME = 2;
+    public static double ARM_DOWN = 0.90;
+    public static double SPEED = 1;
+    public static int DISTANCE = 10;
+    public static double EJECT_TIME = 7;
 
     // Members
     private boolean enabled = false;
@@ -81,7 +81,7 @@ public class Collector extends OpMode {
             distance = hardwareMap.get(DistanceSensor.class, "DC");
 
             in = Globals.input(this);
-            in.register("COLLECT", GAMEPAD.driver2, PAD_KEY.right_bumper);
+            in.register("COLLECT", GAMEPAD.driver2, PAD_KEY.left_bumper);
 
             enabled = true;
         } catch (Exception e) {
@@ -111,6 +111,8 @@ public class Collector extends OpMode {
             return;
         }
 
+        in.loop();
+
         // Distance
         double range = distance.getDistance(DistanceUnit.MM);
         boolean inRange = (range <= DISTANCE);
@@ -120,23 +122,35 @@ public class Collector extends OpMode {
         collector.setPower(Range.clip(spin, SPEED, -SPEED));*/
 
         // Arm
-        if ((inRange || gamepad2.right_bumper) && arm.getPosition() == ARM_DOWN) {
+        telemetry.addData("collector pos", arm.getPosition());
+        telemetry.addData("collector pos", Math.round(arm.getPosition() * 100.0)/100.0);
+        telemetry.addData("inRange?", inRange);
+        telemetry.addData("Distance: ", distance.getDistance(DistanceUnit.MM));
+        telemetry.addData("State", state);
+        if ((inRange || gamepad2.left_bumper) && (Math.round(arm.getPosition() * 100.0)/100.0 == ARM_DOWN)) {
+            telemetry.log().add("Going to up now");
             state = AUTO_STATE.UP;
-        } else if (gamepad2.right_bumper && arm.getPosition() == ARM_UP) {
+            runtime.reset();
+        } else if (gamepad2.left_bumper && (Math.round(arm.getPosition() * 100.0)/100.0 == ARM_UP)) {
+            telemetry.log().add("Going to down now");
             state = AUTO_STATE.DOWN;
         }
 
         switch (state) {
             case DOWN:
+                telemetry.log().add("In down now");
                 arm.setPosition(ARM_DOWN);
                 collector.setPower(SPEED);
                 state = AUTO_STATE.DONE;
                 break;
             case UP:
-                runtime.reset();
-                if (runtime.seconds() < EJECT_TIME) {
+                telemetry.log().add("In up now");
+                if (runtime.seconds() > 1.5 && runtime.seconds() < EJECT_TIME) {
                     arm.setPosition(ARM_UP);
                     collector.setPower(-SPEED);
+                } else if (runtime.seconds() < 1.5 && runtime.seconds() < EJECT_TIME){
+                    arm.setPosition(ARM_DOWN);
+                    collector.setPower(SPEED);
                 } else {
                     arm.setPosition(ARM_UP);
                     collector.setPower(0);

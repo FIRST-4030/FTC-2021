@@ -113,16 +113,14 @@ public class NewNewAuto extends MultiOpModeManager {
         telemetry.addData("Alliance", redAlliance ? "Red" : "Blue");
         telemetry.addData("Direction", duckSide ? "Duck" : "Warehouse");
         super.init_loop();
-        if (num == 0) {
-            distance.startScan();
-            num++;
-        }
     }
 
     @Override
     public void start() {
         super.start();
         num = 0;
+        distance.startScan();
+        driveStop();
         state = AUTO_STATE.BARCODE;
     }
 
@@ -134,6 +132,8 @@ public class NewNewAuto extends MultiOpModeManager {
             return;
         }
 
+        depositor.loop();
+
         in.loop();
 
         telemetry.addData("TURN_RATIO: ", TURN_RATIO);
@@ -144,6 +144,7 @@ public class NewNewAuto extends MultiOpModeManager {
         switch (state) {
             // new routine
             case BARCODE:
+                distance.startScan();
                 if (distance.position() == Distance.BARCODE.LEFT) {
                     depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
                 } else if (distance.position() == Distance.BARCODE.CENTER) {
@@ -151,18 +152,20 @@ public class NewNewAuto extends MultiOpModeManager {
                 } else {
                     depositor.setDoor(Depositor.DOOR_USED.HIGH_DOOR);
                 }
-                if (!drive.isBusy() && depositor.doorUsed() != Depositor.DOOR_USED.NONE) {
+                if (!drive.isBusy() && distance.position() != Distance.BARCODE.NONE) {
                     state = state.next();
                 }
                 break;
 
             case OUT_FROM_WALL:
-                if (!duckSide) {
-                    drive.driveTo(DRIVE_POWER, 15f);
-                } else {
-                    drive.driveTo(DRIVE_POWER, 24.5f);
+                if (num == 0) {
+                    if (!duckSide) {
+                        drive.driveTo(DRIVE_POWER, 15f);
+                    } else {
+                        drive.driveTo(DRIVE_POWER, 24.5f);
+                    }
+                    num++;
                 }
-                num++;
                 telemetry.addData("Times driveTo ran: ", num);
                 if (!drive.isBusy()) {
                     state = state.next();
@@ -185,18 +188,21 @@ public class NewNewAuto extends MultiOpModeManager {
                 break; */
 
             case TURN_TO_HUB:
-                if (duckSide) {
-                    if (redAlliance) {
-                        drive.turnTo(DRIVE_POWER, 64);
+                if (num == 1) {
+                    if (duckSide) {
+                        if (redAlliance) {
+                            drive.turnTo(DRIVE_POWER, 64);
+                        } else {
+                            drive.turnTo(DRIVE_POWER, -64);
+                        }
                     } else {
-                        drive.turnTo(DRIVE_POWER, -64);
+                        if (redAlliance) {
+                            drive.turnTo(DRIVE_POWER, -47);
+                        } else {
+                            drive.turnTo(DRIVE_POWER, 47);
+                        }
                     }
-                } else {
-                    if (redAlliance) {
-                        drive.turnTo(DRIVE_POWER, -47);
-                    } else {
-                        drive.turnTo(DRIVE_POWER, 47);
-                    }
+                    num++;
                 }
                 if (!drive.isBusy()) {
                     state = state.next();
@@ -204,10 +210,13 @@ public class NewNewAuto extends MultiOpModeManager {
                 break;
 
             case ALIGN_TO_HUB:
-                if (!duckSide) {
-                    drive.driveTo(DRIVE_POWER, 10.8f);
-                } else {
-                    drive.driveTo(DRIVE_POWER, 7.6f);
+                if (num == 2) {
+                    if (!duckSide) {
+                        drive.driveTo(DRIVE_POWER, 10.8f);
+                    } else {
+                        drive.driveTo(DRIVE_POWER, 7.6f);
+                    }
+                    num++;
                 }
                 if (!drive.isBusy()) {
                     state = state.next();
@@ -222,10 +231,13 @@ public class NewNewAuto extends MultiOpModeManager {
                 break;
 
             case BACK_UP:
-                if (!duckSide) {
-                    drive.driveTo(-DRIVE_POWER, -10.8f);
-                } else {
-                    drive.driveTo(-DRIVE_POWER, -7.6f);
+                if (num == 3) {
+                    if (!duckSide) {
+                        drive.driveTo(-DRIVE_POWER, -10.8f);
+                    } else {
+                        drive.driveTo(-DRIVE_POWER, -7.6f);
+                    }
+                    num++;
                 }
                 if (!drive.isBusy()) {
                     state = state.next();
@@ -233,36 +245,51 @@ public class NewNewAuto extends MultiOpModeManager {
                 break;
 
             case TURN_TO_PARK:
-                if (duckSide) {
-                    if (redAlliance) {
-                        drive.turnTo(DRIVE_POWER, 26);
+                if (num == 4) {
+                    if (duckSide) {
+                        if (redAlliance) {
+                            drive.turnTo(DRIVE_POWER, 26);
+                        } else {
+                            drive.turnTo(DRIVE_POWER, -26);
+                        }
                     } else {
-                        drive.turnTo(DRIVE_POWER, -26);
+                        if (redAlliance) {
+                            drive.turnTo(DRIVE_POWER, -43);
+                        } else {
+                            drive.turnTo(DRIVE_POWER, 43);
+                        }
                     }
-                } else {
-                    if (redAlliance) {
-                        drive.turnTo(DRIVE_POWER, -43);
-                    } else {
-                        drive.turnTo(DRIVE_POWER, 43);
-                    }
+                    num++;
+                }
+                if (!drive.isBusy()) {
+                    state = state.next();
                 }
                 break;
 
             case PARK:
-                if (duckSide) {
-                    drive.driveTo(-DRIVE_POWER, -24.5f);
-                } else {
-                    drive.driveTo(-DRIVE_POWER, -40);
+                if (num == 5) {
+                    if (duckSide) {
+                        drive.driveTo(-DRIVE_POWER, -24.5f);
+                    } else {
+                        drive.driveTo(-DRIVE_POWER, -40);
+                    }
+                    num++;
+                }
+                if (!drive.isBusy()) {
+                    state = state.next();
                 }
                 break;
 
             case TURN_TO_DUCK:
-                if (duckSide) {
-                    if (redAlliance) {
-                        drive.turnTo(DRIVE_POWER, 90);
-                    } else {
-                        drive.turnTo(DRIVE_POWER, -90);
+                if (num == 6) {
+                    if (duckSide) {
+                        if (redAlliance) {
+                            drive.turnTo(DRIVE_POWER, 90);
+                        } else {
+                            drive.turnTo(DRIVE_POWER, -90);
+                        }
                     }
+                    num++;
                 }
                 if (!drive.isBusy()) {
                     state = state.next();
@@ -270,8 +297,11 @@ public class NewNewAuto extends MultiOpModeManager {
                 break;
 
             case ALIGN_TO_DUCK:
-                if (duckSide) {
-                    drive.driveTo(DRIVE_POWER, 23.1f);
+                if (num == 7) {
+                    if (duckSide) {
+                        drive.driveTo(DRIVE_POWER, 23.1f);
+                    }
+                    num++;
                 }
                 if (!drive.isBusy()) {
                     state = state.next();
@@ -288,8 +318,11 @@ public class NewNewAuto extends MultiOpModeManager {
                 break;
 
             case PARK_FROM_DUCK:
-                if (duckSide) {
-                    drive.driveTo(-DRIVE_POWER, -23.1f);
+                if (num == 8) {
+                    if (duckSide) {
+                        drive.driveTo(-DRIVE_POWER, -23.1f);
+                    }
+                    num++;
                 }
                 if (!drive.isBusy()) {
                     state = state.next();
@@ -314,8 +347,8 @@ public class NewNewAuto extends MultiOpModeManager {
     enum AUTO_STATE implements OrderedEnum {
         BARCODE,
         OUT_FROM_WALL,
-        ALIGN_TO_CAPSTONE,
-        PICK_UP_CAPSTONE,
+        /* ALIGN_TO_CAPSTONE,
+        PICK_UP_CAPSTONE,*/
         TURN_TO_HUB,
         ALIGN_TO_HUB,
         DEPOSIT,

@@ -95,7 +95,6 @@ public class Distance extends OpMode {
 
     @Override
     public void start() {
-        startScan();
     }
 
     @Override
@@ -168,6 +167,10 @@ public class Distance extends OpMode {
                     leftinRange ? "+" : "-", leftLast, leftAccum,
                     rightinRange ? "+" : "-", rightLast, rightAccum);
             telemetry.addData("Distance Output", position);
+        }
+
+        if (gamepad2.a) {
+            startScan();
         }
     }
 
