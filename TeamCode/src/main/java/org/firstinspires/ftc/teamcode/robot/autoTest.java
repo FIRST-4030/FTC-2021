@@ -102,6 +102,7 @@ public class autoTest extends MultiOpModeManager {
         telemetry.addData("Alliance", redAlliance ? "Red" : "Blue");
         telemetry.addData("Direction", duckSide ? "Duck" : "Warehouse");
         super.init_loop();
+        distance.startScan();
     }
 
     @Override
@@ -133,18 +134,22 @@ public class autoTest extends MultiOpModeManager {
         switch (state) {
             // new routine
             case BARCODE:
-                if (num == 0) {
-                    distance.startScan();
-                    num++;
-                }
-                if (distance.position() == Distance.BARCODE.LEFT) {
-                    depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
-                } else if (distance.position() == Distance.BARCODE.CENTER) {
-                    depositor.setDoor(Depositor.DOOR_USED.MID_DOOR);
-                } else {
-                    depositor.setDoor(Depositor.DOOR_USED.HIGH_DOOR);
-                }
-                if (!drive.isBusy() && distance.state() != Distance.AUTO_STATE.DONE && depositor.doorUsed() != Depositor.DOOR_USED.NONE) {
+                if (!drive.isBusy() && distance.state() == Distance.AUTO_STATE.DONE) {
+                    if (distance.position() == Distance.BARCODE.LEFT) {
+                        depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
+                    } else if (distance.position() == Distance.BARCODE.CENTER) {
+                        depositor.setDoor(Depositor.DOOR_USED.MID_DOOR);
+                    } else if (distance.position() == Distance.BARCODE.RIGHT){
+                        depositor.setDoor(Depositor.DOOR_USED.HIGH_DOOR);
+                    } else {
+                        if (!duckSide) {
+                            if (redAlliance) {
+                                depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
+                            } else {
+                                depositor.setDoor(Depositor.DOOR_USED.HIGH_DOOR);
+                            }
+                        }
+                    }
                     state = state.next();
                 }
                 break;

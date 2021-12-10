@@ -182,7 +182,8 @@ public class Depositor extends OpMode {
                 mid.setPosition(MID_CLOSE);
                 high.setPosition(HIGH_OPEN);
                 tilt.setPosition(TILT_FORWARD);
-
+                required_Door = DOOR_USED.NONE;
+                state = AUTO_STATE.DONE;
                 break;
             case DOOR_PREP:      // Move the flipper to below the required door
                 switch (required_Door) {
@@ -218,7 +219,6 @@ public class Depositor extends OpMode {
                 }
                 belt.setPower(BELT_SPEED);
                 if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < BELT_POSITION_DEADBAND) {
-                    required_Door = DOOR_USED.NONE;
                     state = AUTO_STATE.TILTED_FORWARD;
                 }
                 break;

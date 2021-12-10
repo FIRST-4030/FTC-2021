@@ -152,7 +152,7 @@ public class NewNewAuto extends MultiOpModeManager {
                 } else {
                     depositor.setDoor(Depositor.DOOR_USED.HIGH_DOOR);
                 }
-                if (!drive.isBusy() && distance.position() != Distance.BARCODE.NONE) {
+                if (!drive.isBusy() && distance.state() == Distance.AUTO_STATE.DONE && distance.position() != Distance.BARCODE.NONE) {
                     state = state.next();
                 }
                 break;
