@@ -116,7 +116,7 @@ public class Drive extends OpMode {
     }
 
     public boolean isDone() {
-        return((driveLeft.getCurrentPosition() == driveLeft.getTargetPosition()) || (driveRight.getCurrentPosition() == driveRight.getTargetPosition()));
+        return((Math.abs(driveLeft.getCurrentPosition()) >= Math.abs(driveLeft.getTargetPosition())) || (Math.abs(driveRight.getCurrentPosition()) >= Math.abs(driveRight.getTargetPosition())));
     }
 
     public DcMotor.RunMode LdriveMode() {

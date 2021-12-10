@@ -53,8 +53,8 @@ public class NewTeleOp extends MultiOpModeManager {
     private Servo depMid = null;
     private Servo depHigh = null;
     private Servo depTilt = null;
-    //private DcMotor collector = null;
-    //private Servo collectorArm = null;
+    private DcMotor collector = null;
+    private Servo collectorArm = null;
     private Servo capstoneArm = null;
     //private Servo capstoneHook = null;
     private DistanceSensor distanceLeft = null;
@@ -74,7 +74,9 @@ public class NewTeleOp extends MultiOpModeManager {
     private static double HIGH_INIT = 0.55;
     private static double COLLECTOR_UP = 0.37;
     private static double COLLECTOR_DOWN = 0.90;
-    private static double COLLECTOR_POWER = 1;
+    private static double SPEED = 1;
+    public static int DISTANCE = 10;
+    public static double EJECT_TIME = 5;
     private static double timerRatio = 0.0;
     private static double duckPowerMin = 0.63;  // min duck spinner speed (0 - 1.0)
     private static double duckPowerMax = 0.88;  // max duck spinner speed (0 - 1.0)
@@ -102,7 +104,7 @@ public class NewTeleOp extends MultiOpModeManager {
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime duckTimer = new ElapsedTime();
     private ElapsedTime capTimer = new ElapsedTime();
-    private Collector collector;
+    private ElapsedTime collectorTimer = new ElapsedTime();
 
     @Override
     public void init() {
@@ -145,11 +147,14 @@ public class NewTeleOp extends MultiOpModeManager {
 
         // Collector
         try {
-            super.register(new Collector());
+            /* super.register(new Collector());
             collector = new Collector();
             super.register(collector);
 
-            super.init();
+            super.init(); */
+            collector = hardwareMap.get(DcMotor.class, "Collector");
+            collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
+            distanceCollector = hardwareMap.get(DistanceSensor.class, "DC");
         } catch (Exception e) {
             telemetry.log().add("Could not find collector");
             error = true;
@@ -263,8 +268,27 @@ public class NewTeleOp extends MultiOpModeManager {
         }
 
         // Collector
+        // Distance
+        double range = distanceCollector.getDistance(DistanceUnit.MM);
+        boolean inRange = (range <= DISTANCE);
+
         double spin = -gamepad2.left_stick_y;
-        super.loop();
+        if ((inRange || gamepad2.left_bumper) && (Math.round(collectorArm.getPosition() * 100.0)/100.0 == COLLECTOR_DOWN)) {
+            collectorTimer.reset();
+            if (collectorTimer.seconds() > 1.5 && collectorTimer.seconds() < EJECT_TIME) {
+                collectorArm.setPosition(COLLECTOR_UP);
+                collector.setPower(-1);
+            } else if (collectorTimer.seconds() < 1.5 && collectorTimer.seconds() < EJECT_TIME){
+                collectorArm.setPosition(COLLECTOR_DOWN);
+                collector.setPower(1);
+            } else {
+                collectorArm.setPosition(COLLECTOR_UP);
+                collector.setPower(0);
+            }
+        } else if (gamepad2.left_bumper && (Math.round(collectorArm.getPosition() * 100.0)/100.0 == COLLECTOR_UP)) {
+            collectorArm.setPosition(COLLECTOR_DOWN);
+            collector.setPower(1);
+        }
 
         // Capstone
         if (gamepad2.dpad_down) {

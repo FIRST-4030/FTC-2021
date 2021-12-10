@@ -155,6 +155,7 @@ public class Distance extends OpMode {
                     position = BARCODE.NONE;
                 }
                 age.reset();
+                state = state.next();
                 break;
             case DONE:
                 break;

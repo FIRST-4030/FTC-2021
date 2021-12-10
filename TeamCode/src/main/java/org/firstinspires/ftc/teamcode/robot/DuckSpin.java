@@ -96,6 +96,7 @@ public class DuckSpin extends OpMode {
     }
 
     public void teleop(boolean red) {
+        loop();
         speedMin = teleopMin;
         speedMax = teleopMax;
         rampTime = teleopRamp;
@@ -103,6 +104,7 @@ public class DuckSpin extends OpMode {
     }
 
     public void auto(boolean red) {
+        loop();
         speedMin = autoMin;
         speedMax = autoMax;
         rampTime = autoRamp;

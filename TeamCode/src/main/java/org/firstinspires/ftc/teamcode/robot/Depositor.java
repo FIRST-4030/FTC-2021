@@ -57,7 +57,7 @@ public class Depositor extends OpMode {
 
     // Config
     public static boolean DEBUG = false;
-    public static double BELT_SPEED = 0.4;
+    public static double BELT_SPEED = 0.6;
     public static double TILT_BACK = 0.47;
     public static double TILT_FORWARD = 0.18;
     public static double LOW_OPEN = 0.98;
@@ -72,6 +72,7 @@ public class Depositor extends OpMode {
     public static int HIGH_PREP_POS = 850;
     public static int BELT_POSITION_DEADBAND = 10;
     public boolean sensorTriggered = false;
+    public boolean prepPosSet = false;
 
     // Members
     private boolean enabled = false;
@@ -98,6 +99,7 @@ public class Depositor extends OpMode {
             sensor = hardwareMap.get(TouchSensor.class, "DS");
 
             sensorTriggered = false;
+            prepPosSet = false;
 
             in.register("LOW", GAMEPAD.driver2, PAD_KEY.x);
             in.register("MID", GAMEPAD.driver2, PAD_KEY.y);
@@ -174,6 +176,7 @@ public class Depositor extends OpMode {
         if (state != oldState) {
             oldState = state;
             sensorTriggered = false;
+            prepPosSet = false;
         }
         switch (state) {
             // Tilt forward, move flipper to start position
@@ -182,43 +185,51 @@ public class Depositor extends OpMode {
                 mid.setPosition(MID_CLOSE);
                 high.setPosition(HIGH_OPEN);
                 tilt.setPosition(TILT_FORWARD);
+                belt.setPower(0);
                 required_Door = DOOR_USED.NONE;
                 state = AUTO_STATE.DONE;
                 break;
             case DOOR_PREP:      // Move the flipper to below the required door
-                switch (required_Door) {
-                    case LOW_DOOR:
-                        belt.setTargetPosition((belt.getCurrentPosition() / 915 * 915) + LOW_PREP_POS);
-                        break;
-                    case MID_DOOR:
-                        belt.setTargetPosition((belt.getCurrentPosition() / 915 * 915) + MID_PREP_POS);
-                        break;
-                    case HIGH_DOOR:
-                        belt.setTargetPosition((belt.getCurrentPosition() / 915 * 915) + HIGH_PREP_POS);
-                        break;
+                // prepPosSet acts as a flag to make sure that the position command is set only once
+                if (!prepPosSet) {
+                    switch (required_Door) {
+                        case LOW_DOOR:
+                            belt.setTargetPosition((belt.getCurrentPosition() / 927 * 927) + LOW_PREP_POS);
+                            break;
+                        case MID_DOOR:
+                            belt.setTargetPosition((belt.getCurrentPosition() / 927 * 927) + MID_PREP_POS);
+                            break;
+                        case HIGH_DOOR:
+                            belt.setTargetPosition((belt.getCurrentPosition() / 927 * 927) + HIGH_PREP_POS);
+                            break;
+                    }
+                    belt.setPower(BELT_SPEED);
+                    prepPosSet = true;
                 }
-                belt.setPower(BELT_SPEED);
-                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < BELT_POSITION_DEADBAND) {
+                if (belt.getCurrentPosition() >= belt.getTargetPosition()) {
                     state = AUTO_STATE.DONE;
                 }
                 break;
             case DOOR_OPEN:      // Open required door and run conveyor until the magnetic switch is active
-                switch (required_Door) {
-                    case LOW_DOOR:
-                        low.setPosition((LOW_OPEN));
-                        belt.setTargetPosition((belt.getCurrentPosition() / 915 * 915) + INIT_PREP_POS);
-                        break;
-                    case MID_DOOR:
-                        mid.setPosition(MID_OPEN);
-                        belt.setTargetPosition((belt.getCurrentPosition() / 915 * 915) + INIT_PREP_POS) ;
-                        break;
-                    case HIGH_DOOR:
-                        high.setPosition(HIGH_OPEN);
-                        belt.setTargetPosition((belt.getCurrentPosition() / 915 * 915) + INIT_PREP_POS);
-                        break;
+                if (!prepPosSet) {
+                    switch (required_Door) {
+                        case LOW_DOOR:
+                            low.setPosition((LOW_OPEN));
+                            belt.setTargetPosition((((belt.getCurrentPosition() / 927) + 1) * 927) + INIT_PREP_POS);
+                            break;
+                        case MID_DOOR:
+                            mid.setPosition(MID_OPEN);
+                            belt.setTargetPosition((((belt.getCurrentPosition() / 927) + 1) * 927) + INIT_PREP_POS) ;
+                            break;
+                        case HIGH_DOOR:
+                            high.setPosition(HIGH_OPEN);
+                            belt.setTargetPosition((((belt.getCurrentPosition() / 927) + 1) * 927) + INIT_PREP_POS);
+                            break;
+                    }
+                    belt.setPower(BELT_SPEED);
+                    prepPosSet = true;
                 }
-                belt.setPower(BELT_SPEED);
-                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < BELT_POSITION_DEADBAND) {
+                if (belt.getCurrentPosition() >= belt.getTargetPosition()) {
                     state = AUTO_STATE.TILTED_FORWARD;
                 }
                 break;
@@ -315,19 +326,22 @@ public class Depositor extends OpMode {
 
     public void deposit() {
         state = AUTO_STATE.DOOR_OPEN;
+        loop();
     }
 
     public void prep() {
         state = AUTO_STATE.DOOR_PREP;
+        loop();
     }
 
     public boolean isDone() {
-        return (state == AUTO_STATE.DONE);
+        return (state == AUTO_STATE.DONE || state == AUTO_STATE.TILTED_FORWARD);
     }
 
     @Override
     public void stop() {
         belt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        belt.setTargetPosition(belt.getCurrentPosition());
         state = AUTO_STATE.DONE;
     }
 

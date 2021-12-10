@@ -102,7 +102,6 @@ public class autoTest extends MultiOpModeManager {
         telemetry.addData("Alliance", redAlliance ? "Red" : "Blue");
         telemetry.addData("Direction", duckSide ? "Duck" : "Warehouse");
         super.init_loop();
-        distance.startScan();
     }
 
     @Override
@@ -110,16 +109,17 @@ public class autoTest extends MultiOpModeManager {
         super.start();
         num = 0;
         driveStop();
+        distance.startScan();
         state = AUTO_STATE.BARCODE;
     }
 
     @Override
     public void loop() {
         // Stop when the autoSteps are complete
-        if (state == AUTO_STATE.DONE) {
+        /*if (state == AUTO_STATE.DONE) {
             requestOpModeStop();
             return;
-        }
+        }*/
 
         distance.loop();
         depositor.loop();
@@ -134,7 +134,7 @@ public class autoTest extends MultiOpModeManager {
         switch (state) {
             // new routine
             case BARCODE:
-                if (!drive.isBusy() && distance.state() == Distance.AUTO_STATE.DONE) {
+                if (distance.state() == Distance.AUTO_STATE.DONE) {
                     if (distance.position() == Distance.BARCODE.LEFT) {
                         depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
                     } else if (distance.position() == Distance.BARCODE.CENTER) {
@@ -154,9 +154,16 @@ public class autoTest extends MultiOpModeManager {
                 }
                 break;
 
+            case PREP:
+                depositor.prep();
+                if (depositor.isDone()) {
+                    state = state.next();
+                }
+                break;
+
             case DEPOSIT:
                 depositor.deposit();
-                if (!drive.isBusy() && depositor.isDone()) {
+                if (depositor.isDone()) {
                     state = state.next();
                 }
                 break;
@@ -178,6 +185,7 @@ public class autoTest extends MultiOpModeManager {
 
     enum AUTO_STATE implements OrderedEnum {
         BARCODE,
+        PREP,
         DEPOSIT,
         DONE;
 
