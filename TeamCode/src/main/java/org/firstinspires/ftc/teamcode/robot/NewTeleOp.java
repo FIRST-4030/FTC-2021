@@ -72,10 +72,10 @@ public class NewTeleOp extends MultiOpModeManager {
     private static double MID_CLOSE = 0.47;
     private static double HIGH_OPEN = 0.13;
     private static double HIGH_INIT = 0.55;
-    private static double COLLECTOR_UP = 0.37;
+    private static double COLLECTOR_UP = 0.65;
     private static double COLLECTOR_DOWN = 0.90;
     private static double SPEED = 1;
-    public static int DISTANCE = 10;
+    public static int DISTANCE = 30;
     public static double EJECT_TIME = 5;
     private static double timerRatio = 0.0;
     private static double duckPowerMin = 0.63;  // min duck spinner speed (0 - 1.0)
@@ -205,6 +205,7 @@ public class NewTeleOp extends MultiOpModeManager {
         depLow.setPosition(LOW_CLOSE);
         depMid.setPosition(MID_CLOSE);
         depHigh.setPosition(HIGH_OPEN);
+        collectorArm.setPosition(COLLECTOR_UP);
         capstoneArm.setPosition(CAP_MID);
         super.start();
     }
@@ -271,23 +272,22 @@ public class NewTeleOp extends MultiOpModeManager {
         // Distance
         double range = distanceCollector.getDistance(DistanceUnit.MM);
         boolean inRange = (range <= DISTANCE);
+        telemetry.addData("Range", range);
+        telemetry.addData("inRange?", inRange);
 
         double spin = -gamepad2.left_stick_y;
-        if ((inRange || gamepad2.left_bumper) && (Math.round(collectorArm.getPosition() * 100.0)/100.0 == COLLECTOR_DOWN)) {
+        if ((inRange || gamepad2.left_bumper) && collectorArm.getPosition() == COLLECTOR_DOWN) {
             collectorTimer.reset();
-            if (collectorTimer.seconds() > 1.5 && collectorTimer.seconds() < EJECT_TIME) {
-                collectorArm.setPosition(COLLECTOR_UP);
-                collector.setPower(-1);
-            } else if (collectorTimer.seconds() < 1.5 && collectorTimer.seconds() < EJECT_TIME){
-                collectorArm.setPosition(COLLECTOR_DOWN);
-                collector.setPower(1);
-            } else {
-                collectorArm.setPosition(COLLECTOR_UP);
-                collector.setPower(0);
-            }
-        } else if (gamepad2.left_bumper && (Math.round(collectorArm.getPosition() * 100.0)/100.0 == COLLECTOR_UP)) {
+        }
+        if (gamepad2.left_bumper || collectorTimer.seconds() < 1.5) {
             collectorArm.setPosition(COLLECTOR_DOWN);
             collector.setPower(1);
+        } else if (collectorTimer.seconds() < EJECT_TIME) {
+            collectorArm.setPosition(COLLECTOR_UP);
+            collector.setPower(-1);
+        } else {
+            collectorArm.setPosition(COLLECTOR_UP);
+            collector.setPower(0);
         }
 
         // Capstone
@@ -345,7 +345,7 @@ public class NewTeleOp extends MultiOpModeManager {
             servoPos = Math.max(0.0f, servoPos);
         }
         // Set position of desired servo
-        //depTilt.setPosition(servoPos);
+        //collectorArm.setPosition(servoPos);
     }
 
     @Override

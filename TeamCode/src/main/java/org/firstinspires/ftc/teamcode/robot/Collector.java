@@ -80,8 +80,10 @@ public class Collector extends OpMode {
 
             distance = hardwareMap.get(DistanceSensor.class, "DC");
 
+            Globals.opmode = this;
             in = Globals.input(this);
             in.register("COLLECT", GAMEPAD.driver2, PAD_KEY.left_bumper);
+            in.register("COLLECT1", GAMEPAD.driver1, PAD_KEY.left_bumper);
 
             enabled = true;
         } catch (Exception e) {
