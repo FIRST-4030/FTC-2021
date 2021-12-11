@@ -164,7 +164,7 @@ public class Distance extends OpMode {
         // Debug when requested
         if (DEBUG) {
             telemetry.addData("Distance State", state);
-            telemetry.addData("Distance Input", "L %s/%.0f/$.0f, R %s/%.0f/%.0f",
+            telemetry.addData("Distance Input", "L %s/%.0f/%.0f, R %s/%.0f/%.0f",
                     leftinRange ? "+" : "-", leftLast, leftAccum,
                     rightinRange ? "+" : "-", rightLast, rightAccum);
             telemetry.addData("Distance Output", position);

@@ -16,7 +16,7 @@ public class Drive extends OpMode {
     public static boolean DEBUG = false;
     private static final int INPUT_SCALING_EXPONENT = 3;
     public static double TICKS_PER_INCH = 43.24;
-    public static double TURN_RATIO = 6.375;
+    public static double TURN_RATIO = 6.3;
     public static double ACCEL_CONSTANT = 0.4;
 
     // Hardware
@@ -116,7 +116,8 @@ public class Drive extends OpMode {
     }
 
     public boolean isDone() {
-        return((Math.abs(driveLeft.getCurrentPosition()) >= Math.abs(driveLeft.getTargetPosition())) || (Math.abs(driveRight.getCurrentPosition()) >= Math.abs(driveRight.getTargetPosition())));
+        return((Math.abs(driveLeft.getCurrentPosition()) >= Math.abs(driveLeft.getTargetPosition())) ||
+                (Math.abs(driveRight.getCurrentPosition()) >= Math.abs(driveRight.getTargetPosition())));
     }
 
     public DcMotor.RunMode LdriveMode() {
@@ -159,7 +160,6 @@ public class Drive extends OpMode {
         // Don't allow new moves if we're still busy
         if (isBusy()) {
             telemetry.log().add(getClass().getSimpleName() + "::turnTo(): Motors in use");
-            return;
         }
 
         // Fake turns using a distance translation

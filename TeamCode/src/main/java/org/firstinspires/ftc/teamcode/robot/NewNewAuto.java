@@ -29,7 +29,10 @@
 
 package org.firstinspires.ftc.teamcode.robot;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -39,6 +42,7 @@ import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
+import org.firstinspires.ftc.teamcode.roadrunner.util.DashboardUtil;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
@@ -78,6 +82,11 @@ public class NewNewAuto extends MultiOpModeManager {
     private Trajectory move2warehouse;
     private Trajectory move3duck;
     private Trajectory move3warehouse;
+    private Trajectory parkduck;
+    private Trajectory parkwarehouse;
+
+    private TelemetryPacket packet = new TelemetryPacket();
+    private Canvas fieldOverlay = packet.fieldOverlay();
 
     @Override
     public void init() {
@@ -104,25 +113,6 @@ public class NewNewAuto extends MultiOpModeManager {
             capstone = new Capstone();
             super.register(capstone);
             collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
-            move1duck = tankdrive.trajectoryBuilder(startPose)
-                    .forward(15)
-                    .build();
-            move1warehouse = tankdrive.trajectoryBuilder(startPose)
-                    .forward(24.5)
-                    .build();
-            move2duck = tankdrive.trajectoryBuilder(move1duck.end())
-                    .forward(7.6)
-                    .build();
-            move2warehouse = tankdrive.trajectoryBuilder(move1warehouse.end())
-                    .forward(11)
-                    .build();
-            move3duck = tankdrive.trajectoryBuilder(move2duck.end())
-                    .back(7.6)
-                    .build();
-            move3warehouse = tankdrive.trajectoryBuilder(move2warehouse.end())
-                    .back(11)
-                    .build();
-
 
             in = Globals.input(this);
 
@@ -170,6 +160,30 @@ public class NewNewAuto extends MultiOpModeManager {
             }
         }
         tankdrive.setPoseEstimate(startPose);
+        move1duck = tankdrive.trajectoryBuilder(startPose)
+                .forward(15)
+                .build();
+        move1warehouse = tankdrive.trajectoryBuilder(startPose)
+                .forward(24.5)
+                .build();
+        move2duck = tankdrive.trajectoryBuilder(move1duck.end())
+                .forward(7.6)
+                .build();
+        move2warehouse = tankdrive.trajectoryBuilder(move1warehouse.end())
+                .forward(11)
+                .build();
+        move3duck = tankdrive.trajectoryBuilder(move2duck.end())
+                .back(7.6)
+                .build();
+        move3warehouse = tankdrive.trajectoryBuilder(move2warehouse.end())
+                .back(11)
+                .build();
+        parkduck = tankdrive.trajectoryBuilder(move3duck.end())
+                .back(24.8)
+                .build();
+        parkwarehouse = tankdrive.trajectoryBuilder(move3warehouse.end())
+                .back(40)
+                .build();
         num = 0;
         driveStop();
         distance.startScan();
@@ -186,6 +200,7 @@ public class NewNewAuto extends MultiOpModeManager {
 
         depositor.loop();
         distance.loop();
+        tankdrive.update();
 
         in.loop();
 
@@ -221,17 +236,20 @@ public class NewNewAuto extends MultiOpModeManager {
                 if (num == 0) {
                     if (!duckSide) {
                         //drive.driveTo(DRIVE_POWER, 15f);
-                        tankdrive.followTrajectory(move1duck);
+                        tankdrive.followTrajectoryAsync(move1duck);
                     } else {
                         //drive.driveTo(DRIVE_POWER, 24.5f);
-                        tankdrive.followTrajectory(move1warehouse);
+                        tankdrive.followTrajectoryAsync(move1warehouse);
                     }
                     collectorArm.setPosition(COLLECTOR_DOWN);
                     depositor.prep();
                     num++;
                 }
                 telemetry.addData("Times driveTo ran: ", num);
-                if (!drive.isBusy() && depositor.isDone() && drive.isDone()) {
+                DashboardUtil.drawSampledPath(fieldOverlay, move1warehouse.getPath());
+                DashboardUtil.drawRobot(fieldOverlay, tankdrive.getPoseEstimate());
+                FtcDashboard.getInstance().sendTelemetryPacket(packet);
+                if (gamepad1.a && !drive.isBusy() && depositor.isDone() && drive.isDone() && !tankdrive.isBusy()) {
                     state = state.next();
                 }
                 break;
@@ -256,23 +274,23 @@ public class NewNewAuto extends MultiOpModeManager {
                     if (duckSide) {
                         if (redAlliance) {
                             //drive.turnTo(DRIVE_POWER, 64);
-                            tankdrive.turn(64);
+                            tankdrive.turnAsync(64);
                         } else {
                             //drive.turnTo(DRIVE_POWER, -64);
-                            tankdrive.turn(-64);
+                            tankdrive.turnAsync(-64);
                         }
                     } else {
                         if (redAlliance) {
                             //drive.turnTo(DRIVE_POWER + .1f, -50);
-                            tankdrive.turn(-50);
+                            tankdrive.turnAsync(-50);
                         } else {
                             //drive.turnTo(DRIVE_POWER + .1f, 50);
-                            tankdrive.turn(50);
+                            tankdrive.turnAsync(50);
                         }
                     }
                     num++;
                 }
-                if (!drive.isBusy() && drive.isDone()) {
+                if (!drive.isBusy() && drive.isDone() && !tankdrive.isBusy()) {
                     state = state.next();
                 }
                 break;
@@ -281,21 +299,21 @@ public class NewNewAuto extends MultiOpModeManager {
                 if (num == 2) {
                     if (duckSide) {
                         //drive.driveTo(DRIVE_POWER + .2f, 7.6f);
-                        tankdrive.followTrajectory(move2duck);
+                        tankdrive.followTrajectoryAsync(move2duck);
                     } else {
                         //drive.driveTo(DRIVE_POWER + .2f, 11f);
-                        tankdrive.followTrajectory(move2warehouse);
+                        tankdrive.followTrajectoryAsync(move2warehouse);
                     }
                     num++;
                 }
-                if (!drive.isBusy() && drive.isDone()) {
+                if (!drive.isBusy() && drive.isDone() && !tankdrive.isBusy()) {
                     state = state.next();
                 }
                 break;
 
             case DEPOSIT:
                 depositor.deposit();
-                if (!drive.isBusy() && depositor.isDone()) {
+                if (!drive.isBusy() && depositor.isDone() && !tankdrive.isBusy()) {
                     state = state.next();
                 }
                 break;
@@ -304,15 +322,15 @@ public class NewNewAuto extends MultiOpModeManager {
                 if (num == 3) {
                     if (duckSide) {
                         //drive.driveTo(-DRIVE_POWER - .2f, -7.6f);
-                        tankdrive.followTrajectory(move3duck);
+                        tankdrive.followTrajectoryAsync(move3duck);
                     } else {
                         //drive.driveTo(-DRIVE_POWER - .2f, -11f);
-                        tankdrive.followTrajectory(move3warehouse);
+                        tankdrive.followTrajectoryAsync(move3warehouse);
                     }
                     collectorArm.setPosition(COLLECTOR_UP);
                     num++;
                 }
-                if (!drive.isBusy() && drive.isDone()) {
+                if (!drive.isBusy() && drive.isDone() && !tankdrive.isBusy()) {
                     state = state.next();
                 }
                 break;
@@ -322,23 +340,23 @@ public class NewNewAuto extends MultiOpModeManager {
                     if (duckSide) {
                         if (redAlliance) {
                             //drive.turnTo(DRIVE_POWER + .1f, 26);
-                            tankdrive.turn(26);
+                            tankdrive.turnAsync(26);
                         } else {
                             //drive.turnTo(DRIVE_POWER + .1f, -26);
-                            tankdrive.turn(-26);
+                            tankdrive.turnAsync(-26);
                         }
                     } else {
                         if (redAlliance) {
                             //drive.turnTo(DRIVE_POWER + .1f, -40);
-                            tankdrive.turn(-40);
+                            tankdrive.turnAsync(-40);
                         } else {
                             //drive.turnTo(DRIVE_POWER + .1f, 40);
-                            tankdrive.turn(40);
+                            tankdrive.turnAsync(40);
                         }
                     }
                     num++;
                 }
-                if (!drive.isBusy() && drive.isDone()) {
+                if (!drive.isBusy() && drive.isDone() && !tankdrive.isBusy()) {
                     state = state.next();
                 }
                 break;
@@ -346,13 +364,15 @@ public class NewNewAuto extends MultiOpModeManager {
             case PARK:
                 if (num == 5) {
                     if (duckSide) {
-                        drive.driveTo(-DRIVE_POWER, -24.8f);
+                        //drive.driveTo(-DRIVE_POWER, -24.8f);
+                        tankdrive.followTrajectoryAsync(parkduck);
                     } else {
-                        drive.driveTo(-DRIVE_POWER, -40);
+                        //drive.driveTo(-DRIVE_POWER, -40);
+                        tankdrive.followTrajectoryAsync(parkwarehouse);
                     }
                     num++;
                 }
-                if (!drive.isBusy() && drive.isDone()) {
+                if (!drive.isBusy() && drive.isDone() && !tankdrive.isBusy()) {
                     state = state.next();
                 }
                 break;

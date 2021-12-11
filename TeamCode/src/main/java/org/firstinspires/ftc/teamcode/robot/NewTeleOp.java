@@ -76,7 +76,7 @@ public class NewTeleOp extends MultiOpModeManager {
     private static double COLLECTOR_DOWN = 0.90;
     private static double SPEED = 1;
     public static int DISTANCE = 30;
-    public static double EJECT_TIME = 5;
+    public static double EJECT_TIME = 3;
     private static double timerRatio = 0.0;
     private static double duckPowerMin = 0.63;  // min duck spinner speed (0 - 1.0)
     private static double duckPowerMax = 0.88;  // max duck spinner speed (0 - 1.0)
@@ -104,7 +104,7 @@ public class NewTeleOp extends MultiOpModeManager {
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime duckTimer = new ElapsedTime();
     private ElapsedTime capTimer = new ElapsedTime();
-    private ElapsedTime collectorTimer = new ElapsedTime();
+    private ElapsedTime collectorTimer = new ElapsedTime(0);
 
     @Override
     public void init() {
@@ -279,7 +279,7 @@ public class NewTeleOp extends MultiOpModeManager {
         if ((inRange || gamepad2.left_bumper) && collectorArm.getPosition() == COLLECTOR_DOWN) {
             collectorTimer.reset();
         }
-        if (gamepad2.left_bumper || collectorTimer.seconds() < 1.5) {
+        if (gamepad2.left_bumper || collectorTimer.seconds() < 0.24) {
             collectorArm.setPosition(COLLECTOR_DOWN);
             collector.setPower(1);
         } else if (collectorTimer.seconds() < EJECT_TIME) {
