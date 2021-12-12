@@ -75,7 +75,7 @@ public class NewAuto extends MultiOpModeManager {
     private boolean duckSide = false;
     private InputHandler in;
     private boolean waitDepositor = false;
-    private boolean waitDrive = false;
+    private boolean  waitDrive = false;
 
     @Override
     public void init() {
@@ -237,17 +237,19 @@ public class NewAuto extends MultiOpModeManager {
                 } else {
                     drive.driveTo(DRIVE_POWER, 14f);
                 }
+                waitDepositor = true;
                 waitDrive = true;
                 break;
 
             case DEPOSIT:
                 depositor.deposit();
                 waitDepositor = true;
+                waitDrive = true;
                 break;
 
             case BACK_UP:
                 if (duckSide) {
-                    drive.driveTo(-DRIVE_POWER, -7.2f);
+                    drive.driveTo(-DRIVE_POWER, -7.5f);
                 } else {
                     drive.driveTo(-DRIVE_POWER, -14f);
                 }

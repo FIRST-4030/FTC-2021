@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.robot;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 
+@Disabled
 @TeleOp(name = "MOMM_Teleop", group = "MOMM")
 public class MOMM_Teleop extends MultiOpModeManager {
     private Drive drive;

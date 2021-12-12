@@ -80,7 +80,7 @@ public class NewTeleOp extends MultiOpModeManager {
     private static double timerRatio = 0.0;
     private static double duckPowerMin = 0.63;  // min duck spinner speed (0 - 1.0)
     private static double duckPowerMax = 0.88;  // max duck spinner speed (0 - 1.0)
-    private static double duckRampTime = 1.25;  // duck spinner ramp time (seconds, >0)
+    private static double duckRampTime = 1.4;  // duck spinner ramp time (seconds, >0)
     private static double CAP_IN = 0;
     //private static double CAP_UP = 0.35;
     private static double CAP_MID = 0.5;

@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.robot.Globals;
 
-//@Disabled
+@Disabled
 @TeleOp(name = "InputHandlerTest", group = "Test")
 public class InputHandlerTest extends OpMode {
     // Class under test

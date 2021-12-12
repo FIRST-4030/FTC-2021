@@ -139,7 +139,6 @@ public class Drive extends OpMode {
         // Don't allow new moves if we're still busy
         if (isBusy()) {
             telemetry.log().add(getClass().getSimpleName() + "::driveTo(): Motors in use");
-            return;
         }
 
         // Set a target, translated from inches to encoder ticks

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.robot.auto;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -12,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TfodCurrentGame;
 
 import java.util.List;
 
+@Disabled
 @TeleOp(name = "TensorFlow3 (Blocks to Java)")
 public class TensorFlow3 extends LinearOpMode {
 
