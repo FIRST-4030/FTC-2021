@@ -60,6 +60,7 @@ public class NewTeleOp extends MultiOpModeManager {
     private DistanceSensor distanceLeft = null;
     private DistanceSensor distanceRight = null;
     private DistanceSensor distanceCollector = null;
+    private Depositor depositor;
 
     // Constants used for hardware
     private static double DUCK_POWER = 0.0;
@@ -133,12 +134,16 @@ public class NewTeleOp extends MultiOpModeManager {
 
         // Depositor
         try {
-            depBelt = hardwareMap.get(DcMotor.class, "Depbelt");
-            //depBelt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            /* depBelt = hardwareMap.get(DcMotor.class, "Depbelt");
+            depBelt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             depLow = hardwareMap.get(Servo.class, "Deplow");
             depMid = hardwareMap.get(Servo.class, "Depmid");
             depHigh = hardwareMap.get(Servo.class, "Dephigh");
-            depTilt = hardwareMap.get(Servo.class, "Deptilt");
+            depTilt = hardwareMap.get(Servo.class, "Deptilt");*/
+            super.register(new Depositor());
+            depositor = new Depositor();
+            super.register(depositor);
+            depositor.init();
         } catch (Exception e) {
             telemetry.log().add("Could not find depositor");
             error = true;
@@ -189,7 +194,6 @@ public class NewTeleOp extends MultiOpModeManager {
 
     @Override
     public void init_loop() {
-        super.init_loop();
     }
 
     @Override
@@ -201,10 +205,6 @@ public class NewTeleOp extends MultiOpModeManager {
         leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        depTilt.setPosition(DEP_DOWN);
-        depLow.setPosition(LOW_CLOSE);
-        depMid.setPosition(MID_CLOSE);
-        depHigh.setPosition(HIGH_OPEN);
         collectorArm.setPosition(COLLECTOR_UP);
         capstoneArm.setPosition(CAP_MID);
         super.start();
@@ -241,7 +241,8 @@ public class NewTeleOp extends MultiOpModeManager {
         duckSpinner.setPower(DUCK_POWER);
 
         // Depositor
-        if (gamepad2.a || gamepad2.b || gamepad2.x) {
+        depositor.loop();
+        /* if (gamepad2.a || gamepad2.b || gamepad2.x) {
             depBelt.setPower(DEP_BELT_POWER);
         } else if (gamepad2.y) {
             depBelt.setPower(-DEP_BELT_POWER);
@@ -266,7 +267,7 @@ public class NewTeleOp extends MultiOpModeManager {
             depTilt.setPosition(DEP_UP);
         } else {
             depTilt.setPosition(DEP_DOWN);
-        }
+        } */
 
         // Collector
         // Distance
@@ -327,11 +328,11 @@ public class NewTeleOp extends MultiOpModeManager {
                 leftDrive.getPower(), leftDrive.getCurrentPosition(),
                 rightDrive.getPower(), rightDrive.getCurrentPosition());
         /* telemetry.addData("Duck/Collector", "D %.2f, C (%.2f)",
-                duckSpinner.getPower(), collector.getPower()); */
+                duckSpinner.getPower(), collector.getPower());
         telemetry.addData("Depositor", "B %.2f, L %.2f, M %.2f",
                 depBelt.getPower(), depLow.getPosition(), depMid.getPosition());
         telemetry.addData("Spin", spin);
-        telemetry.addData("Dep Belt Pos: ", depBelt.getCurrentPosition());
+        telemetry.addData("Dep Belt Pos: ", depBelt.getCurrentPosition()); */
 
         // Shows number of servoPos
         telemetry.addData("Pos:", servoPos);
@@ -350,6 +351,5 @@ public class NewTeleOp extends MultiOpModeManager {
 
     @Override
     public void stop() {
-        super.stop();
     }
 }
