@@ -218,8 +218,8 @@ public class NewTeleOp extends MultiOpModeManager {
         } else {
             fastFactor = ACCEL_CONSTANT;
         }
-        LEFT_DRIVE_POW = Math.pow(-gamepad1.left_stick_y, 3);
-        RIGHT_DRIVE_POW = Math.pow(-gamepad1.right_stick_y, 3);
+        LEFT_DRIVE_POW = Math.pow(-gamepad1.left_stick_y, 1);
+        RIGHT_DRIVE_POW = Math.pow(-gamepad1.right_stick_y, 1);
         leftDrive.setPower(LEFT_DRIVE_POW * fastFactor);
         rightDrive.setPower(RIGHT_DRIVE_POW * fastFactor);
 

@@ -45,6 +45,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class ServoTester extends OpMode{
     // Hardware
     private Servo collectorArm = null;
+    private Servo mid = null;
     // Constants used for hardware
     private static double COLLECTOR_UP = 0.37;
     private static double COLLECTOR_DOWN = 0.9;
@@ -64,8 +65,9 @@ public class ServoTester extends OpMode{
         // Collector
         try {
             collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
+            mid = hardwareMap.get(Servo.class, "Depmid");
         } catch (Exception e) {
-            telemetry.log().add("Could not find collector");
+            telemetry.log().add("Could not find servo");
             error = true;
         }
 
@@ -83,7 +85,6 @@ public class ServoTester extends OpMode{
 
     @Override
     public void start() {
-        runtime.reset();
     }
 
     @Override
@@ -100,7 +101,7 @@ public class ServoTester extends OpMode{
             servoPos = Math.max(0.0f, servoPos);
         }
         // Set position of desired servo
-        collectorArm.setPosition(servoPos);
+        mid.setPosition(servoPos);
     }
 
     @Override
