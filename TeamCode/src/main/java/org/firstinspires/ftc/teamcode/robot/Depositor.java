@@ -86,9 +86,7 @@ public class Depositor extends OpMode {
 
     @Override
     public void init() {
-        in = Globals.input(this);
 
-        // Depositor
         try {
             belt = hardwareMap.get(DcMotor.class, "Depbelt");
             belt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -102,6 +100,8 @@ public class Depositor extends OpMode {
             tilt = hardwareMap.get(Servo.class, "Deptilt");
             sensor = hardwareMap.get(TouchSensor.class, "DS");
 
+            Globals.opmode = this;
+            in = Globals.input(this);
             sensorTriggered = false;
             prepPosSet = false;
             num = 0;
@@ -170,12 +170,10 @@ public class Depositor extends OpMode {
         // this senses the magnetic prox switch, and reinitializes the belt encoder
         // and sets the flag that the switch has been hit
         // Note that the flag isn't reset until the state changes
-        /*if (sensor.isPressed()) {
-            sensorTriggered = true;
-            belt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            belt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            state = AUTO_STATE.TILTED_FORWARD;
-        }*/
+
+        if (Math.abs(belt.getCurrentPosition() % 927 - belt.getTargetPosition()) <= BELT_POSITION_DEADBAND) {
+
+        }
 
         // if the state changed, set sensorTriggered to false
         if (state != oldState) {
