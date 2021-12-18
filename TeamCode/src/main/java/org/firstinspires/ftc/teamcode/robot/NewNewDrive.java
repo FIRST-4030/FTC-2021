@@ -183,7 +183,7 @@ public class NewNewDrive extends OpMode {
 
         double speed = 0;
         double rampTime;
-        double v = 20 * (speedMax * 3 + speedMin) / 4; // inches per second
+        double v = 40 * (speedMax * 4 + speedMin * 2) / 6; // inches per second
         double arcLength = Math.PI * (angle / 180.0) * r;
         double arcLengthL;
         double arcLengthR;
@@ -199,6 +199,7 @@ public class NewNewDrive extends OpMode {
         double time = Math.abs(arcLength / v);
         double leftVel = v * arcLengthL / arcLength;
         double rightVel = v * arcLengthR / arcLength;
+        double maxRatio = 1;
 
         if (!started) {
             rampTimer.reset();
@@ -206,32 +207,36 @@ public class NewNewDrive extends OpMode {
             driveRight.setPower(speedMin * (rightVel / v));
             started = true;
             done = false;
-        } else if (done = true) {
+        } else if (done) {
             driveLeft.setPower(0);
             driveRight.setPower(0);
         }
 
-        if (isBusy()) {
-            if (rampTimer.seconds() <= (time / 4)) {
-                rampTime = time / 4.0;
-                speed = (speedMin + (rampTimer.seconds() / rampTime) *
-                        (speedMax - speedMin)) * Math.signum(speed);
-            } else if (rampTimer.seconds() <= (time * 3 / 4)) {
+        if (isBusy() || !done) {
+            if (rampTimer.seconds() <= (time * 0.25)) {
+                if (speed != 0.0) speed = (speedMin + (rampTimer.seconds() / (time * 0.25)) * (speedMax - speedMin)) * Math.signum(speed);
+                else              speed = (speedMin + (rampTimer.seconds() / (time * 0.25)) * (speedMax - speedMin));
+            } else if (rampTimer.seconds() <= (time * 0.75)) {
                 speed = speedMax;
             } else if (rampTimer.seconds() < time){
-                rampTime = time / 4.0;
-                speed = (speedMax + ((rampTimer.seconds() - time * 3.0 / 4.0) / rampTime) *
-                        (speedMin - speedMax)) * Math.signum(speed);
+                if (speed != 0) speed = (speedMax + ((rampTimer.seconds() - (time * 0.75)) / (time * 0.25)) * (speedMin - speedMax)) * Math.signum(speed);
+                else            speed = (speedMax + ((rampTimer.seconds() - (time * 0.75)) / (time * 0.25)) * (speedMin - speedMax));
             } else {
                 speed = 0;
                 done = true;
             }
 
-            double maxRatio = Math.max(leftVel, rightVel) / v;
-            driveLeft.setPower(speed * (leftVel / v) *  maxRatio);
-            driveRight.setPower(speed * (rightVel / v) *  maxRatio);
-            telemetry.log().add(getClass().getSimpleName() + "::arcTo(): Motors in use");
+            maxRatio = Math.max(leftVel, rightVel) / v;
+            driveLeft.setPower(speed * (leftVel / v) / maxRatio);
+            driveRight.setPower(speed * (rightVel / v) / maxRatio);
         }
+        telemetry.log().add(getClass().getSimpleName() + "::arcTo(): Motors in use");
+        if (isBusy() || !done) telemetry.addData("max ratio", maxRatio);
+        telemetry.addData("leftVel", leftVel);
+        telemetry.addData("rightVel", rightVel);
+        telemetry.addData("speed", speed);
+        telemetry.addData("timer", rampTimer.seconds());
+        telemetry.addData("time", time);
     }
 
     public void driveStop() {
