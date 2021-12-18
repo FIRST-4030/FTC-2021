@@ -172,20 +172,35 @@ public class NewNewDrive extends OpMode {
     }
 
 
+    // angle = angle of rotation, degrees
+    // r - radius of rotation, inches
+    // speedMin - minimum speed of the drive, 0 - 1
+    // speedMax - maximum speed of the drive, 0 - 1
     public void arcTo(double angle, double r, double speedMin, double speedMax) {
+        // it should be, but ensure that the radius is positive
+        r = Math.abs(r);
+        if (r < 5) r = 5.0;
+
         double speed = 0;
         double rampTime;
         double v = 20 * (speedMax * 3 + speedMin) / 4; // inches per second
-        double time = 2 * Math.PI * r / v * (angle / 360);
-        double w = v / r;
-        //r = 35.625;
-        //angle = 50;
-        double leftVel = v - (trackWidth * w / 2);
-        double rightVel = v + (trackWidth * w / 2);
-        /*leftTarget = 2 * Math.PI * (r - trackWidth / 2) * (angle / 360);
-        rightTarget = 2 * Math.PI * (r + trackWidth / 2) * (angle / 360);*/
+        double arcLength = Math.PI * (angle / 180.0) * r;
+        double arcLengthL;
+        double arcLengthR;
+        if (angle < 0) {    // if angle is negative, we are turning to the right
+            // difference is signs on the trackWidth
+            angle *= -1;
+            arcLengthL = Math.PI * (angle / 180.0) * (r + trackWidth / 2.0);
+            arcLengthR = Math.PI * (angle / 180.0) * (r - trackWidth / 2.0);
+        } else {
+            arcLengthL = Math.PI * (angle / 180.0) * (r - trackWidth / 2.0);
+            arcLengthR = Math.PI * (angle / 180.0) * (r + trackWidth / 2.0);
+        }
+        double time = Math.abs(arcLength / v);
+        double leftVel = v * arcLengthL / arcLength;
+        double rightVel = v * arcLengthR / arcLength;
 
-        if (started == false) {
+        if (!started) {
             rampTimer.reset();
             driveLeft.setPower(speedMin * (leftVel / v));
             driveRight.setPower(speedMin * (rightVel / v));
@@ -198,24 +213,24 @@ public class NewNewDrive extends OpMode {
 
         if (isBusy()) {
             if (rampTimer.seconds() <= (time / 4)) {
-                rampTime = time / 4;
+                rampTime = time / 4.0;
                 speed = (speedMin + (rampTimer.seconds() / rampTime) *
                         (speedMax - speedMin)) * Math.signum(speed);
             } else if (rampTimer.seconds() <= (time * 3 / 4)) {
                 speed = speedMax;
             } else if (rampTimer.seconds() < time){
-                rampTime = time * 3 / 4;
-                speed = (speedMax + (rampTimer.seconds() / rampTime) *
+                rampTime = time / 4.0;
+                speed = (speedMax + ((rampTimer.seconds() - time * 3.0 / 4.0) / rampTime) *
                         (speedMin - speedMax)) * Math.signum(speed);
             } else {
                 speed = 0;
                 done = true;
             }
 
-            driveLeft.setPower(speed * (leftVel / v));
-            driveRight.setPower(speed * (rightVel / v));
+            double maxRatio = Math.max(leftVel, rightVel) / v;
+            driveLeft.setPower(speed * (leftVel / v) *  maxRatio);
+            driveRight.setPower(speed * (rightVel / v) *  maxRatio);
             telemetry.log().add(getClass().getSimpleName() + "::arcTo(): Motors in use");
-            return;
         }
     }
 
