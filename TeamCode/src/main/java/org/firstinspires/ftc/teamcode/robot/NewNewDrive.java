@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
+import org.firstinspires.ftc.teamcode.utils.PiecewiseFunction;
 
 @Config
 public class NewNewDrive extends OpMode {
@@ -19,6 +20,7 @@ public class NewNewDrive extends OpMode {
     public static double TURN_RATIO = 6.3;
     public static double ACCEL_CONSTANT = 0.4;
     public static double trackWidth = 15.25;
+    public static double trackWidthHalf = trackWidth / 2.0;
 
     // Hardware
     private DcMotor driveLeft;
@@ -31,6 +33,7 @@ public class NewNewDrive extends OpMode {
     private ElapsedTime rampTimer = new ElapsedTime();
     private boolean started;
     private boolean done;
+    private PiecewiseFunction speedCurve;
 
     // Standard methods
     @Override
@@ -184,7 +187,7 @@ public class NewNewDrive extends OpMode {
         double speed = 0;
         double rampTime;
         double v = 40 * (speedMax * 4 + speedMin * 2) / 6; // inches per second
-        double arcLength = Math.PI * (angle / 180.0) * r;
+        double arcLength = Math.PI * (angle / 180.0) * r; // inches
         double arcLengthL;
         double arcLengthR;
         if (angle < 0) {    // if angle is negative, we are turning to the right
@@ -205,6 +208,14 @@ public class NewNewDrive extends OpMode {
             rampTimer.reset();
             driveLeft.setPower(speedMin * (leftVel / v));
             driveRight.setPower(speedMin * (rightVel / v));
+
+            // initialize speedCurve to have time be the X coordinate and motor speed be the Y coordinate
+            // note that elements need to be added in ascending order of X
+            speedCurve.setClampLimits(true);
+            speedCurve.addElement(0.00 * time, speedMin);
+            speedCurve.addElement(0.25 * time, speedMax);
+            speedCurve.addElement(0.75 * time, speedMax);
+            speedCurve.addElement(1.00 * time, speedMin);
             started = true;
             done = false;
         } else if (done) {
@@ -213,7 +224,7 @@ public class NewNewDrive extends OpMode {
         }
 
         if (isBusy() || !done) {
-            if (rampTimer.seconds() <= (time * 0.25)) {
+/*            if (rampTimer.seconds() <= (time * 0.25)) {
                 if (speed != 0.0) speed = (speedMin + (rampTimer.seconds() / (time * 0.25)) * (speedMax - speedMin)) * Math.signum(speed);
                 else              speed = (speedMin + (rampTimer.seconds() / (time * 0.25)) * (speedMax - speedMin));
             } else if (rampTimer.seconds() <= (time * 0.75)) {
@@ -224,7 +235,11 @@ public class NewNewDrive extends OpMode {
             } else {
                 speed = 0;
                 done = true;
-            }
+            }*/
+
+            // speed is calculated using the curve defined above
+            speed = speedCurve.getY(rampTimer.seconds());
+            done = speedCurve.isClamped();
 
             maxRatio = Math.max(leftVel, rightVel) / v;
             driveLeft.setPower(speed * (leftVel / v) / maxRatio);
