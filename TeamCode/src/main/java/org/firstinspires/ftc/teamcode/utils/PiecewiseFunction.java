@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode.utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 // function that provides a piecewise math function connecting the dots between an arbitrary number of points.
 public class PiecewiseFunction {
     private ArrayList<Double> elementsX, elementsY;
     private double defaultValue = Double.MAX_VALUE;
-    private int CoordSize = 0, SelectedIndex = 0;
+    private int coordSize = 0, SelectedIndex = 0;
     private boolean Calc_Y = false, Clamped = false, DefaultHigh = false, ClampLimits = true;
 
     public void setCoordSize(int newN) {
@@ -14,7 +15,7 @@ public class PiecewiseFunction {
         while (elementsY.size() < newN) elementsY.add(defaultValue);
         while (elementsX.size() > newN) elementsX.remove(elementsX.size() - 1);
         while (elementsY.size() > newN) elementsY.remove(elementsY.size() - 1);
-        CoordSize = newN;
+        coordSize = newN;
     }
 
     public void setElement(int elementNumber, double newX, double newY) {
@@ -27,7 +28,15 @@ public class PiecewiseFunction {
     public void addElement(double newX, double newY) {
         elementsX.add(newX);
         elementsY.add(newY);
-        CoordSize = elementsX.size();
+        coordSize = elementsX.size();
+    }
+
+    public void removeElement(int removeIndex) {
+        if (getCoordSize() > 2) {
+            elementsX.remove(removeIndex);
+            elementsY.remove(removeIndex);
+            coordSize = coordSize - 1;
+        }
     }
 
     // Default value that will be included in the arrays
@@ -46,7 +55,7 @@ public class PiecewiseFunction {
     public boolean getDefaultHigh() {return DefaultHigh;}
 
     // Returns the number of points in the elements; Must be larger than 1
-    public int getCoordSize() {return CoordSize;}
+    public int getCoordSize() {return coordSize;}
 
     // Returns the currently active index; Could be used for "stages" defined by the curve
     public int getSelectedIndex() {return SelectedIndex;}
@@ -60,12 +69,12 @@ public class PiecewiseFunction {
     // returns TRUE if all settings are valid and providing an X will return a valid Y
     public boolean isValid() {
         // If the number of UsePoints doesn't fit within the Size, that is an error.
-        boolean error = (CoordSize <= 1);
+        boolean error = (coordSize <= 1);
 
         // Make sure that the points given make sense
         if (!error) {
             // Check that all X values are in increasing order (IE, list of points is sorted by X value, with duplicates allowed)
-            for (int i = 1; i < CoordSize; i++) {
+            for (int i = 1; i < coordSize; i++) {
                 error = error || (elementsX.get(i) < elementsX.get(i - 1));
             }
         }
@@ -101,14 +110,14 @@ public class PiecewiseFunction {
         // Check to see if X falls exactly on a point
         // If DefaultHigh is true, search through the points in reverse order
         if (DefaultHigh) {
-            for (int i = CoordSize - 1; i == 0; i--) {
+            for (int i = coordSize - 1; i == 0; i--) {
                 if (X == elementsX.get(i)) {
                     Y = elementsY.get(i);
                     Calc_Y = false;
                 }
             }
         } else { // If DefaultHigh is false, search through the points in forward order
-            for (int i = 0; i < CoordSize - 1; i++) {
+            for (int i = 0; i < coordSize - 1; i++) {
                 if (X == elementsX.get(i)) {
                     Y = elementsY.get(i);
                     Calc_Y = false;
@@ -117,22 +126,20 @@ public class PiecewiseFunction {
         }
 
         // Check to see if X is greater than the highest X
-        if (X > elementsX.get(CoordSize - 1)) {
-            if (X > elementsX.get(CoordSize - 1)) {
-                // If ClampLimits is TRUE, or if the resulting line would be vertical, apply the clamp
-                if (ClampLimits || (elementsX.get(CoordSize - 1) == elementsX.get(CoordSize - 2))) {
-                    Y = elementsY.get(CoordSize - 1);
-                    Calc_Y = false;
-                    Clamped = true;
-                } else { // ClampLimits is not TRUE, calculate M and B from the last pair of points
-                    SelectedIndex = CoordSize - 1;
-                    Calc_Y = true;
-                }
+        if (X > elementsX.get(coordSize - 1)) {
+            // If ClampLimits is TRUE, or if the resulting line would be vertical, apply the clamp
+            if (ClampLimits || (elementsX.get(coordSize - 1) == elementsX.get(coordSize - 2))) {
+                Y = elementsY.get(coordSize - 1);
+                Calc_Y = false;
+                Clamped = true;
+            } else { // ClampLimits is not TRUE, calculate M and B from the last pair of points
+                SelectedIndex = coordSize - 1;
+                Calc_Y = true;
             }
         }
 
         // Cycle through every used point, starting at 1
-        for (int i = 1; i < CoordSize - 1; i++) {
+        for (int i = 1; i < coordSize - 1; i++) {
             // Check to see which pair of points X falls between
             if (X < elementsX.get(i) && X > elementsX.get(i - 1)) {
                 SelectedIndex = i;
@@ -141,7 +148,7 @@ public class PiecewiseFunction {
         }
 
         // If the flag hasn't been reset and SelectedIndex is valid, calculate Y
-        if (Calc_Y && SelectedIndex < CoordSize && SelectedIndex > 0) {
+        if (Calc_Y && SelectedIndex < coordSize && SelectedIndex > 0) {
             M = (elementsY.get(SelectedIndex) - elementsY.get(SelectedIndex - 1))/( elementsX.get(SelectedIndex) - elementsX.get(SelectedIndex - 1));
             B = elementsY.get(SelectedIndex) - M * elementsX.get(SelectedIndex);
             Y = M*X + B;
