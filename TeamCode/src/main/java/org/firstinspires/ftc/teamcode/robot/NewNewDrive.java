@@ -152,6 +152,44 @@ public class NewNewDrive extends OpMode {
         driveRight.setPower(speed);
     }
 
+    public void driveTo(double speedMin, double speedMax, double distance) {
+        double speed = 0;
+        double v = 40 * (speedMax * 4 + speedMin * 2) / 6; // inches per second
+        double time = Math.abs(distance / v);
+
+        if (!started) {
+            rampTimer.reset();
+            driveLeft.setPower(speedMin);
+            driveRight.setPower(speedMin);
+
+            // initialize speedCurve to have time be the X coordinate and motor speed be the Y coordinate
+            // note that elements need to be added in ascending order of X
+            speedCurve.setClampLimits(true);
+            speedCurve.addElement(0.00 * time, speedMin);
+            speedCurve.addElement(0.25 * time, speedMax);
+            speedCurve.addElement(0.75 * time, speedMax);
+            speedCurve.addElement(1.00 * time, speedMin);
+            started = true;
+            done = false;
+        } else if (done) {
+            driveLeft.setPower(0);
+            driveRight.setPower(0);
+        }
+
+        if (isBusy() || !done) {
+            // speed is calculated using the curve defined above
+            speed = speedCurve.getY(rampTimer.seconds());
+            done = speedCurve.isClamped();
+
+            driveLeft.setPower(speed);
+            driveRight.setPower(speed);
+        }
+        telemetry.log().add(getClass().getSimpleName() + "::driveTo(): Motors in use");
+        telemetry.addData("speed", speed);
+        telemetry.addData("timer", rampTimer.seconds());
+        telemetry.addData("time", time);
+    }
+
     public void turnTo(float speed, float angle) {
         // Don't allow new moves if we're still busy
         if (isBusy()) {
