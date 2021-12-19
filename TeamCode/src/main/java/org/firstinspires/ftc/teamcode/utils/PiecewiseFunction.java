@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 // function that provides a piecewise math function connecting the dots between an arbitrary number of points.
 public class PiecewiseFunction {
@@ -9,6 +8,11 @@ public class PiecewiseFunction {
     private double defaultValue = Double.MAX_VALUE;
     private int coordSize = 0, SelectedIndex = 0;
     private boolean Calc_Y = false, Clamped = false, DefaultHigh = false, ClampLimits = true;
+
+    public PiecewiseFunction() {
+        elementsX = new ArrayList<Double>();
+        elementsY = new ArrayList<Double>();
+    }
 
     public void setCoordSize(int newN) {
         while (elementsX.size() < newN) elementsX.add(defaultValue);
@@ -31,12 +35,35 @@ public class PiecewiseFunction {
         coordSize = elementsX.size();
     }
 
+    public double getElementX(int elementNumber) {
+        return elementsX.get(elementNumber);
+    }
+
+    public double getElementY(int elementNumber) {
+        return elementsY.get(elementNumber);
+    }
+
+    public double getLastX() {
+        return elementsX.get(elementsX.size() - 1);
+    }
+
+    public double getLastY() {
+        return elementsY.get(elementsY.size() - 1);
+    }
+
     public void removeElement(int removeIndex) {
         if (getCoordSize() > 2) {
             elementsX.remove(removeIndex);
             elementsY.remove(removeIndex);
             coordSize = coordSize - 1;
         }
+    }
+
+    // Reset deletes all elements and returns things to default
+    public void reset() {
+        while (!elementsX.isEmpty()) elementsX.remove(0);
+        while (!elementsY.isEmpty()) elementsY.remove(0);
+        coordSize = 0;
     }
 
     // Default value that will be included in the arrays
@@ -78,7 +105,7 @@ public class PiecewiseFunction {
                 error = error || (elementsX.get(i) < elementsX.get(i - 1));
             }
         }
-        return error;
+        return !error;
     }
 
     // given an X value, calculate the appropriate Y value

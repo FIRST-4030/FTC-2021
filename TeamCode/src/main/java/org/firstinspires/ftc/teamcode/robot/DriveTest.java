@@ -106,7 +106,7 @@ public class DriveTest extends MultiOpModeManager {
         // Step through the auto commands
         switch (state) {
             case ARC:
-                drive.arcTo(50, 35.625, 0.2, 0.4);
+                drive.arcToTicks(50, 35.625, 0.2, 0.4);
                 if (drive.isDone()) {
                     state = state.next();
                 }
