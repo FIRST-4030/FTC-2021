@@ -368,8 +368,8 @@ public class NewNewDrive extends OpMode {
         double maxRatio = Math.max(leftTicks / rightTicks, leftTicks / rightTicks);
         if ((isBusy() || !done) && speedCurveL.isValid() && speedCurveR.isValid() && started) {
             // speed is calculated using the curve defined above
-            driveLeft.setPower((leftTicks / rightTicks) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition()));
-            driveRight.setPower((rightTicks / leftTicks) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition()));
+            driveLeft.setPower((leftTicks / rightTicks) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
+            driveRight.setPower((rightTicks / leftTicks) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
             done = speedCurveL.isClamped() || speedCurveR.isClamped();
         }
 
