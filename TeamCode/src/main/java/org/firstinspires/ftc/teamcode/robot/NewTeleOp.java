@@ -35,6 +35,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -56,10 +57,9 @@ public class NewTeleOp extends MultiOpModeManager {
     private DcMotor collector = null;
     private Servo collectorArm = null;
     private Servo capstoneArm = null;
-    //private Servo capstoneHook = null;
     private DistanceSensor distanceLeft = null;
     private DistanceSensor distanceRight = null;
-    private DistanceSensor distanceCollector = null;
+    private TouchSensor sensorCollector = null;
     private Depositor depositor;
 
     // Constants used for hardware
@@ -73,19 +73,19 @@ public class NewTeleOp extends MultiOpModeManager {
     private static double MID_CLOSE = 0.47;
     private static double HIGH_OPEN = 0.13;
     private static double HIGH_INIT = 0.55;
-    private static double COLLECTOR_UP = 0.65;
-    private static double COLLECTOR_DOWN = 0.90;
+    public static double COLLECTOR_UP = 0.65;
+    public static double COLLECTOR_DOWN = 0.90;
     private static double SPEED = 1;
     public static int DISTANCE = 30;
     public static double EJECT_TIME = 3;
     private static double timerRatio = 0.0;
-    private static double duckPowerMin = 0.63;  // min duck spinner speed (0 - 1.0)
-    private static double duckPowerMax = 0.88;  // max duck spinner speed (0 - 1.0)
-    private static double duckRampTime = 1.4;  // duck spinner ramp time (seconds, >0)
-    private static double CAP_IN = 0;
+    public static double duckPowerMin = 0.63;  // min duck spinner speed (0 - 1.0)
+    public static double duckPowerMax = 0.88;  // max duck spinner speed (0 - 1.0)
+    public static double duckRampTime = 1.4;  // duck spinner ramp time (seconds, >0)
+    public static double CAP_IN = 0;
     //private static double CAP_UP = 0.35;
-    private static double CAP_MID = 0.5;
-    private static double CAP_DOWN = 0.87;
+    public static double CAP_MID = 0.5;
+    public static double CAP_DOWN = 0.87;
     private static double CAPSTONE_DELTA = 0.01;
     private static double delayTime = 0.1;
     private static double capstoneTarget = 0;
@@ -159,7 +159,7 @@ public class NewTeleOp extends MultiOpModeManager {
             super.init(); */
             collector = hardwareMap.get(DcMotor.class, "Collector");
             collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
-            distanceCollector = hardwareMap.get(DistanceSensor.class, "DC");
+            sensorCollector = hardwareMap.get(TouchSensor.class, "DC");
         } catch (Exception e) {
             telemetry.log().add("Could not find collector");
             error = true;
@@ -178,7 +178,6 @@ public class NewTeleOp extends MultiOpModeManager {
         try {
             distanceLeft = hardwareMap.get(DistanceSensor.class, "DL");
             distanceRight = hardwareMap.get(DistanceSensor.class, "DR");
-            distanceCollector = hardwareMap.get(DistanceSensor.class, "DC");
         } catch (Exception e) {
             telemetry.log().add("Could not find range sensors");
             error = true;
@@ -242,45 +241,22 @@ public class NewTeleOp extends MultiOpModeManager {
 
         // Depositor
         depositor.loop();
-        /* if (gamepad2.a || gamepad2.b || gamepad2.x) {
-            depBelt.setPower(DEP_BELT_POWER);
-        } else if (gamepad2.y) {
-            depBelt.setPower(-DEP_BELT_POWER);
-        } else {
-            depBelt.setPower(0);
-        }
-        if (gamepad2.a) {
-            depLow.setPosition(LOW_OPEN);
-        } else {
-            depLow.setPosition(LOW_CLOSE);
-        }
-        if (gamepad2.b) {
-            depMid.setPosition(MID_OPEN);
-        } else {
-            depMid.setPosition(MID_CLOSE);
-        }
-        if (gamepad2.x) {
-            depHigh.setPosition(HIGH_OPEN);
-        }
-
-        if (gamepad2.dpad_right) {
-            depTilt.setPosition(DEP_UP);
-        } else {
-            depTilt.setPosition(DEP_DOWN);
-        } */
 
         // Collector
-        // Distance
-        double range = distanceCollector.getDistance(DistanceUnit.MM);
-        boolean inRange = (range <= DISTANCE);
-        telemetry.addData("Range", range);
-        telemetry.addData("inRange?", inRange);
+        // Sensor
+        boolean collected = sensorCollector.isPressed();
+        telemetry.addData("Collected? ", collected);
 
         double spin = -gamepad2.left_stick_y;
-        if ((inRange || gamepad2.left_bumper) && collectorArm.getPosition() == COLLECTOR_DOWN) {
+        if ((collected || gamepad2.left_bumper) && collectorArm.getPosition() == COLLECTOR_DOWN) {
             collectorTimer.reset();
+        } else if (gamepad2.left_bumper && collectorArm.getPosition() == COLLECTOR_UP) {
+            collectorArm.setPosition(COLLECTOR_DOWN);
+            collector.setPower(1);
         }
-        if (gamepad2.left_bumper || collectorTimer.seconds() < 0.24) {
+        if (gamepad2.left_stick_y != 0) {
+            collector.setPower(spin);
+        } else if (collectorTimer.seconds() < 0.24) {
             collectorArm.setPosition(COLLECTOR_DOWN);
             collector.setPower(1);
         } else if (collectorTimer.seconds() < EJECT_TIME) {
@@ -297,9 +273,9 @@ public class NewTeleOp extends MultiOpModeManager {
         } else if (gamepad2.dpad_up) {
             capstoneTarget = CAP_MID;
         }
-        if (capstoneTarget >= 0 && capstoneTarget <= 1) {
+ /*       if (capstoneTarget >= 0 && capstoneTarget <= 1) {
             capstoneTarget += (gamepad2.right_stick_y * 0.02);
-        }
+        } */
 
         double capError = capstoneTarget - capstoneArm.getPosition();
         if (capError != 0 && capTimer.seconds() > delayTime) {
@@ -327,9 +303,9 @@ public class NewTeleOp extends MultiOpModeManager {
         telemetry.addData("Drive", "L %.2f/%d, R %.2f/%d",
                 leftDrive.getPower(), leftDrive.getCurrentPosition(),
                 rightDrive.getPower(), rightDrive.getCurrentPosition());
-        /* telemetry.addData("Duck/Collector", "D %.2f, C (%.2f)",
+        telemetry.addData("Duck/Collector", "D %.2f, C (%.2f)",
                 duckSpinner.getPower(), collector.getPower());
-        telemetry.addData("Depositor", "B %.2f, L %.2f, M %.2f",
+        /* telemetry.addData("Depositor", "B %.2f, L %.2f, M %.2f",
                 depBelt.getPower(), depLow.getPosition(), depMid.getPosition());
         telemetry.addData("Spin", spin);
         telemetry.addData("Dep Belt Pos: ", depBelt.getCurrentPosition()); */

@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
@@ -411,6 +412,9 @@ public class NewNewDrive extends OpMode {
         telemetry.addData("rightVel", driveRight.getPower());
     }
 
+    // Original arcTo method relying on time to ramp
+    // angle, degrees; positive is left, negative is right
+    // radius, inches
     public void arcToOG(double angle, double r, double speedMin, double speedMax) {
         if (angle == 0) {
             return;
@@ -453,9 +457,9 @@ public class NewNewDrive extends OpMode {
                 speed = (speedMin + (rampTimer.seconds() / rampTime) * (speedMax - speedMin));
             } else if (rampTimer.seconds() <= (time * 0.625)) {
                 speed = speedMax;
-            } else if (rampTimer.seconds() < time){
-                rampTime = time * 0.625;
-                speed = (speedMax + (rampTimer.seconds() / rampTime) * (speedMin - speedMax));
+            } else if (rampTimer.seconds() < time) {
+                rampTime = time * 0.375;
+                speed = (speedMax + ((rampTimer.seconds() - (time * 0.625)) / rampTime) * (speedMin - speedMax));
             } else {
                 speed = 0;
                 done = true;
@@ -479,78 +483,122 @@ public class NewNewDrive extends OpMode {
         telemetry.addData("time", time);
     }
 
-    public void arcToDistance(double r, double arcLength, double speedMin, double speedMax) {
-
-        // it should be, but ensure that the radius is positive
-        r = Math.abs(r);
-        if (r < 5) r = 5.0;
-        double speedL = 0;
-        double speedR = 0;
-        double angle = (arcLength * 180.0) / (Math.PI * r);
-        double arcLengthL;
-        double arcLengthR;
-        if (r > 1000) {
-            arcLengthL = arcLength;
-            arcLengthR = arcLength;
-        } else if (angle < 0) {    // if angle is negative, we are turning to the right
-            // difference is signs on the trackWidth
-            angle *= -1;
-            arcLengthL = Math.PI * (angle / 180.0) * (r + trackWidthHalf);
-            arcLengthR = Math.PI * (angle / 180.0) * (r - trackWidthHalf);
-        } else {
-            arcLengthL = Math.PI * (angle / 180.0) * (r - trackWidthHalf);
-            arcLengthR = Math.PI * (angle / 180.0) * (r + trackWidthHalf);
-        }
-        double leftTicks = arcLengthL * TICKS_PER_INCH;
-        double rightTicks = arcLengthR * TICKS_PER_INCH;
-        double maxRatio = Math.max(leftTicks / rightTicks, leftTicks / rightTicks);
-
-        if (!started) {
-            driveLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            driveRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            driveLeft.setPower(speedMin * (leftTicks / rightTicks) / maxRatio);
-            driveRight.setPower(speedMin * (rightTicks / leftTicks) / maxRatio);
-            started = true;
-            done = false;
-        }
-
-        if ((isBusy() || !done) && started) {
-            if (driveLeft.getCurrentPosition() <= (leftTicks * 0.125) || driveRight.getCurrentPosition() <= (rightTicks * 0.125)) {
-                speedL = (speedMin + (driveLeft.getCurrentPosition() / leftTicks) * (speedMax - speedMin));
-                speedR = (speedMin + (driveRight.getCurrentPosition() / rightTicks) * (speedMax - speedMin));
-            } else if (driveLeft.getCurrentPosition() <= (leftTicks * 0.625) || driveRight.getCurrentPosition() <= (rightTicks * 0.625)) {
-                speedL = speedMax;
-                speedR = speedMax;
-            } else if (driveLeft.getCurrentPosition() < leftTicks || driveRight.getCurrentPosition() < rightTicks){
-                speedL = (speedMax + (driveLeft.getCurrentPosition() / leftTicks) * (speedMin - speedMax));
-                speedR = (speedMax + (driveRight.getCurrentPosition() / rightTicks) * (speedMin - speedMax));
+    public void arcToDistance(double r, double arcLength, double speedMin, double speedMax, boolean time) {
+        if (!time) {
+            double speedL = 0;
+            double speedR = 0;
+            double angle = (arcLength * 180.0) / (Math.PI * r);
+            double arcLengthL;
+            double arcLengthR;
+            if (r > 1000) {
+                arcLengthL = arcLength;
+                arcLengthR = arcLength;
+            } else if (angle < 0) {    // if angle is negative, we are turning to the right
+                // difference is signs on the trackWidth
+                angle *= -1;
+                arcLengthL = Math.PI * (angle / 180.0) * (r + trackWidthHalf);
+                arcLengthR = Math.PI * (angle / 180.0) * (r - trackWidthHalf);
             } else {
-                speedL = 0;
-                speedR = 0;
-                done = true;
+                arcLengthL = Math.PI * (angle / 180.0) * (r - trackWidthHalf);
+                arcLengthR = Math.PI * (angle / 180.0) * (r + trackWidthHalf);
             }
-            driveLeft.setPower(speedL * (leftTicks / rightTicks) / maxRatio);
-            driveRight.setPower(speedR * (rightTicks / leftTicks) / maxRatio);
-            telemetry.log().add(getClass().getSimpleName() + "::arcToDistance(): Motors in use");
-        }
+            double leftTicks = arcLengthL * TICKS_PER_INCH;
+            double rightTicks = arcLengthR * TICKS_PER_INCH;
+            double midTicks = arcLength * TICKS_PER_INCH;
+            if (midTicks == 0) {
+                midTicks = 1;
+            }
+            double maxRatio = Math.max(leftTicks, rightTicks) / midTicks;
 
-        if (done) {
-            driveLeft.setPower(0);
-            driveRight.setPower(0);
-            started = false;
-        }
+            if (!started) {
+                driveLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                driveLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                driveRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                driveLeft.setPower(speedMin * (leftTicks / midTicks) / maxRatio);
+                driveRight.setPower(speedMin * (rightTicks / midTicks) / maxRatio);
+                started = true;
+                done = false;
+            }
 
-        if (isBusy() || !done) telemetry.addData("max ratio", maxRatio);
-        telemetry.addData("speedL", speedL);
-        telemetry.addData("speedR", speedR);
-        telemetry.addData("Left Ticks", leftTicks);
-        telemetry.addData("Right Ticks", rightTicks);
-        telemetry.addData("Left Current Ticks", driveLeft.getCurrentPosition());
-        telemetry.addData("Right Current Ticks", driveRight.getCurrentPosition());
-        telemetry.addData("Left Inches", driveLeft.getCurrentPosition() / TICKS_PER_INCH);
-        telemetry.addData("Right Inches", driveRight.getCurrentPosition() / TICKS_PER_INCH);
+            if ((isBusy() || !done) && started) {
+                if (leftTicks != 0 && rightTicks != 0) {
+                    if (driveLeft.getCurrentPosition() <= (leftTicks * 0.125) || driveRight.getCurrentPosition() <= (rightTicks * 0.125)) {
+                        speedL = (speedMin + (driveLeft.getCurrentPosition() / (leftTicks * 0.125)) * (speedMax - speedMin));
+                        speedR = (speedMin + (driveRight.getCurrentPosition() / (rightTicks * 0.125)) * (speedMax - speedMin));
+                    } else if (driveLeft.getCurrentPosition() <= (leftTicks * 0.625) || driveRight.getCurrentPosition() <= (rightTicks * 0.625)) {
+                        speedL = speedMax;
+                        speedR = speedMax;
+                    } else if (driveLeft.getCurrentPosition() < leftTicks || driveRight.getCurrentPosition() < rightTicks) {
+                        speedL = (speedMax + ((driveLeft.getCurrentPosition() - (leftTicks * 0.625)) / (leftTicks * 0.375)) * (speedMin - speedMax));
+                        speedR = (speedMax + ((driveRight.getCurrentPosition() - (rightTicks * 0.625)) / (rightTicks * 0.375)) * (speedMin - speedMax));
+                    } else {
+                        speedL = 0;
+                        speedR = 0;
+                        done = true;
+                    }
+                } else if (leftTicks == 0) {
+                    if (driveLeft.getCurrentPosition() <= (leftTicks * 0.125) || driveRight.getCurrentPosition() <= (rightTicks * 0.125)) {
+                        speedL = 0;
+                        speedR = (speedMin + (driveRight.getCurrentPosition() / rightTicks) * (speedMax - speedMin));
+                    } else if (driveLeft.getCurrentPosition() <= (leftTicks * 0.625) || driveRight.getCurrentPosition() <= (rightTicks * 0.625)) {
+                        speedL = 0;
+                        speedR = speedMax;
+                    } else if (driveLeft.getCurrentPosition() < leftTicks || driveRight.getCurrentPosition() < rightTicks) {
+                        speedL = 0;
+                        speedR = (speedMax + (driveRight.getCurrentPosition() / rightTicks) * (speedMin - speedMax));
+                    } else {
+                        speedL = 0;
+                        speedR = 0;
+                        done = true;
+                    }
+                } else {
+                    if (driveLeft.getCurrentPosition() <= (leftTicks * 0.125) || driveRight.getCurrentPosition() <= (rightTicks * 0.125)) {
+                        speedL = (speedMin + (driveLeft.getCurrentPosition() / leftTicks) * (speedMax - speedMin));
+                        speedR = 0;
+                    } else if (driveLeft.getCurrentPosition() <= (leftTicks * 0.625) || driveRight.getCurrentPosition() <= (rightTicks * 0.625)) {
+                        speedL = speedMax;
+                        speedR = 0;
+                    } else if (driveLeft.getCurrentPosition() < leftTicks || driveRight.getCurrentPosition() < rightTicks) {
+                        speedL = (speedMax + (driveLeft.getCurrentPosition() / leftTicks) * (speedMin - speedMax));
+                        speedR = 0;
+                    } else {
+                        speedL = 0;
+                        speedR = 0;
+                        done = true;
+                    }
+                }
+                driveLeft.setPower(speedL * (leftTicks / midTicks) / maxRatio);
+                driveRight.setPower(speedR * (rightTicks / midTicks) / maxRatio);
+                telemetry.log().add(getClass().getSimpleName() + "::arcToDistance(): Motors in use");
+            }
+
+            if (done) {
+                driveLeft.setPower(0);
+                driveRight.setPower(0);
+                started = false;
+                telemetry.log().add("speedL", speedL);
+                telemetry.log().add("speedR", speedR);
+                telemetry.log().add("Left Ticks", leftTicks);
+                telemetry.log().add("Right Ticks", rightTicks);
+                telemetry.log().add("Left Current Ticks", driveLeft.getCurrentPosition());
+                telemetry.log().add("Right Current Ticks", driveRight.getCurrentPosition());
+                telemetry.log().add("Left Inches", driveLeft.getCurrentPosition() / TICKS_PER_INCH);
+                telemetry.log().add("Right Inches", driveRight.getCurrentPosition() / TICKS_PER_INCH);
+            }
+
+            if (isBusy() || !done) telemetry.addData("max ratio", maxRatio);
+            telemetry.addData("speedL", speedL);
+            telemetry.addData("speedR", speedR);
+            telemetry.addData("Left Ticks", leftTicks);
+            telemetry.addData("Right Ticks", rightTicks);
+            telemetry.addData("Left Current Ticks", driveLeft.getCurrentPosition());
+            telemetry.addData("Right Current Ticks", driveRight.getCurrentPosition());
+            telemetry.addData("Left Inches", driveLeft.getCurrentPosition() / TICKS_PER_INCH);
+            telemetry.addData("Right Inches", driveRight.getCurrentPosition() / TICKS_PER_INCH);
+        } else {
+            return;
+        }
     }
 
     public void setDoneFalse() {

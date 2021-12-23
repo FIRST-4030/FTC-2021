@@ -68,10 +68,10 @@ public class Depositor extends OpMode {
     public static double MID_CLOSE = 0.24;
     public static double HIGH_OPEN = 0.13;
     public static double HIGH_INIT = 0.55;
-    public static int INIT_PREP_POS = 400;
+    public static int INIT_PREP_POS = 390;
     public static int LOW_PREP_POS = 560;
     public static int MID_PREP_POS = 690;
-    public static int HIGH_PREP_POS = 845;
+    public static int HIGH_PREP_POS = 840;
     public static int BELT_POSITION_DEADBAND = 15;
     public int num = 0;
     public boolean sensorTriggered = false;
@@ -267,11 +267,11 @@ public class Depositor extends OpMode {
         }
 
 
-        if (in.down("REVERSE")) {
+        /* if (in.down("REVERSE")) {
             state = AUTO_STATE.REVERSE_RUN;
         } else if (in.up("REVERSE")) {
             state = AUTO_STATE.DONE;
-        }
+        } */
         if (isDone()) {
             if (gamepad2.x) {
                 if (required_Door == DOOR_USED.LOW_DOOR) {
@@ -307,18 +307,27 @@ public class Depositor extends OpMode {
                 telemetry.addData("action: ", "going to tilt forward");
                 state = AUTO_STATE.TILTED_FORWARD;
             }
+            if (gamepad2.dpad_right) {
+                telemetry.addData("action: ", "going to tilt backward");
+                state = AUTO_STATE.TILTED_BACK;
+            }
+            if (gamepad2.a) {
+                mid.setPosition(MID_OPEN);
+            } else {
+                mid.setPosition(MID_CLOSE);
+            }
             if (gamepad2.right_trigger > 0) {
                 high.setPosition(HIGH_OPEN + (gamepad2.right_trigger * 0.24));
             } else {
                 high.setPosition(HIGH_OPEN);
             }
+            if (gamepad2.left_trigger > 0) {
+                low.setPosition(LOW_CLOSE + (gamepad2.left_trigger * (1 - LOW_CLOSE)));
+            } else {
+                low.setPosition(LOW_CLOSE);
+            }
+            belt.setPower(gamepad1.right_stick_y * 0.8);
         }
-
-        if (in.down("TILT_BACK")) {
-            telemetry.addData("action: ", "going to tilt backward");
-            state = AUTO_STATE.TILTED_BACK;
-        }
-
 
         // Debug when requested
         if (DEBUG) {
