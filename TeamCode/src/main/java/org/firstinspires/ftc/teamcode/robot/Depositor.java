@@ -272,7 +272,7 @@ public class Depositor extends OpMode {
         } else if (in.up("REVERSE")) {
             state = AUTO_STATE.DONE;
         } */
-        if (isDone()) {
+        if (state == AUTO_STATE.DONE) {
             if (gamepad2.x) {
                 if (required_Door == DOOR_USED.LOW_DOOR) {
                     telemetry.addData("action: ", "going to low door open");
@@ -326,7 +326,7 @@ public class Depositor extends OpMode {
             } else {
                 low.setPosition(LOW_CLOSE);
             }
-            belt.setPower(gamepad1.right_stick_y * 0.8);
+            belt.setPower(gamepad2.right_stick_y * 0.8);
         }
 
         // Debug when requested
