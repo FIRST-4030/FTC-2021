@@ -12,8 +12,6 @@ import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.utils.PiecewiseFunction;
 
-import java.util.ArrayList;
-
 @Config
 public class NewNewDrive extends OpMode {
     // Config
@@ -272,14 +270,7 @@ public class NewNewDrive extends OpMode {
         double speed = 0;
         double v; // inches per second
         if (!speedCurve.isValid()) v = 40 * speedMax;
-        else {
-            double totalLength = 0;
-            for (int i = 1; i < speedCurve.getCoordSize() - 1; i++) {
-                totalLength += (speedCurve.getElementX(i) - speedCurve.getElementX(i - 1)) *
-                        (speedCurve.getElementY(i) + speedCurve.getElementY(i - 1)) / 2.0;
-            }
-            v = totalLength / time;
-        }
+        else v = speedCurve.getAverage();
         double arcLength = Math.PI * (angle / 180.0) * r; // inches
         double arcLengthL;
         double arcLengthR;
@@ -313,7 +304,6 @@ public class NewNewDrive extends OpMode {
             driveRight.setPower(speedMin * (rightVel / v));
 
             // initialize speedCurve to have time be the X coordinate and motor speed be the Y coordinate
-            // note that elements need to be added in ascending order of X
             speedCurve.setClampLimits(true);
             speedCurve.addElement(0.00, speedMin);
             speedCurve.addElement(0.25, speedMax);
@@ -381,7 +371,6 @@ public class NewNewDrive extends OpMode {
             driveLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             driveRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             // initialize speedCurve to have motor ticks be the X coordinate and motor speed be the Y coordinate
-            // note that elements need to be added in ascending order of X
             speedCurveL.setClampLimits(true);
             speedCurveR.setClampLimits(true);
             speedCurveL.addElement(0.00 * leftTicks, speedMin);
@@ -406,8 +395,8 @@ public class NewNewDrive extends OpMode {
         telemetry.log().add(getClass().getSimpleName() + "::arcToTicks(): Motors in use");
         telemetry.addData("left ticks", driveLeft.getCurrentPosition());
         telemetry.addData("right ticks", driveRight.getCurrentPosition());
-        telemetry.addData("left ticks", speedCurveL.getElementX(speedCurveL.getCoordSize() - 1));
-        telemetry.addData("right ticks", speedCurveR.getElementX(speedCurveR.getCoordSize() - 1));
+        telemetry.addData("left ticks", speedCurveL.getElementX(speedCurveL.getSize() - 1));
+        telemetry.addData("right ticks", speedCurveR.getElementX(speedCurveR.getSize() - 1));
         telemetry.addData("leftVel", driveLeft.getPower());
         telemetry.addData("rightVel", driveRight.getPower());
     }
