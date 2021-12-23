@@ -149,7 +149,7 @@ public class NewNewDrive extends OpMode {
         }
 
         double speed = 0;
-        double v = 40 * (speedMax * 4 + speedMin * 2) / 6; // inches per second
+        double v = 40 * (((speedMin + speedMax) / 2 * 0.5) + (speedMax * 0.5)); // inches per second
         double time = Math.abs(distance / v);
 
         if ((isBusy() || !done) && speedCurve.isValid() && started) {
@@ -170,8 +170,8 @@ public class NewNewDrive extends OpMode {
             // note that elements need to be added in ascending order of X
             speedCurve.setClampLimits(true);
             speedCurve.addElement(0.00 * time, speedMin);
-            speedCurve.addElement(0.25 * time, speedMax);
-            speedCurve.addElement(0.75 * time, speedMax);
+            speedCurve.addElement(0.125 * time, speedMax);
+            speedCurve.addElement(0.625 * time, speedMax);
             speedCurve.addElement(1.00 * time, speedMin);
             started = true;
             done = false;
