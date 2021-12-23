@@ -38,6 +38,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
@@ -96,6 +97,8 @@ public class NewTeleOp extends MultiOpModeManager {
     private static double duckPowerAutoMin = 0.46;
     private static double duckPowerAutoMax = 0.66;
     private static double autoDuckRampTime = 1.65;
+
+    private static boolean collectorActive = false;
 
     // Servo position test constants
     private float servoPos = 0.4f;
@@ -246,16 +249,30 @@ public class NewTeleOp extends MultiOpModeManager {
         // Sensor
         boolean collected = sensorCollector.isPressed();
         telemetry.addData("Collected? ", collected);
+        /* if (gamepad2.left_bumper) {
+            collectorActive = true;
+        }
 
-        double spin = -gamepad2.left_stick_y;
+        if (collectorActive) {
+            if ((collected || !gamepad2.left_bumper) && collectorArm.getPosition() == COLLECTOR_DOWN) {
+                collectorTimer.reset();
+            }
+            if (collectorTimer.seconds() > EJECT_TIME) {
+                collectorActive = false;
+                collector.setPower(-1);
+            } else {
+                collector.setPower(1);
+            }
+        } else {
+            collector.setPower(0);
+        }
+        collectorArm.setPosition(collectorActive ? COLLECTOR_DOWN : COLLECTOR_UP);*/
         if ((collected || gamepad2.left_bumper) && collectorArm.getPosition() == COLLECTOR_DOWN) {
             collectorTimer.reset();
-        } else if (gamepad2.left_bumper && collectorArm.getPosition() == COLLECTOR_UP) {
+        }
+        if (gamepad2.left_bumper && collectorArm.getPosition() == COLLECTOR_UP) {
             collectorArm.setPosition(COLLECTOR_DOWN);
             collector.setPower(1);
-        }
-        if (gamepad2.left_stick_y != 0) {
-            collector.setPower(spin);
         } else if (collectorTimer.seconds() < 0.24) {
             collectorArm.setPosition(COLLECTOR_DOWN);
             collector.setPower(1);
@@ -266,6 +283,10 @@ public class NewTeleOp extends MultiOpModeManager {
             collectorArm.setPosition(COLLECTOR_UP);
             collector.setPower(0);
         }
+        RobotLog.d("," + "Collector" + "," + getRuntime() + "," +
+                gamepad2.left_bumper + "," + collected + "," +
+                collectorArm.getPosition() + "," + collector.getPower() + "," +
+                collectorTimer.seconds());
 
         // Capstone
         if (gamepad2.dpad_down) {

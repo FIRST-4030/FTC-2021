@@ -55,8 +55,8 @@ public class DriveTest extends MultiOpModeManager {
     private NewNewDrive drive;
 
     // Constants
-    public static double speedMin = 0.3;
-    public static double speedMax = 0.5;
+    public static double speedMin = 0.4;
+    public static double speedMax = 0.6;
     public static double r = 40;
     public static double angle = 45.3;
     public static double arcLength = 30.467;
@@ -111,16 +111,23 @@ public class DriveTest extends MultiOpModeManager {
         // Step through the auto commands
         switch (state) {
             case MOVE_OUT:
-                drive.driveTo(speedMin, speedMax, 8);
-                if (drive.isDone()) {
+                drive.driveTo(speedMin, speedMax, 14);
+                if (drive.isDone() && !drive.isBusy()) {
                     drive.setDoneFalse();
                     state = state.next();
                 }
                 break;
             case ARC:
                 //drive.arcToDistance(r, arcLength, speedMin, speedMax, false);
-                drive.arcToTicks(angle, r, speedMin, speedMax);
-                if (drive.isDone()) {
+                drive.arcToTicks(62, 13, speedMin, speedMax);
+                if (drive.isDone() && !drive.isBusy()) {
+                    drive.setDoneFalse();
+                    state = state.next();
+                }
+                break;
+            case PARK:
+                drive.driveTo(-speedMin, -speedMax, -52);
+                if (drive.isDone() && !drive.isBusy()) {
                     drive.setDoneFalse();
                     state = state.next();
                 }
@@ -142,6 +149,7 @@ public class DriveTest extends MultiOpModeManager {
     enum AUTO_STATE implements OrderedEnum {
         MOVE_OUT,
         ARC,
+        PARK,
         DONE;
 
         public DriveTest.AUTO_STATE next() {
