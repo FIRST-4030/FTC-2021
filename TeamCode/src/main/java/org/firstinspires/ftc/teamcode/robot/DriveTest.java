@@ -39,6 +39,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
@@ -89,6 +90,7 @@ public class DriveTest extends MultiOpModeManager {
             status = "Hardware Error";
         }
         telemetry.addData("Status", status);
+        drive.enableLogging();
     }
 
     @Override
