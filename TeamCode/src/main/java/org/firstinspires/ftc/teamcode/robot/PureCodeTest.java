@@ -357,7 +357,7 @@ public class PureCodeTest extends OpMode {
         double speed = 0;
         double v; // inches per second
         if (!speedCurve.isValid()) v = 40 * speedMax;
-        else v = speedCurve.getAverage();
+        else v = 40.0 * speedCurve.getAverage();
         double arcLength = Math.PI * (angle / 180.0) * r; // inches
         double arcLengthL;
         double arcLengthR;
