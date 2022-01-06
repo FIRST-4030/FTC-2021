@@ -62,10 +62,10 @@ public class Depositor extends OpMode {
     public static double BELT_SPEED = 0.6;
     public static double TILT_BACK = 0.47;
     public static double TILT_FORWARD = 0.18;
-    public static double LOW_OPEN = 0.98;
-    public static double LOW_CLOSE = 0.56;
-    public static double MID_OPEN = 0.69;
-    public static double MID_CLOSE = 0.24;
+    public static double LOW_OPEN = 0.6;
+    public static double LOW_CLOSE = 0.125;
+    public static double MID_OPEN = 0.59;
+    public static double MID_CLOSE = 0.13;
     public static double HIGH_OPEN = 0.13;
     public static double HIGH_INIT = 0.55;
     public static int INIT_PREP_POS = 390;
@@ -322,7 +322,7 @@ public class Depositor extends OpMode {
                 high.setPosition(HIGH_OPEN);
             }
             if (gamepad2.left_trigger > 0) {
-                low.setPosition(LOW_CLOSE + (gamepad2.left_trigger * (1 - LOW_CLOSE)));
+                low.setPosition(LOW_CLOSE + (gamepad2.left_trigger * (.73 - LOW_CLOSE)));
             } else {
                 low.setPosition(LOW_CLOSE);
             }

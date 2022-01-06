@@ -101,7 +101,8 @@ public class DriveTest extends MultiOpModeManager {
     @Override
     public void start() {
         super.start();
-        state = AUTO_STATE.ARC;
+        drive.setDoneFalse();
+        state = AUTO_STATE.MOVE_OUT;
     }
 
     @Override
@@ -119,7 +120,7 @@ public class DriveTest extends MultiOpModeManager {
                 break;
             case ARC:
                 //drive.arcToDistance(r, arcLength, speedMin, speedMax, false);
-                drive.arcToTicks(62, 13, speedMin, speedMax);
+                drive.arcToTicks(62, 13, 0, speedMin, speedMax);
                 if (drive.isDone() && !drive.isBusy()) {
                     drive.setDoneFalse();
                     state = state.next();

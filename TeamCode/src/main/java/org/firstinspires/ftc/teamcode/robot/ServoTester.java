@@ -39,6 +39,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
+import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
+import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 
 @Config
 @TeleOp(name = "ServoTest", group = "Test")
@@ -46,6 +49,7 @@ public class ServoTester extends OpMode{
     // Hardware
     private Servo collectorArm = null;
     private Servo mid = null;
+    private Servo low = null;
     // Constants used for hardware
     private static double COLLECTOR_UP = 0.37;
     private static double COLLECTOR_DOWN = 0.9;
@@ -56,6 +60,7 @@ public class ServoTester extends OpMode{
 
     // Members
     private ElapsedTime runtime = new ElapsedTime();
+    private InputHandler in;
 
     @Override
     public void init() {
@@ -66,6 +71,11 @@ public class ServoTester extends OpMode{
         try {
             collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
             mid = hardwareMap.get(Servo.class, "Depmid");
+            low = hardwareMap.get(Servo.class, "Deplow");
+            Globals.opmode = this;
+            in = Globals.input(this);
+            in.register("+", GAMEPAD.driver1, PAD_KEY.dpad_up);
+            in.register("-", GAMEPAD.driver1, PAD_KEY.dpad_down);
         } catch (Exception e) {
             telemetry.log().add("Could not find servo");
             error = true;
@@ -89,14 +99,15 @@ public class ServoTester extends OpMode{
 
     @Override
     public void loop() {
+        in.loop();
         // Shows number of servoPos
         telemetry.addData("Pos:", servoPos);
         // Moving the servo position and number should increase
-        if (gamepad1.dpad_up) {
+        if (in.down("+")) {
             servoPos += INCREMENT;
             servoPos = Math.min(1.0f, servoPos);
             // Moving the servo position and number should decrease
-        } else if (gamepad1.dpad_down) {
+        } else if (in.down("-")) {
             servoPos -= INCREMENT;
             servoPos = Math.max(0.0f, servoPos);
         }

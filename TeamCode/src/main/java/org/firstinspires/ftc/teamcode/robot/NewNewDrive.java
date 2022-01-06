@@ -190,8 +190,6 @@ public class NewNewDrive extends OpMode {
         }
 
         if (!started) {
-            started = true;
-            done = false;
             // This resets the encoder ticks to zero on both motors
             driveLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -203,6 +201,8 @@ public class NewNewDrive extends OpMode {
             speedCurve.addElement(0.125 * midTicks, speedMax);
             speedCurve.addElement(0.625 * midTicks, speedMax);
             speedCurve.addElement(1.00 * midTicks, speedMin);
+            started = true;
+            done = false;
         } else if (done) {
             driveLeft.setPower(0);
             driveRight.setPower(0);
@@ -211,6 +211,10 @@ public class NewNewDrive extends OpMode {
         }
 
         telemetry.log().add(getClass().getSimpleName() + "::driveTo(): Motors in use");
+        telemetry.addData("left ticks", driveLeft.getCurrentPosition());
+        telemetry.addData("right ticks", driveRight.getCurrentPosition());
+        telemetry.addData("leftVel", driveLeft.getPower());
+        telemetry.addData("rightVel", driveRight.getPower());
         logData("driveTo()", "");
     }
 
@@ -290,8 +294,8 @@ public class NewNewDrive extends OpMode {
     // r - radius of rotation, inches
     // speedMin - minimum speed of the drive, (-1) - 1
     // speedMax - maximum speed of the drive, (-1) - 1
-    public void arcToTicks(double angle, double r, double speedMin, double speedMax) {
-        if (angle == 0) {
+    public void arcToTicks(double angle, double r, double arcLength, double speedMin, double speedMax) {
+        if (angle == 0 && arcLength == 0) {
             return;
         }
         double arcLengthL;
@@ -302,8 +306,13 @@ public class NewNewDrive extends OpMode {
         r = Math.abs(r);
 
         if (r < 5) r = 5.0;
-        double arcLength = Math.PI * (angle / 180.0) * r;
-        if (angle < 0) {    // if angle is negative, we are turning to the right
+        if (arcLength == 0) {
+            arcLength = Math.PI * (angle / 180.0) * r;
+        }
+        if (angle == 0) {
+            arcLengthL = arcLength;
+            arcLengthR = arcLength;
+        } else if (angle < 0) {    // if angle is negative, we are turning to the right
             // difference is signs on the trackWidth
             angle *= -1;
             arcLengthL = Math.PI * (angle / 180.0) * (r + trackWidthHalf);
