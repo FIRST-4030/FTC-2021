@@ -159,7 +159,7 @@ public class NewNewDrive extends OpMode {
      */
     private void logDataInit() {
         RobotLog.d("");
-        RobotLog.d(",Function,Time (s),Left Position (in),Right Position (in),Left Velocity (in/s),Right Velocity (in/s)");
+        RobotLog.d(",Drive Function,Time (s),Left Position (in),Right Position (in),Left Velocity (in/s),Right Velocity (in/s)");
     }
 
     /**

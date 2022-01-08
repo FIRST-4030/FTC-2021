@@ -36,6 +36,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.apache.commons.math3.analysis.function.Abs;
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
@@ -118,6 +119,7 @@ public class Depositor extends OpMode {
             telemetry.log().add(getClass().getSimpleName() + ": " +
                     "Could not initialize" + e.getMessage());
         }
+        RobotLog.d(",Depositor(),Time (s),State,Sensor isPressed,Belt isBusy,Belt Power,Belt Current Position,Belt Target Position,Low Position,Mid Position,High Position,Tilt Position,Enabled,Required_Door");
     }
 
     @Override
@@ -159,13 +161,6 @@ public class Depositor extends OpMode {
 
         // actually process the inputs from the game pads
         in.loop();
-
-        telemetry.addData("isPressed?", sensor.isPressed() ? "Yes" : "No");
-        telemetry.addData("beltBusy? ", belt.isBusy() ? "Yes" : "No");
-        telemetry.addData("state", state);
-        telemetry.addData("required door", required_Door);
-        telemetry.addData("beltPos", belt.getCurrentPosition());
-        telemetry.addData("beltPosCmd", belt.getTargetPosition());
 
         // if the state changed, set sensorTriggered to false
         if (state != oldState) {
@@ -329,6 +324,18 @@ public class Depositor extends OpMode {
                     low.getPosition(), mid.getPosition(), tilt.getPosition());
             telemetry.addData("mode", state);
         }
+        telemetry.addData("isPressed?", sensor.isPressed() ? "Yes" : "No");
+        telemetry.addData("beltBusy? ", belt.isBusy() ? "Yes" : "No");
+        telemetry.addData("state", state);
+        telemetry.addData("required door", required_Door);
+        telemetry.addData("beltPos", belt.getCurrentPosition());
+        telemetry.addData("beltPosCmd", belt.getTargetPosition());
+
+        RobotLog.d(",Depositor()," + getRuntime() + "," + state + "," + sensor.isPressed() + "," +
+                belt.isBusy() + "," + belt.getPower() + "," + belt.getCurrentPosition() + "," + belt.getTargetPosition() + "," +
+                low.getPosition() + "," + mid.getPosition() + "," +
+                high.getPosition() + "," + tilt.getPosition() + "," +
+                enabled + "," + required_Door);
     }
 
     enum AUTO_STATE implements OrderedEnum {

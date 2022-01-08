@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.robot;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 
@@ -165,11 +166,30 @@ public class PureCodeTest extends OpMode {
 
         if (!done) {
 //            arcToDistance(35.625, 15, 0.2, 0.4);
-            arcTo(-50, 40, 0.2, 0.4);
-//            driveTo(0.2, 0.4, 50.0);
+//            arcTo(-50, 40, 0.2, 0.4);
+            driveTo(-0.2, -0.4, -52);
         }
 
         simulateMovement();
+    }
+
+    /**
+     * Initialize the headers for all of the logged data
+     * Note that this does NOT add headers for any function-specific data
+     */
+    private void logDataInit() {
+        RobotLog.d("");
+        RobotLog.d(",Time (s),Function,Left Position (in),Right Position (in),Left Velocity (in/s),Right Velocity (in/s)");
+    }
+
+    /**
+     * Log the basic drive data to a text file. Also log the "additionalData" string;
+     */
+    private void logData(String functionName, String additionalData) {
+        RobotLog.d("," + functionName + "," + getRuntime() + "," +
+                driveLeftPosition / TICKS_PER_INCH + "," + driveRightPosition / TICKS_PER_INCH + "," +
+                driveLeftPower * 40.0 + "," + driveLeftPower * 40.0 + "," +
+                additionalData);
     }
 
     private void simulateMovement() {
@@ -234,44 +254,40 @@ public class PureCodeTest extends OpMode {
         if (distance == 0) {
             return;
         }
-
-        double speed = 0;
-        double v = 40 * (speedMax * 4 + speedMin * 2) / 6; // inches per second
-        double time = Math.abs(distance / v);
+        double midTicks = distance * TICKS_PER_INCH;
 
         if ((isBusy() || !done) && speedCurve.isValid() && started) {
             // speed is calculated using the curve defined above
-            speed = speedCurve.getY(rampTimer.seconds());
+            driveLeftPower = (speedCurve.getY(driveLeftPosition * 1.0));
+            driveRightPower = (speedCurve.getY(driveRightPosition * 1.0));
             done = speedCurve.isClamped();
-
-            driveLeftPower = speed;
-            driveRightPower = speed;
         }
 
         if (!started) {
-            rampTimer.reset();
-            driveLeftPower = speedMin;
-            driveRightPower = speedMin;
-
-            // initialize speedCurve to have time be the X coordinate and motor speed be the Y coordinate
-            // note that elements need to be added in ascending order of X
+            // This resets the encoder ticks to zero on both motors
+            driveLeftPosition = 0;
+            driveRightPosition = 0;
+            // initialize speedCurve to have motor ticks be the X coordinate and motor speed be the Y coordinate
             speedCurve.setClampLimits(true);
-            speedCurve.addElement(0.00 * time, speedMin);
-            speedCurve.addElement(0.25 * time, speedMax);
-            speedCurve.addElement(0.75 * time, speedMax);
-            speedCurve.addElement(time, speedMin);
+            speedCurve.addElement(0.00 * midTicks, speedMin);
+            speedCurve.addElement(0.125 * midTicks, speedMax);
+            speedCurve.addElement(0.625 * midTicks, speedMax);
+            speedCurve.addElement(1.00 * midTicks, speedMin);
             started = true;
             done = false;
         } else if (done) {
-            driveLeftPower = 0;
-            driveRightPower = 0;
+            driveLeftPower = (0);
+            driveRightPower = (0);
             started = false;
+            speedCurve.reset();
         }
 
         telemetry.log().add(getClass().getSimpleName() + "::driveTo(): Motors in use");
-        telemetry.addData("speed", speed);
-        telemetry.addData("timer", rampTimer.seconds());
-        telemetry.addData("time", time);
+        telemetry.addData("left ticks", driveLeftPosition);
+        telemetry.addData("right ticks", driveRightPosition);
+        telemetry.addData("leftVel", driveLeftPower);
+        telemetry.addData("rightVel", driveRightPower);
+        logData("driveTo()", started + "," + done + "," + speedCurve.isClamped() + "," + speedCurve.isValid() + "," + speedCurve.getSize());
     }
 
     // angle = angle of rotation, degrees; positive is left, negative is right
