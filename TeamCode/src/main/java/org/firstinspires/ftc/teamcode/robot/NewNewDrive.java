@@ -215,7 +215,7 @@ public class NewNewDrive extends OpMode {
         telemetry.addData("right ticks", driveRight.getCurrentPosition());
         telemetry.addData("leftVel", driveLeft.getPower());
         telemetry.addData("rightVel", driveRight.getPower());
-        logData("driveTo()", "");
+        logData("driveTo()", started + "," + done + "," + speedCurve.isClamped() + "," + speedCurve.isValid() + "," + speedCurve.getSize());
     }
 
     // angle = angle of rotation, degrees; positive is left, negative is right
