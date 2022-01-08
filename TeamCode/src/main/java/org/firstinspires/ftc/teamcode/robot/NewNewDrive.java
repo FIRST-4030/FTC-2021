@@ -159,7 +159,7 @@ public class NewNewDrive extends OpMode {
      */
     private void logDataInit() {
         RobotLog.d("");
-        RobotLog.d(",Time (s),Function,Left Position (in),Right Position (in),Left Velocity (in/s),Right Velocity (in/s)");
+        RobotLog.d(",Function,Time (s),Left Position (in),Right Position (in),Left Velocity (in/s),Right Velocity (in/s)");
     }
 
     /**
@@ -169,7 +169,7 @@ public class NewNewDrive extends OpMode {
         if (loggingEnabled)
             RobotLog.d("," + functionName + "," + getRuntime() + "," +
                     driveLeft.getCurrentPosition() / TICKS_PER_INCH + "," + driveRight.getCurrentPosition() / TICKS_PER_INCH + "," +
-                    driveLeft.getPower() * MAX_VELOCITY + "," + driveLeft.getPower() * MAX_VELOCITY + "," +
+                    driveLeft.getPower() * MAX_VELOCITY + "," + driveRight.getPower() * MAX_VELOCITY + "," +
                     additionalData);
     }
 
@@ -182,32 +182,33 @@ public class NewNewDrive extends OpMode {
         }
         double midTicks = distance * TICKS_PER_INCH;
 
-        if ((isBusy() || !done) && speedCurve.isValid() && started) {
+        if ((isBusy() || !done) && speedCurveL.isValid() && speedCurveR.isValid() && started) {
             // speed is calculated using the curve defined above
-            driveLeft.setPower(speedCurve.getY(driveLeft.getCurrentPosition() * 1.0));
-            driveRight.setPower(speedCurve.getY(driveRight.getCurrentPosition() * 1.0));
-            done = speedCurve.isClamped();
+            driveLeft.setPower(speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
+            driveRight.setPower(speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
+            done = speedCurveL.isClamped() || speedCurveR.isClamped();
         }
 
         if (!started) {
-            // This resets the encoder ticks to zero on both motors
-            driveLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            driveRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            // initialize speedCurve to have motor ticks be the X coordinate and motor speed be the Y coordinate
-            speedCurve.setClampLimits(true);
-            speedCurve.addElement(0.00 * midTicks, speedMin);
-            speedCurve.addElement(0.125 * midTicks, speedMax);
-            speedCurve.addElement(0.625 * midTicks, speedMax);
-            speedCurve.addElement(1.00 * midTicks, speedMin);
+            // initialize speedCurveL and speedCurveR to have motor ticks be the X coordinate and motor speed be the Y coordinate
+            speedCurveL.setClampLimits(true);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() - 0.05 * midTicks, speedMin);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.125 * midTicks, speedMax);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.625 * midTicks, speedMax);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + 1.00 * midTicks, speedMin);
+            speedCurveR.setClampLimits(true);
+            speedCurveR.addElement(driveRight.getCurrentPosition() - 0.05 * midTicks, speedMin);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + 0.125 * midTicks, speedMax);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + 0.625 * midTicks, speedMax);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + 1.00 * midTicks, speedMin);
             started = true;
             done = false;
         } else if (done) {
             driveLeft.setPower(0);
             driveRight.setPower(0);
             started = false;
-            speedCurve.reset();
+            speedCurveL.reset();
+            speedCurveR.reset();
         }
 
         telemetry.log().add(getClass().getSimpleName() + "::driveTo(): Motors in use");
@@ -215,7 +216,7 @@ public class NewNewDrive extends OpMode {
         telemetry.addData("right ticks", driveRight.getCurrentPosition());
         telemetry.addData("leftVel", driveLeft.getPower());
         telemetry.addData("rightVel", driveRight.getPower());
-        logData("driveTo()", started + "," + done + "," + speedCurve.isClamped() + "," + speedCurve.isValid() + "," + speedCurve.getSize());
+        logData("driveTo()", started + "," + done + "," + speedCurveL.isValid() + "," + speedCurveL.getSize() + "," + speedCurveR.isValid() + "," + speedCurveR.getSize());
     }
 
     // angle = angle of rotation, degrees; positive is left, negative is right
@@ -287,7 +288,7 @@ public class NewNewDrive extends OpMode {
         telemetry.addData("speed", speed);
         telemetry.addData("timer", rampTimer.seconds());
         telemetry.addData("time", time);
-        logData("arcTo()", "");
+        logData("turnTo()", "");
     }
 
     // angle = angle of rotation, degrees; positive is left, negative is right
@@ -337,22 +338,17 @@ public class NewNewDrive extends OpMode {
         }
 
         if (!started) {
-            // This resets the encoder ticks to zero on both motors
-            driveLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            driveRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             // initialize speedCurve to have motor ticks be the X coordinate and motor speed be the Y coordinate
             speedCurveL.setClampLimits(true);
             speedCurveR.setClampLimits(true);
-            speedCurveL.addElement(0.00 * leftTicks, speedMin);
-            speedCurveL.addElement(0.125 * leftTicks, speedMax);
-            speedCurveL.addElement(0.625 * leftTicks, speedMax);
-            speedCurveL.addElement(1.00 * leftTicks, speedMin);
-            speedCurveR.addElement(0.00 * rightTicks, speedMin);
-            speedCurveR.addElement(0.125 * rightTicks, speedMax);
-            speedCurveR.addElement(0.625 * rightTicks, speedMax);
-            speedCurveR.addElement(1.00 * rightTicks, speedMin);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() - 0.05 * leftTicks, speedMin);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.125 * leftTicks, speedMax);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.625 * leftTicks, speedMax);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + 1.00 * leftTicks, speedMin);
+            speedCurveR.addElement(driveRight.getCurrentPosition() - 0.05 * rightTicks, speedMin);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + 0.125 * rightTicks, speedMax);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + 0.625 * rightTicks, speedMax);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + 1.00 * rightTicks, speedMin);
 
             started = true;
             done = false;
@@ -369,7 +365,7 @@ public class NewNewDrive extends OpMode {
         telemetry.addData("right ticks", driveRight.getCurrentPosition());
         telemetry.addData("leftVel", driveLeft.getPower());
         telemetry.addData("rightVel", driveRight.getPower());
-        logData("arcToTicks()", "");
+        logData("arcToTicks()", started + "," + done + "," + speedCurveL.isValid() + "," + speedCurveL.getSize() + "," + speedCurveR.isValid() + "," + speedCurveR.getSize());
     }
 
     // Original arcTo method relying on time to ramp
@@ -446,18 +442,5 @@ public class NewNewDrive extends OpMode {
 
     public void setDoneFalse() {
         done = false;
-    }
-
-    public void driveStop() {
-        // Zero the drive encoders, and enable RUN_TO_POSITION
-        driveLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        driveLeft.setTargetPosition(driveLeft.getCurrentPosition());
-        driveLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        driveLeft.setPower(0);
-
-        driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        driveRight.setTargetPosition(driveRight.getCurrentPosition());
-        driveRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        driveRight.setPower(0);
     }
 }

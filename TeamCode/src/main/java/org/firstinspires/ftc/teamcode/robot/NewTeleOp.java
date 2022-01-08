@@ -131,8 +131,8 @@ public class NewTeleOp extends MultiOpModeManager {
         try {
             duckSpinner = hardwareMap.get(DcMotor.class, "duck");
             duckSpinner.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            //duckSpinner2 = hardwareMap.get(DcMotor.class, "duck2");
-            //duckSpinner2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            duckSpinner2 = hardwareMap.get(DcMotor.class, "duck2");
+            duckSpinner2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         } catch (Exception e) {
             telemetry.log().add("Could not find duck spinner");
             error = true;
@@ -244,7 +244,7 @@ public class NewTeleOp extends MultiOpModeManager {
             DUCK_POWER = 0.0;
         }
         duckSpinner.setPower(DUCK_POWER);
-        //duckSpinner2.setPower(DUCK_POWER);
+        duckSpinner2.setPower(DUCK_POWER);
 
         // Depositor
         depositor.loop();

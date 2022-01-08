@@ -37,7 +37,9 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 
@@ -53,22 +55,52 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 public class DriveTest extends MultiOpModeManager {
     // Hardware
     private NewNewDrive drive;
+    private Servo collectorArm = null;
+    private Distance distance;
+    private Depositor depositor;
+    private Capstone capstone;
 
     // Constants
-    public static double speedMin = 0.4;
-    public static double speedMax = 0.6;
-    public static double r = 40;
-    public static double angle = 45.3;
-    public static double arcLength = 30.467;
+    public static double speedMin = 0.2;
+    public static double speedMax = 0.4;
+    public static double r = 16;
+    public static double arcLength = 18;
+    private static double angle = arcLength / Math.PI * 180.0 / r;
+    public static double COLLECTOR_UP = 0.65;
+    public static double COLLECTOR_DOWN = 0.90;
 
     // Members
     private AUTO_STATE state = AUTO_STATE.DONE;
     private InputHandler in;
+    private boolean redAlliance = false;
+    private boolean duckSide = false;
 
     @Override
     public void init() {
         boolean error = false;
         telemetry.addData("Status", "Initializing...");
+
+        try {
+            super.register(new Depositor());
+            super.register(new Capstone());
+            super.register(new Distance());
+
+            distance = new Distance();
+            super.register(distance);
+            depositor = new Depositor();
+            super.register(depositor);
+            capstone = new Capstone();
+            super.register(capstone);
+
+            in = Globals.input(this);
+
+            distance.startScan();
+
+            super.init();
+        } catch (Exception e) {
+            telemetry.log().add(String.valueOf(e));
+            error = true;
+        }
 
         try {
             super.register(new NewNewDrive());
@@ -84,6 +116,13 @@ public class DriveTest extends MultiOpModeManager {
             error = true;
         }
 
+        try {
+            collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
+        } catch (Exception e) {
+            telemetry.log().add("Could not find collector");
+            error = true;
+        }
+
         // Initialization status
         String status = "Ready";
         if (error) {
@@ -95,34 +134,71 @@ public class DriveTest extends MultiOpModeManager {
 
     @Override
     public void init_loop() {
+        if (gamepad1.dpad_right) redAlliance = true;
+        if (gamepad1.dpad_left) redAlliance = false;
+        if (gamepad1.dpad_up) duckSide = true;
+        if (gamepad1.dpad_down) duckSide = false;
+        telemetry.addData("Alliance", redAlliance ? "Red" : "Blue");
+        telemetry.addData("Direction", duckSide ? "Duck" : "Warehouse");
         super.init_loop();
     }
 
     @Override
     public void start() {
         super.start();
+        distance.startScan();
         drive.setDoneFalse();
         state = AUTO_STATE.MOVE_OUT;
     }
 
     @Override
     public void loop() {
+        depositor.loop();
+        distance.loop();
         in.loop();
 
         // Step through the auto commands
         switch (state) {
+            case BARCODE:
+                if (distance.state() == Distance.AUTO_STATE.DONE) {
+                    if (distance.position() == Distance.BARCODE.LEFT) {
+                        depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
+                    } else if (distance.position() == Distance.BARCODE.CENTER) {
+                        depositor.setDoor(Depositor.DOOR_USED.MID_DOOR);
+                    } else if (distance.position() == Distance.BARCODE.RIGHT) {
+                        depositor.setDoor(Depositor.DOOR_USED.HIGH_DOOR);
+                    } else {
+                        if (!duckSide) {
+                            if (redAlliance) {
+                                depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
+                            } else {
+                                depositor.setDoor(Depositor.DOOR_USED.HIGH_DOOR);
+                            }
+                        }
+                    }
+                    state = state.next();
+                }
+                break;
+
             case MOVE_OUT:
+                depositor.prep();
                 drive.driveTo(speedMin, speedMax, 14);
+                collectorArm.setPosition(COLLECTOR_UP);
                 if (drive.isDone() && !drive.isBusy()) {
                     drive.setDoneFalse();
                     state = state.next();
                 }
                 break;
             case ARC:
-                //drive.arcToDistance(r, arcLength, speedMin, speedMax, false);
-                drive.arcToTicks(62, 13, 0, speedMin, speedMax);
-                if (drive.isDone() && !drive.isBusy()) {
+                drive.arcToTicks(angle, r, 0, speedMin, speedMax);
+                if (drive.isDone() && !drive.isBusy() && depositor.isDone()) {
                     drive.setDoneFalse();
+                    state = state.next();
+                }
+                break;
+            case DEPOSIT:
+                depositor.deposit();
+                if (depositor.isDone()) {
                     state = state.next();
                 }
                 break;
@@ -148,18 +224,15 @@ public class DriveTest extends MultiOpModeManager {
     }
 
     enum AUTO_STATE implements OrderedEnum {
+        BARCODE,
         MOVE_OUT,
         ARC,
+        DEPOSIT,
         PARK,
         DONE;
 
         public DriveTest.AUTO_STATE next() {
             return OrderedEnumHelper.next(this);
         }
-    }
-
-    public void driveStop() {
-        // Zero the drive encoders, and enable RUN_TO_POSITION
-        drive.driveStop();
     }
 }

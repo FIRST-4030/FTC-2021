@@ -167,14 +167,6 @@ public class Depositor extends OpMode {
         telemetry.addData("beltPos", belt.getCurrentPosition());
         telemetry.addData("beltPosCmd", belt.getTargetPosition());
 
-        // this senses the magnetic prox switch, and reinitializes the belt encoder
-        // and sets the flag that the switch has been hit
-        // Note that the flag isn't reset until the state changes
-
-        if (Math.abs(belt.getCurrentPosition() % 927 - belt.getTargetPosition()) <= BELT_POSITION_DEADBAND) {
-
-        }
-
         // if the state changed, set sensorTriggered to false
         if (state != oldState) {
             oldState = state;
@@ -203,8 +195,8 @@ public class Depositor extends OpMode {
                 if (belt.getCurrentPosition() >= belt.getTargetPosition()) {
                     belt.setPower(0);
                     state = AUTO_STATE.DONE;
+                    required_Door = DOOR_USED.NONE;
                 }
-                required_Door = DOOR_USED.NONE;
                 break;
             case DOOR_PREP:      // Move the flipper to below the required door
                 // prepPosSet acts as a flag to make sure that the position command is set only once
