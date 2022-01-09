@@ -44,11 +44,12 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
-@Disabled
+//@Disabled
 @TeleOp(name = "DuckSpin", group = "Test")
 public class DuckSpin extends OpMode {
     // Hardware
     private DcMotor duck = null;
+    private DcMotor duck2 = null;
 
     // Config
     public static double teleopMin = 0.63;
@@ -67,17 +68,20 @@ public class DuckSpin extends OpMode {
     public static double speedMax = teleopMax;  // max duck spinner speed (0 - 1.0)
     public static double rampTime = teleopRamp;  // duck spinner ramp time (seconds, >0)
     private ElapsedTime timer = new ElapsedTime();
-    private AUTO_STATE state = AUTO_STATE.DONE;
+    private AUTO_STATE state = AUTO_STATE.IDLE;
 
     @Override
     public void init() {
         // Pull in Globals
+        Globals.opmode = this;
         in = Globals.input(this);
 
         // Duck spinner
         try {
             duck = hardwareMap.get(DcMotor.class, "duck");
             duck.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            duck2 = hardwareMap.get(DcMotor.class, "duck2");
+            duck2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             enabled = true;
         } catch (Exception e) {
             telemetry.log().add(getClass().getSimpleName() + ": " +
@@ -110,7 +114,9 @@ public class DuckSpin extends OpMode {
         speedMin = autoMin;
         speedMax = autoMax;
         rampTime = autoRamp;
-        state = red ? AUTO_STATE.RED : AUTO_STATE.BLUE;
+        if (state == AUTO_STATE.IDLE) {
+            state = red ? AUTO_STATE.RED : AUTO_STATE.BLUE;
+        }
     }
 
     public boolean isDone() {
@@ -137,19 +143,21 @@ public class DuckSpin extends OpMode {
 
         // Run the auto cycle (including translated driver commands)
         switch (state) {
+            case IDLE:
+                break;
             case RED:
                 // Start backward
                 speed = -speedMin;
                 timer.reset();
-                state = AUTO_STATE.SPIN; // Jump to a specific state
+                state = AUTO_STATE.SPIN_RED; // Jump to a specific state
                 break;
             case BLUE:
                 // Start forward
                 speed = speedMin;
                 timer.reset();
-                state = AUTO_STATE.SPIN; // Jump to a specific state
+                state = AUTO_STATE.SPIN_BLUE; // Jump to a specific state
                 break;
-            case SPIN:
+            case SPIN_BLUE:
                 // Run the spin cycle
                 if (speed != 0 && timer.seconds() < rampTime) {
                     speed = (speedMin + (timer.seconds() / rampTime) *
@@ -159,6 +167,17 @@ public class DuckSpin extends OpMode {
                     state = state.next(); // Jump to the next state in the enum list
                 }
                 duck.setPower(speed);
+                break;
+            case SPIN_RED:
+                // Run the spin cycle
+                if (speed != 0 && timer.seconds() < rampTime) {
+                    speed = (speedMin + (timer.seconds() / rampTime) *
+                            (speedMax - speedMin)) * Math.signum(speed);
+                } else {
+                    speed = 0;
+                    state = state.next(); // Jump to the next state in the enum list
+                }
+                duck2.setPower(speed);
                 break;
             case DONE:
                 break;
@@ -195,9 +214,11 @@ public class DuckSpin extends OpMode {
     }
 
     enum AUTO_STATE implements OrderedEnum {
+        IDLE,
         RED,
         BLUE,
-        SPIN,
+        SPIN_BLUE,
+        SPIN_RED,
         DONE;
 
         public AUTO_STATE next() {

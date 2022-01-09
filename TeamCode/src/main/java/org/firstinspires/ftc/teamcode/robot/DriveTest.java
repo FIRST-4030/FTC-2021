@@ -59,15 +59,17 @@ public class DriveTest extends MultiOpModeManager {
     private Distance distance;
     private Depositor depositor;
     private Capstone capstone;
+    private DuckSpin duck;
 
     // Constants
     public static double speedMin = 0.2;
-    public static double speedMax = 0.4;
+    public static double speedMax = 0.5;
     public static double r = 16;
-    public static double arcLength = 18;
-    private static double angle = arcLength / Math.PI * 180.0 / r;
+    public static double arcLength = 16;
+    public static double angle = arcLength / Math.PI * 180.0 / r;
     public static double COLLECTOR_UP = 0.65;
     public static double COLLECTOR_DOWN = 0.90;
+    public static int num = 0;
 
     // Members
     private AUTO_STATE state = AUTO_STATE.DONE;
@@ -84,6 +86,7 @@ public class DriveTest extends MultiOpModeManager {
             super.register(new Depositor());
             super.register(new Capstone());
             super.register(new Distance());
+            super.register(new DuckSpin());
 
             distance = new Distance();
             super.register(distance);
@@ -91,6 +94,8 @@ public class DriveTest extends MultiOpModeManager {
             super.register(depositor);
             capstone = new Capstone();
             super.register(capstone);
+            duck = new DuckSpin();
+            super.register(duck);
 
             in = Globals.input(this);
 
@@ -146,15 +151,17 @@ public class DriveTest extends MultiOpModeManager {
     @Override
     public void start() {
         super.start();
+        num = 0;
         distance.startScan();
         drive.setDoneFalse();
-        state = AUTO_STATE.MOVE_OUT;
+        state = AUTO_STATE.BARCODE;
     }
 
     @Override
     public void loop() {
         depositor.loop();
         distance.loop();
+        duck.loop();
         in.loop();
 
         // Step through the auto commands
@@ -190,9 +197,26 @@ public class DriveTest extends MultiOpModeManager {
                 }
                 break;
             case ARC:
-                drive.arcToTicks(angle, r, 0, speedMin, speedMax);
-                if (drive.isDone() && !drive.isBusy() && depositor.isDone()) {
+                if (duckSide) {
+                    if (redAlliance) {
+                        drive.arcTo(-r, arcLength, speedMin, speedMax);
+                    } else {
+                        drive.arcTo(r, arcLength, speedMin, speedMax);
+                    }
+                } else {
+                    if (redAlliance) {
+                        drive.arcTo(r, arcLength, speedMin, speedMax);
+                    } else {
+                        drive.arcTo(-r, arcLength, speedMin, speedMax);
+                    }
+                }
+                if (drive.isDone() && !drive.isBusy()) {
                     drive.setDoneFalse();
+                    state = state.next();
+                }
+                break;
+            case PREP_WAIT:
+                if (depositor.isDone()) {
                     state = state.next();
                 }
                 break;
@@ -203,10 +227,71 @@ public class DriveTest extends MultiOpModeManager {
                 }
                 break;
             case PARK:
-                drive.driveTo(-speedMin, -speedMax, -52);
+                if (duckSide) {
+                    if (redAlliance) {
+                        drive.arcTo(-14, -37.25, -speedMin, -speedMax);
+                    } else {
+                        drive.arcTo(14, -37.25, -speedMin, -speedMax);
+                    }
+                } else {
+                    if (redAlliance) {
+                        drive.arcTo(-70, -42, -speedMin, -speedMax);
+                    } else {
+                        drive.arcTo(70, -42, -speedMin, -speedMax);
+                    }
+                }
+                //drive.driveTo(-speedMin, -speedMax, -52);
                 if (drive.isDone() && !drive.isBusy()) {
                     drive.setDoneFalse();
                     state = state.next();
+                }
+                break;
+            /* case RESET:
+                if (num == 0) {
+                    depositor.reset();
+                    num++;
+                }
+                if (depositor.isDone()) {
+                    state = state.next();
+                }
+                break;*/
+            case ADD1:
+                if (duckSide) {
+                    drive.arcTo(0, 37.5, speedMin, speedMax);
+                } else {
+                    //drive.arcTo(-60, 40, speedMin, speedMax);
+                    state = state.next();
+                }
+                if (drive.isDone() && !drive.isBusy()) {
+                    drive.setDoneFalse();
+                    state = state.next();
+                }
+                break;
+            case DUCK_SPIN:
+                if (duckSide) {
+                    duck.auto(redAlliance);
+                    if (duck.isDone()) {
+                        state = state.next();
+                    }
+                } else {
+                    state = state.next();
+                }
+                break;
+            case ADD2:
+                if (duckSide) {
+                    if (redAlliance) {
+                        drive.arcTo(-9.8, -37.8, -speedMin, -speedMax);
+                    } else {
+                        drive.arcTo(9.8, -37.8, -speedMin, -speedMax);
+                    }
+                } else {
+                    //drive.arcTo(60, -40, -speedMin, -speedMax);
+                    state = state.next();
+                }
+                if (drive.isDone() && !drive.isBusy()) {
+                    depositor.tiltBack();
+                    drive.setDoneFalse();
+                    state = AUTO_STATE.DONE;
                 }
                 break;
             // Stop processing
@@ -227,8 +312,13 @@ public class DriveTest extends MultiOpModeManager {
         BARCODE,
         MOVE_OUT,
         ARC,
+        PREP_WAIT,
         DEPOSIT,
         PARK,
+        //   RESET,
+        ADD1,
+        DUCK_SPIN,
+        ADD2,
         DONE;
 
         public DriveTest.AUTO_STATE next() {

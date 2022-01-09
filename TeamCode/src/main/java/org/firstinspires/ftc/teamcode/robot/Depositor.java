@@ -237,15 +237,26 @@ public class Depositor extends OpMode {
                     state = AUTO_STATE.TILTED_FORWARD;
                 }
                 break;
-            case TILTED_BACK:
+            case TILT_BACK:
                 tilt.setPosition(TILT_BACK);
+                state = AUTO_STATE.DONE;
+                break;
+            case TILT_FORWARD:
+                tilt.setPosition(TILT_FORWARD);
                 state = AUTO_STATE.DONE;
                 break;
             case REVERSE_RUN:      // Run the belt in reverse for a set time (for TeleOp only)
                 belt.setPower(-BELT_SPEED);
                 break;
+            case RESET_BELT:
+                belt.setTargetPosition((((belt.getCurrentPosition() / 927) + 1) * 927));
+                belt.setPower(0.7);
+                if (belt.getCurrentPosition() >= belt.getTargetPosition()) {
+                    state = AUTO_STATE.DONE;
+                }
+                break;
             case DONE:
-                tilt.setPosition(TILT_FORWARD);
+                tilt.setPosition(tilt.getPosition());
                 low.setPosition(low.getPosition());
                 mid.setPosition(mid.getPosition());
                 high.setPosition(high.getPosition());
@@ -292,11 +303,11 @@ public class Depositor extends OpMode {
             }
             if (gamepad2.dpad_left) {
                 telemetry.addData("action: ", "going to tilt forward");
-                state = AUTO_STATE.TILTED_FORWARD;
+                state = AUTO_STATE.TILT_FORWARD;
             }
             if (gamepad2.dpad_right) {
                 telemetry.addData("action: ", "going to tilt backward");
-                state = AUTO_STATE.TILTED_BACK;
+                state = AUTO_STATE.TILT_BACK;
             }
             if (gamepad2.a) {
                 mid.setPosition(MID_OPEN);
@@ -342,8 +353,10 @@ public class Depositor extends OpMode {
         TILTED_FORWARD,     // Tilt forward, move flipper to start position
         DOOR_PREP,          // Move the flipper to below the required door
         DOOR_OPEN,          // Open the required door and run conveyor a small amount
-        TILTED_BACK,        // Tilt back
+        TILT_BACK,
+        TILT_FORWARD,
         REVERSE_RUN,        // Run the belt in reverse for a set time (for TeleOp only)
+        RESET_BELT,
         DONE;               // Power down all servos
 
         public AUTO_STATE next() {
@@ -368,6 +381,15 @@ public class Depositor extends OpMode {
         loop();
     }
 
+    public void tiltBack() {
+        state = AUTO_STATE.TILT_BACK;
+        loop();
+    }
+
+    public void reset() {
+        state = AUTO_STATE.RESET_BELT;
+        loop();
+    }
     public boolean isDone() {
         return (state == AUTO_STATE.DONE || state == AUTO_STATE.TILTED_FORWARD);
     }

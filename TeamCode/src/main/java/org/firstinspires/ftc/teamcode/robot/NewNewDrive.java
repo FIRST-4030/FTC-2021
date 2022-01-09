@@ -295,33 +295,38 @@ public class NewNewDrive extends OpMode {
     // r - radius of rotation, inches
     // speedMin - minimum speed of the drive, (-1) - 1
     // speedMax - maximum speed of the drive, (-1) - 1
-    public void arcToTicks(double angle, double r, double arcLength, double speedMin, double speedMax) {
-        if (angle == 0 && arcLength == 0) {
+    public void arcTo(double r, double arcLength, double speedMin, double speedMax) {
+        if (arcLength == 0) {
             return;
         }
         double arcLengthL;
         double arcLengthR;
+        double arcLengthInner;
+        double arcLengthOuter;
         double leftTicks;
         double rightTicks;
         // it should be, but ensure that the radius is positive
-        r = Math.abs(r);
+        double angle = 0;
 
-        if (r < 5) r = 5.0;
-        if (arcLength == 0) {
-            arcLength = Math.PI * (angle / 180.0) * r;
-        }
-        if (angle == 0) {
+        if (r == 0) {
             arcLengthL = arcLength;
             arcLengthR = arcLength;
-        } else if (angle < 0) {    // if angle is negative, we are turning to the right
-            // difference is signs on the trackWidth
-            angle *= -1;
-            arcLengthL = Math.PI * (angle / 180.0) * (r + trackWidthHalf);
-            arcLengthR = Math.PI * (angle / 180.0) * (r - trackWidthHalf);
         } else {
-            arcLengthL = Math.PI * (angle / 180.0) * (r - trackWidthHalf);
-            arcLengthR = Math.PI * (angle / 180.0) * (r + trackWidthHalf);
+            angle = Math.toDegrees(arcLength / Math.abs(r));
+            arcLengthInner = Math.toRadians(angle) * (Math.abs(r) - trackWidthHalf);
+            arcLengthOuter = Math.toRadians(angle) * (Math.abs(r) + trackWidthHalf);
+
+            if (r > 0) {
+                // if radius is greater than zero, we are moving to the left, so the right side is on the outside
+                arcLengthL = arcLengthInner;
+                arcLengthR = arcLengthOuter;
+            } else {
+                // if radius is greater than zero, we are moving to the left, so the right side is on the inside
+                arcLengthL = arcLengthOuter;
+                arcLengthR = arcLengthInner;
+            }
         }
+
         leftTicks = arcLengthL * TICKS_PER_INCH;
         rightTicks = arcLengthR * TICKS_PER_INCH;
         double midTicks = arcLength * TICKS_PER_INCH;
@@ -329,7 +334,7 @@ public class NewNewDrive extends OpMode {
             midTicks = 1;
         }
 
-        double maxRatio = Math.max(leftTicks, rightTicks) / midTicks;
+        double maxRatio = Math.max(Math.abs(leftTicks), Math.abs(rightTicks)) / Math.abs(midTicks);
         if ((isBusy() || !done) && speedCurveL.isValid() && speedCurveR.isValid() && started) {
             // speed is calculated using the curve defined above
             driveLeft.setPower((leftTicks / midTicks) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
@@ -365,79 +370,11 @@ public class NewNewDrive extends OpMode {
         telemetry.addData("right ticks", driveRight.getCurrentPosition());
         telemetry.addData("leftVel", driveLeft.getPower());
         telemetry.addData("rightVel", driveRight.getPower());
-        logData("arcToTicks()", started + "," + done + "," + speedCurveL.isValid() + "," + speedCurveL.getSize() + "," + speedCurveR.isValid() + "," + speedCurveR.getSize());
-    }
-
-    // Original arcTo method relying on time to ramp
-    // angle, degrees; positive is left, negative is right
-    // radius, inches
-    public void arcToOG(double angle, double r, double speedMin, double speedMax) {
-        if (angle == 0) {
-            return;
-        }
-
-        // it should be, but ensure that the radius is positive
-        r = Math.abs(r);
-        if (r < 5) r = 5.0;
-        double speed = 0;
-        double rampTime;
-        double v = 40 * (((speedMin + speedMax) / 2 * 0.5) + (speedMax * 0.5)); // inches per second
-        double arcLength = Math.PI * (Math.abs(angle) / 180.0) * r; // inches
-        double arcLengthL;
-        double arcLengthR;
-        if (angle < 0) {    // if angle is negative, we are turning to the right
-            // difference is signs on the trackWidth
-            angle *= -1;
-            arcLengthL = Math.PI * (angle / 180.0) * (r + trackWidthHalf);
-            arcLengthR = Math.PI * (angle / 180.0) * (r - trackWidthHalf);
-        } else {
-            arcLengthL = Math.PI * (angle / 180.0) * (r - trackWidthHalf);
-            arcLengthR = Math.PI * (angle / 180.0) * (r + trackWidthHalf);
-        }
-        double time = Math.abs(arcLength / v);
-        double leftVel = v * arcLengthL / arcLength;
-        double rightVel = v * arcLengthR / arcLength;
-        double maxRatio = Math.max(Math.abs(leftVel), Math.abs(rightVel)) / Math.abs(v);
-
-        if (!started) {
-            rampTimer.reset();
-            driveLeft.setPower(speedMin * (leftVel / v) / maxRatio);
-            driveRight.setPower(speedMin * (rightVel / v) / maxRatio);
-            started = true;
-            done = false;
-        }
-
-        if ((isBusy() || !done) && started) {
-            if (rampTimer.seconds() <= (time * 0.125)) {
-                rampTime = time * 0.125;
-                speed = (speedMin + (rampTimer.seconds() / rampTime) * (speedMax - speedMin));
-            } else if (rampTimer.seconds() <= (time * 0.625)) {
-                speed = speedMax;
-            } else if (rampTimer.seconds() < time) {
-                rampTime = time * 0.375;
-                speed = (speedMax + ((rampTimer.seconds() - (time * 0.625)) / rampTime) * (speedMin - speedMax));
-            } else {
-                speed = 0;
-                done = true;
-            }
-            driveLeft.setPower(speed * (leftVel / v) / maxRatio);
-            driveRight.setPower(speed * (rightVel / v) / maxRatio);
-            telemetry.log().add(getClass().getSimpleName() + "::arcToOG(): Motors in use");
-        }
-
-        if (done) {
-            driveLeft.setPower(0);
-            driveRight.setPower(0);
-            started = false;
-        }
-
-        if (isBusy() || !done) telemetry.addData("max ratio", maxRatio);
-        telemetry.addData("leftVel", leftVel);
-        telemetry.addData("rightVel", rightVel);
-        telemetry.addData("speed", speed);
-        telemetry.addData("timer", rampTimer.seconds());
-        telemetry.addData("time", time);
-        logData("arcToOG()", "");
+        logData("arcTo()", started + "," + done + "," +
+                speedCurveL.isValid() + "," + speedCurveL.getSize() + "," +
+                speedCurveR.isValid() + "," + speedCurveR.getSize() + "," +
+                arcLengthL + "," + arcLengthR + "," +
+                leftTicks + "," + rightTicks + "," + midTicks + "," + maxRatio);
     }
 
     public void setDoneFalse() {
