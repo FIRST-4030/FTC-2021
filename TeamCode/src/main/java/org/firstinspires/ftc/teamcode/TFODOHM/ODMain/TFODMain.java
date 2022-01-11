@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.TFODOMH.ODMain;
+package org.firstinspires.ftc.teamcode.TFODOHM.ODMain;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -10,9 +10,9 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.TFODOMH.TFMaths.Matrix4fBuilder;
-import org.firstinspires.ftc.teamcode.TFODOMH.TFMaths.Vector2f;
-import org.firstinspires.ftc.teamcode.TFODOMH.TFMaths.Vector3f;
+import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Matrix4fBuilder;
+import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector2f;
+import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector3f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
