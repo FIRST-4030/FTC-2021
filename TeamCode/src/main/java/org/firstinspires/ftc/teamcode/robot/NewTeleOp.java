@@ -43,6 +43,8 @@ import com.qualcomm.robotcore.util.RobotLog;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 
+import java.net.IDN;
+
 @Config
 @TeleOp(name = "NewTeleOp", group = "Test")
 public class NewTeleOp extends MultiOpModeManager {
@@ -98,6 +100,7 @@ public class NewTeleOp extends MultiOpModeManager {
     private static double duckPowerAutoMin = 0.46;
     private static double duckPowerAutoMax = 0.66;
     private static double autoDuckRampTime = 1.65;
+    collectCmd collectCmdState = collectCmd.IDLE;
 
     private static boolean collectorActive = false;
 
@@ -249,43 +252,56 @@ public class NewTeleOp extends MultiOpModeManager {
         // Depositor
         depositor.loop();
 
-        // Collector
-        // Sensor
+        // Collector state
         boolean collected = sensorCollector.isPressed();
         telemetry.addData("Collected? ", collected);
-        /* if (gamepad2.left_bumper) {
-            collectorActive = true;
+        switch (collectCmdState) {
+            case IDLE:
+                if (gamepad2.left_bumper) {
+                    collectCmdState = collectCmd.COLLECT;
+                }
+                break;
+            case COLLECT:
+                if (!gamepad2.left_bumper) {
+                    collectCmdState = collectCmd.EJECT;
+                }
+                if (sensorCollector.isPressed()) {
+                    collectorTimer.reset();
+                    collectCmdState = collectCmd.SENSOR_DELAY;
+                }
+                break;
+            case SENSOR_DELAY:
+                if (collectorTimer.seconds() > 0.24) {
+                    collectCmdState = collectCmd.EJECT;
+                }
+                break;
+            case EJECT:
+                collectorTimer.reset();
+                collectCmdState = collectCmd.EJECT_DELAY;
+                break;
+            case EJECT_DELAY:
+                if (collectorTimer.seconds() > EJECT_TIME) {
+                    collectCmdState = collectCmd.IDLE;
+                }
+                break;
         }
 
-        if (collectorActive) {
-            if ((collected || !gamepad2.left_bumper) && collectorArm.getPosition() == COLLECTOR_DOWN) {
-                collectorTimer.reset();
-            }
-            if (collectorTimer.seconds() > EJECT_TIME) {
-                collectorActive = false;
-                collector.setPower(-1);
-            } else {
+        // Collector commands
+        switch (collectCmdState) {
+            case IDLE:
+                collectorArm.setPosition(COLLECTOR_UP);
+                collector.setPower(0);
+                break;
+            case COLLECT:
+            case SENSOR_DELAY:
+                collectorArm.setPosition(COLLECTOR_DOWN);
                 collector.setPower(1);
-            }
-        } else {
-            collector.setPower(0);
-        }
-        collectorArm.setPosition(collectorActive ? COLLECTOR_DOWN : COLLECTOR_UP);*/
-        if ((collected || gamepad2.left_bumper) && collectorArm.getPosition() == COLLECTOR_DOWN) {
-            collectorTimer.reset();
-        }
-        if (gamepad2.left_bumper && collectorArm.getPosition() == COLLECTOR_UP) {
-            collectorArm.setPosition(COLLECTOR_DOWN);
-            collector.setPower(1);
-        } else if (collectorTimer.seconds() < 0.24) {
-            collectorArm.setPosition(COLLECTOR_DOWN);
-            collector.setPower(1);
-        } else if (collectorTimer.seconds() < EJECT_TIME) {
-            collectorArm.setPosition(COLLECTOR_UP);
-            collector.setPower(-1);
-        } else {
-            collectorArm.setPosition(COLLECTOR_UP);
-            collector.setPower(0);
+                break;
+            case EJECT:
+            case EJECT_DELAY:
+                collectorArm.setPosition(COLLECTOR_UP);
+                collector.setPower(-1);
+                break;
         }
         RobotLog.d("," + "Collector" + "," + getRuntime() + "," +
                 gamepad2.left_bumper + "," + collected + "," +
@@ -352,5 +368,13 @@ public class NewTeleOp extends MultiOpModeManager {
 
     @Override
     public void stop() {
+    }
+
+    enum collectCmd {
+        IDLE,
+        COLLECT,
+        SENSOR_DELAY,
+        EJECT,
+        EJECT_DELAY
     }
 }
