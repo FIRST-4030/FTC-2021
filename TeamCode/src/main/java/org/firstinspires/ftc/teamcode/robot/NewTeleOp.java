@@ -53,11 +53,6 @@ public class NewTeleOp extends MultiOpModeManager {
     private DcMotor rightDrive = null;
     private DcMotor duckSpinner = null;
     private DcMotor duckSpinner2 = null;
-    private DcMotor depBelt = null;
-    private Servo depLow = null;
-    private Servo depMid = null;
-    private Servo depHigh = null;
-    private Servo depTilt = null;
     private DcMotor collector = null;
     private Servo collectorArm = null;
     private Servo capstoneArm = null;
@@ -68,20 +63,12 @@ public class NewTeleOp extends MultiOpModeManager {
 
     // Constants used for hardware
     private static double DUCK_POWER = 0.0;
-    private static double DEP_BELT_POWER = 0.88;
-    private static double DEP_UP = 0.47;
-    private static double DEP_DOWN = 0.18;
-    private static double LOW_OPEN = 0.98;
-    private static double LOW_CLOSE = 0.56;
-    private static double MID_OPEN = 0.9;
-    private static double MID_CLOSE = 0.47;
-    private static double HIGH_OPEN = 0.13;
-    private static double HIGH_INIT = 0.55;
-    public static double COLLECTOR_UP = 0.65;
+    public static double COLLECTOR_UP = 0.53;
     public static double COLLECTOR_DOWN = 0.90;
     private static double SPEED = 1;
     public static int DISTANCE = 30;
-    public static double EJECT_TIME = 3;
+    public static double DELAY_TIME = 1.25;
+    public static double EJECT_TIME = 2;
     private static double timerRatio = 0.0;
     public static double duckPowerMin = 0.63;  // min duck spinner speed (0 - 1.0)
     public static double duckPowerMax = 0.88;  // max duck spinner speed (0 - 1.0)
@@ -97,9 +84,7 @@ public class NewTeleOp extends MultiOpModeManager {
     private double RIGHT_DRIVE_POW = 0;
     private static double ACCEL_CONSTANT = 0.4;
     private static double fastFactor = 0;
-    private static double duckPowerAutoMin = 0.46;
-    private static double duckPowerAutoMax = 0.66;
-    private static double autoDuckRampTime = 1.65;
+    private static double fastFactor2 = 0;
     collectCmd collectCmdState = collectCmd.IDLE;
 
     private static boolean collectorActive = false;
@@ -143,12 +128,6 @@ public class NewTeleOp extends MultiOpModeManager {
 
         // Depositor
         try {
-            /* depBelt = hardwareMap.get(DcMotor.class, "Depbelt");
-            depBelt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            depLow = hardwareMap.get(Servo.class, "Deplow");
-            depMid = hardwareMap.get(Servo.class, "Depmid");
-            depHigh = hardwareMap.get(Servo.class, "Dephigh");
-            depTilt = hardwareMap.get(Servo.class, "Deptilt");*/
             super.register(new Depositor());
             depositor = new Depositor();
             super.register(depositor);
@@ -161,11 +140,6 @@ public class NewTeleOp extends MultiOpModeManager {
 
         // Collector
         try {
-            /* super.register(new Collector());
-            collector = new Collector();
-            super.register(collector);
-
-            super.init(); */
             collector = hardwareMap.get(DcMotor.class, "Collector");
             collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
             sensorCollector = hardwareMap.get(TouchSensor.class, "DC");
@@ -221,15 +195,20 @@ public class NewTeleOp extends MultiOpModeManager {
     @Override
     public void loop() {
         // PoV drive
-        if (gamepad1.right_trigger > ACCEL_CONSTANT) {
-            fastFactor = gamepad1.right_trigger;
+        if (gamepad1.left_trigger > ACCEL_CONSTANT) {
+            fastFactor = gamepad1.left_trigger;
         } else {
             fastFactor = ACCEL_CONSTANT;
+        }
+        if (gamepad1.right_trigger > ACCEL_CONSTANT) {
+            fastFactor2 = gamepad1.right_trigger;
+        } else {
+            fastFactor2 = ACCEL_CONSTANT;
         }
         LEFT_DRIVE_POW = Math.pow(-gamepad1.left_stick_y, 1);
         RIGHT_DRIVE_POW = Math.pow(-gamepad1.right_stick_y, 1);
         leftDrive.setPower(LEFT_DRIVE_POW * fastFactor);
-        rightDrive.setPower(RIGHT_DRIVE_POW * fastFactor);
+        rightDrive.setPower(RIGHT_DRIVE_POW * fastFactor2);
 
         // Duck spinner
         if (gamepad1.a) {
@@ -271,7 +250,7 @@ public class NewTeleOp extends MultiOpModeManager {
                 }
                 break;
             case SENSOR_DELAY:
-                if (collectorTimer.seconds() > 0.24) {
+                if (collectorTimer.seconds() > DELAY_TIME) {
                     collectCmdState = collectCmd.EJECT;
                 }
                 break;

@@ -36,6 +36,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -52,11 +53,12 @@ public class Collector extends OpMode {
     // Hardware
     private Servo arm = null;
     private DcMotor collector = null;
-    private DistanceSensor distance = null;
+    //private DistanceSensor distance = null;
+    private TouchSensor touchSensor = null;
 
     // Config
     public static boolean DEBUG = false;
-    public static double ARM_UP = 0.37;
+    public static double ARM_UP = 0.65;
     public static double ARM_DOWN = 0.90;
     public static double SPEED = 1;
     public static int DISTANCE = 10;
@@ -78,7 +80,8 @@ public class Collector extends OpMode {
             arm = hardwareMap.get(Servo.class, "CollectorArm");
             arm.setPosition(ARM_UP);
 
-            distance = hardwareMap.get(DistanceSensor.class, "DC");
+            touchSensor = hardwareMap.get(TouchSensor.class, "DC");
+            //distance = hardwareMap.get(DistanceSensor.class, "DC");
 
             Globals.opmode = this;
             in = Globals.input(this);
@@ -115,10 +118,6 @@ public class Collector extends OpMode {
 
         in.loop();
 
-        // Distance
-        double range = distance.getDistance(DistanceUnit.MM);
-        boolean inRange = (range <= DISTANCE);
-
         /*// Collector
         double spin = -gamepad2.left_stick_y;
         collector.setPower(Range.clip(spin, SPEED, -SPEED));*/
@@ -126,10 +125,8 @@ public class Collector extends OpMode {
         // Arm
         telemetry.addData("collector pos", arm.getPosition());
         telemetry.addData("collector pos", Math.round(arm.getPosition() * 100.0)/100.0);
-        telemetry.addData("inRange?", inRange);
-        telemetry.addData("Distance: ", distance.getDistance(DistanceUnit.MM));
         telemetry.addData("State", state);
-        if ((inRange || gamepad2.left_bumper) && (Math.round(arm.getPosition() * 100.0)/100.0 == ARM_DOWN)) {
+        if (gamepad2.left_bumper && (Math.round(arm.getPosition() * 100.0)/100.0 == ARM_DOWN)) {
             telemetry.log().add("Going to up now");
             state = AUTO_STATE.UP;
             runtime.reset();
@@ -165,8 +162,8 @@ public class Collector extends OpMode {
 
         // Debug when requested
         if (DEBUG) {
-            telemetry.addData("Collector Input", "R %.0f/%s",
-                    range, inRange ? "+" : "-");
+            /*telemetry.addData("Collector Input", "R %.0f/%s",
+                    range, inRange ? "+" : "-");*/
             telemetry.addData("Collector Output", "C %.2f/%d, A %.2f",
                     collector.getPower(), collector.getCurrentPosition(), arm.getPosition());
         }

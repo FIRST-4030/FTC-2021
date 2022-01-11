@@ -67,7 +67,7 @@ public class DriveTest extends MultiOpModeManager {
     public static double r = 16;
     public static double arcLength = 16;
     public static double angle = arcLength / Math.PI * 180.0 / r;
-    public static double COLLECTOR_UP = 0.65;
+    public static double COLLECTOR_UP = 0.53;
     public static double COLLECTOR_DOWN = 0.90;
     public static int num = 0;
 
@@ -240,21 +240,16 @@ public class DriveTest extends MultiOpModeManager {
                         drive.arcTo(70, -42, -speedMin, -speedMax);
                     }
                 }
+                if (num == 0) {
+                    depositor.reset();
+                    num++;
+                }
                 //drive.driveTo(-speedMin, -speedMax, -52);
                 if (drive.isDone() && !drive.isBusy()) {
                     drive.setDoneFalse();
                     state = state.next();
                 }
                 break;
-            /* case RESET:
-                if (num == 0) {
-                    depositor.reset();
-                    num++;
-                }
-                if (depositor.isDone()) {
-                    state = state.next();
-                }
-                break;*/
             case ADD1:
                 if (duckSide) {
                     drive.arcTo(0, 37.5, speedMin, speedMax);
@@ -284,11 +279,11 @@ public class DriveTest extends MultiOpModeManager {
                     } else {
                         drive.arcTo(9.8, -37.8, -speedMin, -speedMax);
                     }
-                } else {
+                } else if (depositor.isDone()) {
                     //drive.arcTo(60, -40, -speedMin, -speedMax);
                     state = state.next();
                 }
-                if (drive.isDone() && !drive.isBusy()) {
+                if (drive.isDone() && !drive.isBusy() && depositor.isDone()) {
                     depositor.tiltBack();
                     drive.setDoneFalse();
                     state = AUTO_STATE.DONE;
@@ -315,7 +310,6 @@ public class DriveTest extends MultiOpModeManager {
         PREP_WAIT,
         DEPOSIT,
         PARK,
-        //   RESET,
         ADD1,
         DUCK_SPIN,
         ADD2,

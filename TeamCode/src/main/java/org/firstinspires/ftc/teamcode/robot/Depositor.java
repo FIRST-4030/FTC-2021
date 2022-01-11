@@ -61,6 +61,7 @@ public class Depositor extends OpMode {
     // Config
     public static boolean DEBUG = false;
     public static double BELT_SPEED = 0.6;
+    public static double RESET_BELT_SPEED = 0.27;
     public static double TILT_BACK = 0.47;
     public static double TILT_FORWARD = 0.18;
     public static double LOW_OPEN = 0.6;
@@ -136,7 +137,7 @@ public class Depositor extends OpMode {
             belt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             belt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         } else {
-            belt.setPower(0.3);
+            belt.setPower(RESET_BELT_SPEED);
         }
     }
 
@@ -249,8 +250,11 @@ public class Depositor extends OpMode {
                 belt.setPower(-BELT_SPEED);
                 break;
             case RESET_BELT:
-                belt.setTargetPosition((((belt.getCurrentPosition() / 927) + 1) * 927));
-                belt.setPower(0.7);
+                if (!prepPosSet) {
+                    belt.setTargetPosition((((belt.getCurrentPosition() / 927) + 1) * 927));
+                    belt.setPower(RESET_BELT_SPEED);
+                    prepPosSet = true;
+                }
                 if (belt.getCurrentPosition() >= belt.getTargetPosition()) {
                     state = AUTO_STATE.DONE;
                 }

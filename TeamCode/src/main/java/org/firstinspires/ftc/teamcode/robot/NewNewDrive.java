@@ -193,12 +193,12 @@ public class NewNewDrive extends OpMode {
             // initialize speedCurveL and speedCurveR to have motor ticks be the X coordinate and motor speed be the Y coordinate
             speedCurveL.setClampLimits(true);
             speedCurveL.addElement(driveLeft.getCurrentPosition() - 0.05 * midTicks, speedMin);
-            speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.125 * midTicks, speedMax);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.375 * midTicks, speedMax);
             speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.625 * midTicks, speedMax);
             speedCurveL.addElement(driveLeft.getCurrentPosition() + 1.00 * midTicks, speedMin);
             speedCurveR.setClampLimits(true);
             speedCurveR.addElement(driveRight.getCurrentPosition() - 0.05 * midTicks, speedMin);
-            speedCurveR.addElement(driveRight.getCurrentPosition() + 0.125 * midTicks, speedMax);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + 0.375 * midTicks, speedMax);
             speedCurveR.addElement(driveRight.getCurrentPosition() + 0.625 * midTicks, speedMax);
             speedCurveR.addElement(driveRight.getCurrentPosition() + 1.00 * midTicks, speedMin);
             started = true;
@@ -347,11 +347,11 @@ public class NewNewDrive extends OpMode {
             speedCurveL.setClampLimits(true);
             speedCurveR.setClampLimits(true);
             speedCurveL.addElement(driveLeft.getCurrentPosition() - 0.05 * leftTicks, speedMin);
-            speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.125 * leftTicks, speedMax);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.375 * leftTicks, speedMax);
             speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.625 * leftTicks, speedMax);
             speedCurveL.addElement(driveLeft.getCurrentPosition() + 1.00 * leftTicks, speedMin);
             speedCurveR.addElement(driveRight.getCurrentPosition() - 0.05 * rightTicks, speedMin);
-            speedCurveR.addElement(driveRight.getCurrentPosition() + 0.125 * rightTicks, speedMax);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + 0.375 * rightTicks, speedMax);
             speedCurveR.addElement(driveRight.getCurrentPosition() + 0.625 * rightTicks, speedMax);
             speedCurveR.addElement(driveRight.getCurrentPosition() + 1.00 * rightTicks, speedMin);
 

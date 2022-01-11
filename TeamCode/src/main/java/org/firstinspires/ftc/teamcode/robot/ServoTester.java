@@ -112,7 +112,7 @@ public class ServoTester extends OpMode{
             servoPos = Math.max(0.0f, servoPos);
         }
         // Set position of desired servo
-        mid.setPosition(servoPos);
+        collectorArm.setPosition(servoPos);
     }
 
     @Override
