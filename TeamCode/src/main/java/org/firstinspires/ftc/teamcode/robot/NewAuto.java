@@ -31,6 +31,7 @@ package org.firstinspires.ftc.teamcode.robot;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -40,7 +41,8 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
-@Autonomous(name = "NewAuto", group = "Test")
+//@Disabled
+@Autonomous(name = "OldAuto", group = "Test")
 public class NewAuto extends MultiOpModeManager {
     // Hardware
     private Drive drive;

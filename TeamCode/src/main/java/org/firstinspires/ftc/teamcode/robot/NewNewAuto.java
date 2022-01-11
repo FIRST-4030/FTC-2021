@@ -39,7 +39,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 
@@ -51,8 +50,8 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
 //@Disabled
-@Autonomous(name = "DriveTest", group = "Test")
-public class DriveTest extends MultiOpModeManager {
+@Autonomous(name = "Autonomous", group = "Test")
+public class NewNewAuto extends MultiOpModeManager {
     // Hardware
     private NewNewDrive drive;
     private Servo collectorArm = null;
@@ -315,7 +314,7 @@ public class DriveTest extends MultiOpModeManager {
         ADD2,
         DONE;
 
-        public DriveTest.AUTO_STATE next() {
+        public NewNewAuto.AUTO_STATE next() {
             return OrderedEnumHelper.next(this);
         }
     }
