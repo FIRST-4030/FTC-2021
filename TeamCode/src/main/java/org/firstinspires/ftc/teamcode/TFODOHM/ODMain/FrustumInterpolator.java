@@ -22,7 +22,7 @@ public class FrustumInterpolator {
     private Plane3f cardinalAxisPlane = Plane3f.X_PLANE;
 
     //presets for listed cameras
-    public static FrustumInterpolator Logitech_C270 = new FrustumInterpolator(TFMathExtension.findFOV(3.58, 2.11, 4));
+    public static FrustumInterpolator Logitech_C270 = new FrustumInterpolator(TFMathExtension.findFOV(3.58, 2.02, 4.11));
 
     public FrustumInterpolator(double horizontal_fov, double vertical_fov, Matrix4f cam_rot, Vector3f cam_pos){
         this.hFOV = horizontal_fov;
