@@ -41,6 +41,12 @@ public class Vector3f {
         return this.z;
     }
 
+    public void setX(float nx){ this.x = nx; }
+
+    public void setY(float ny){ this.y = ny; }
+
+    public void setZ(float nz){ this.z = nz; }
+
     public float length(){
         return (float) Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     }

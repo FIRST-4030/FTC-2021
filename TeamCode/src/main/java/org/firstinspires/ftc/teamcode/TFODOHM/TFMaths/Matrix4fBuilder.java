@@ -1,7 +1,16 @@
 package org.firstinspires.ftc.teamcode.TFODOHM.TFMaths;
 
 public class Matrix4fBuilder {
+    /**
+     * In these methods under this class, almost all matrices built expect a Vector4f with W being 1 to achieve the desired effect
+     */
+    public static void affineHelp(){return;}
 
+    /**
+     * Builds a translation matrix that transforms the X, Y, Z by the forth column, vector t
+     * @param translation
+     * @return
+     */
     public Matrix4f buildTranslation(Vector3f translation){
         return new Matrix4f(
                 new float[]{1, 0, 0, translation.getX(),
@@ -10,12 +19,33 @@ public class Matrix4fBuilder {
                             0, 0, 0,                  1});
     }
 
-    public Matrix4f buidlDilation(float factor){
+    /**
+     * Builds a scaling matrix that scales the X, Y, Z by a single factor
+     * @param factor
+     * @return
+     */
+    public Matrix4f buildDilation(float factor){
         return new Matrix4f(
                 new float[]{factor,      0,      0, 1,
                                  0, factor,      0, 1,
                                  0,      0, factor, 1,
                                  0,      0,      0, 1});
+    }
+
+    /**
+     * Builds a scaling matrix that scales the X, Y, Z individually
+     * @param xFactor
+     * @param yFactor
+     * @param zFactor
+     * @return
+     */
+    public Matrix4f buildDialation(float xFactor, float yFactor, float zFactor){
+        return new Matrix4f(
+                new float[]{xFactor, 0, 0, 1,
+                            0, yFactor, 0, 1,
+                            0, 0, zFactor, 1,
+                            0, 0,       0, 1}
+        );
     }
 
     /**
@@ -147,4 +177,25 @@ public class Matrix4fBuilder {
                         0,              0,              0,                                 1});
     }
 
+    /**
+     * Builds a Quaternion Rotation Matrix to rotate around a described axis
+     * <br> Generally, buildGenRot does its job, but it's using Eulerian angles
+     * @param axis
+     * @param angle_rad
+     * @return
+     */
+    public static Matrix4f buildQuaternionRot(Vector3f axis, double angle_rad){
+        float    s = 2 / (axis.length() * axis.length()), //manually multiply axis.length^-2 because Math.pow is 'inefficient'
+                qi = axis.getX(),
+                qj = axis.getY(),
+                qk = axis.getZ(),
+                qw = (float) Math.sin(angle_rad);
+
+        return new Matrix4f(
+                new float[]{1 - s * (qj * qj + qk * qk),     s * (qi * qj - qk * qw),     s * (qi * qk + qj * qw), 0,
+                                s * (qi * qj + qk * qw), 1 - s * (qi * qi + qk * qk),     s * (qj * qk - qi * qw), 0,
+                                s * (qi * qk - qj * qw),     s * (qj * qk + qi * qw), 1 - s * (qi * qi + qj * qj), 0,
+                                                      0,                           0,                           0, 1}
+                );
+    }
 }

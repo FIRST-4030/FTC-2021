@@ -103,7 +103,7 @@ public class FrustumInterpolator {
 
     @Override
     public String toString(){
-        return "";
+        return "HFOV: " + this.hFOV + " \nVFOV: " + this.vFOV + " \nCamera Position Vector3f: " + this.camPos.toString() + " \nCamera Rotation Matrix: \n" + this.camRot.toString();
     }
 
     /**

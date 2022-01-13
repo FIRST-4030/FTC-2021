@@ -18,6 +18,22 @@ public class TFMathExtension {
 
     /**
      * Liner Interpolation: 'a' & 'b' are the start & end points (order matters), and 't' is the scalar value: 0 gives 'a', 1 gives 'b', anything between gives a point in between 'a' & 'b'
+     * <br>Vector2f
+     * @param a
+     * @param b
+     * @param t
+     * @return
+     */
+    public static Vector2f lerp(Vector2f a, Vector2f b, float t){
+        float nX = a.getX() + (b.getX() - a.getX()) * t;
+        float nY = a.getY() + (b.getY() - a.getY()) * t;
+
+        return new Vector2f(nX, nY);
+    }
+
+    /**
+     * Liner Interpolation: 'a' & 'b' are the start & end points (order matters), and 't' is the scalar value: 0 gives 'a', 1 gives 'b', anything between gives a point in between 'a' & 'b'
+     * <br>Vector3f
      * @param a
      * @param b
      * @param t
@@ -31,13 +47,22 @@ public class TFMathExtension {
         return new Vector3f(nX, nY, nZ);
     }
 
-    public static Vector2f lerp(Vector2f a, Vector2f b, float t){
+    /**
+     * Liner Interpolation: 'a' & 'b' are the start & end points (order matters), and 't' is the scalar value: 0 gives 'a', 1 gives 'b', anything between gives a point in between 'a' & 'b'
+     * <br>Vector4f
+     * @param a
+     * @param b
+     * @param t
+     * @return
+     */
+    public static Vector4f lerp(Vector4f a, Vector4f b, float t){
         float nX = a.getX() + (b.getX() - a.getX()) * t;
         float nY = a.getY() + (b.getY() - a.getY()) * t;
+        float nZ = a.getZ() + (b.getZ() - a.getZ()) * t;
+        float nW = a.getW() + (b.getW() - a.getW()) * t;
 
-        return new Vector2f(nX, nY);
+        return new Vector4f(nX, nY, nZ, nW);
     }
-
     /**
      * quick clamping solution. Clamps a value between a min and max
      * @param min
@@ -147,18 +172,34 @@ public class TFMathExtension {
         return new double[] {hFov, vFov};
     }
 
-    public static Vector2f genBezierCurve(ArrayList<Vector2f> controlPoints, float t){
-        ArrayList<Vector2f> cachedPoints = controlPoints;
+    /**
+     * This method interpolates through a bezier curve through the given t value. The control points first and last element are the beginning and end points respectively.
+     * @param controlPoints
+     * @param t
+     * @return
+     */
+    public static Vector2f gen2fBezierCurve(ArrayList<Vector2f> controlPoints, float t){
+        ArrayList<Vector2f> cachedPoints = controlPoints, newCachedPoints = new ArrayList<>();
         Vector2f tempPoint = new Vector2f();
 
-        if (controlPoints.size() < 1){ return null;}
+        if (controlPoints.size() < 1){ return null;} //abort
+        else if (controlPoints.size() == 1){return controlPoints.get(0);}
 
         //loop over points, find interpolation points, repeat
-        for (int i = 0; i < cachedPoints.size() - 1; i++){
-            //          get point at index ; get point connected to prev ; interpolation factor
-            tempPoint = lerp(cachedPoints.get(i), cachedPoints.get(i + 1), t);
+        while (cachedPoints.size() > 1) {
+
+
+            for (int i = 0; i < cachedPoints.size() - 1; i++) {
+                //          get point at index ; get point connected to prev ; interpolation factor
+                tempPoint = lerp(cachedPoints.get(i), cachedPoints.get(i + 1), t);
+                newCachedPoints.add(tempPoint);
+            }
+
+            //overwrite points
+            cachedPoints = newCachedPoints;
+            newCachedPoints.clear();
         }
 
-        return tempPoint;
+        return cachedPoints.get(0); //the result is in a size one array, so get the first and only element of it
     }
 }

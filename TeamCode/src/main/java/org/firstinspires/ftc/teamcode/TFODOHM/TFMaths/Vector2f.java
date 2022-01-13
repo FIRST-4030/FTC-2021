@@ -33,6 +33,10 @@ public class Vector2f {
         return this.y;
     }
 
+    public void setX(float nx){ this.x = nx; }
+
+    public void setY(float ny){ this.y = ny; }
+
     public float length(){
         return (float) Math.sqrt(this.x * this.x + this.y * this.y);
     }
