@@ -60,7 +60,8 @@ public class Depositor extends OpMode {
 
     // Config
     public static boolean DEBUG = false;
-    public static double BELT_SPEED = 0.6;
+    public static double PREP_SPEED = 1;
+    public static double BELT_SPEED = 0.78;
     public static double RESET_BELT_SPEED = 0.27;
     public static double TILT_BACK = 0.47;
     public static double TILT_FORWARD = 0.18;
@@ -208,7 +209,7 @@ public class Depositor extends OpMode {
                             belt.setTargetPosition((belt.getCurrentPosition() / 927 * 927) + HIGH_PREP_POS);
                             break;
                     }
-                    belt.setPower(BELT_SPEED);
+                    belt.setPower(PREP_SPEED);
                     prepPosSet = true;
                 }
                 if (belt.getCurrentPosition() >= belt.getTargetPosition()) {
@@ -268,12 +269,6 @@ public class Depositor extends OpMode {
                 break;
         }
 
-
-        /* if (in.down("REVERSE")) {
-            state = AUTO_STATE.REVERSE_RUN;
-        } else if (in.up("REVERSE")) {
-            state = AUTO_STATE.DONE;
-        } */
         if (state == AUTO_STATE.DONE) {
             if (gamepad2.x) {
                 if (required_Door == DOOR_USED.LOW_DOOR) {

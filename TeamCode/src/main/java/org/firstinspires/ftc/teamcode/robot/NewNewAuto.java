@@ -55,6 +55,7 @@ public class NewNewAuto extends MultiOpModeManager {
     // Hardware
     private NewNewDrive drive;
     private Servo collectorArm = null;
+    //private DcMotor collector = null;
     private Distance distance;
     private Depositor depositor;
     private Capstone capstone;
@@ -122,6 +123,7 @@ public class NewNewAuto extends MultiOpModeManager {
 
         try {
             collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
+            //collector = hardwareMap.get(DcMotor.class, "Collector");
         } catch (Exception e) {
             telemetry.log().add("Could not find collector");
             error = true;
