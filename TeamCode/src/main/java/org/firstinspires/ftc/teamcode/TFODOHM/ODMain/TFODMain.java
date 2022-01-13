@@ -62,12 +62,23 @@ public class TFODMain extends OpMode {
     private HashMap<String, Boolean> objHMDetected;
     private ArrayList<Float> bbLeft = null, bbRight = null, bbTop = null, bbBottom = null; //coordinates for debugging
     private ArrayList<Vector2f> bbTopLeft = null, bbBottomRight = null; //in the NDC standard for graphics
-    private Vector3f local_pos = new Vector3f();
+    private Vector3f bbLocalPos = new Vector3f();
 
     //object to describe the camera frustum
     private FrustumInterpolator l270;
+    //camera attributes (with testing defaults)
+    private Vector3f localPos = new Vector3f(3.8f, 7.4f, 6.8f);
+    private double localPitch, localYaw, localRoll;
 
     public TFODMain(){init();}
+
+    public TFODMain(Vector3f camLocalPos, double camPitch, double camYaw, double camRoll){
+        localPos = camLocalPos;
+        localPitch = camPitch;
+        localYaw = camYaw;
+        localRoll = camRoll;
+        init();
+    }
 
     @Override
     public void init() {
@@ -84,8 +95,8 @@ public class TFODMain extends OpMode {
 
         l270 = FrustumInterpolator.Logitech_C270; //get preset for the Logitech C270 webcam that includes the FOV for both Vertical & Horizontal
 
-        l270.setCamPos(new Vector3f(3.8f, 7.4f, 6.8f)); //describe the position of the camera ***lens***
-        l270.setCamRot(Matrix4fBuilder.buildGenRot(325, 0, 180)); //describe the rotation of the camera ***lens***
+        l270.setCamPos(this.localPos); //describe the position of the camera ***lens***
+        l270.setCamRot(Matrix4fBuilder.buildGenRot(localPitch, localYaw, localRoll)); //describe the rotation of the camera ***lens***
         l270.setupFrustum();
 
         isBusy = false;
@@ -106,7 +117,7 @@ public class TFODMain extends OpMode {
         scan();
         Vector2f bb = calculateBBVector();
         if (bb.getY() == -2) {
-            local_pos = l270.convertIMGCoord(bb);
+            bbLocalPos = l270.convertIMGCoord(bb);
         }
 
         if (isBusy == false && debug == true) {
@@ -120,7 +131,7 @@ public class TFODMain extends OpMode {
             telemetry.addData("BBBOTRIGHT: ", bbBottomRight);
             telemetry.addData("Null? [bbTopLeft, bbBottomRight]: ", "[" + (bbTopLeft == null) + ", " + (bbBottomRight == null) + "]");
             telemetry.addData("BBClosest: ", bb);
-            telemetry.addData("BB to Local: ", local_pos);
+            telemetry.addData("BB to Local: ", bbLocalPos);
             telemetry.addData("Cam HFOV: ", l270.gethFOV());
             telemetry.addData("Cam VFOV: ", l270.getvFOV());
             telemetry.addData("Bottom: ", l270.getFplane_bottom());

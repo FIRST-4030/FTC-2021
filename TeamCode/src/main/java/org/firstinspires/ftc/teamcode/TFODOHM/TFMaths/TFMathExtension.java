@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.TFODOHM.TFMaths;
 
+import java.util.ArrayList;
+import java.util.Vector;
+
 public class TFMathExtension {
 
     /**
@@ -26,6 +29,13 @@ public class TFMathExtension {
         float nZ = a.getZ() + (b.getZ() - a.getZ()) * t;
 
         return new Vector3f(nX, nY, nZ);
+    }
+
+    public static Vector2f lerp(Vector2f a, Vector2f b, float t){
+        float nX = a.getX() + (b.getX() - a.getX()) * t;
+        float nY = a.getY() + (b.getY() - a.getY()) * t;
+
+        return new Vector2f(nX, nY);
     }
 
     /**
@@ -135,5 +145,20 @@ public class TFMathExtension {
         vFov = 2 * Math.atan2(height, 2 * focal_len);
 
         return new double[] {hFov, vFov};
+    }
+
+    public static Vector2f genBezierCurve(ArrayList<Vector2f> controlPoints, float t){
+        ArrayList<Vector2f> cachedPoints = controlPoints;
+        Vector2f tempPoint = new Vector2f();
+
+        if (controlPoints.size() < 1){ return null;}
+
+        //loop over points, find interpolation points, repeat
+        for (int i = 0; i < cachedPoints.size() - 1; i++){
+            //          get point at index ; get point connected to prev ; interpolation factor
+            tempPoint = lerp(cachedPoints.get(i), cachedPoints.get(i + 1), t);
+        }
+
+        return tempPoint;
     }
 }
