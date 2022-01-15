@@ -18,7 +18,7 @@ public class NewNewDrive extends OpMode {
     public static boolean DEBUG = false;
     private static final int INPUT_SCALING_EXPONENT = 3;
     private static final double MAX_VELOCITY = 40.0; // inches per second
-    public static double TICKS_PER_INCH = 43.24 * 38 / 37;
+    public static double TICKS_PER_INCH = 40.75;
     public static double ACCEL_CONSTANT = 0.4;
     public static double trackWidth = 15.25;
     public static double trackWidthHalf = trackWidth / 2.0;

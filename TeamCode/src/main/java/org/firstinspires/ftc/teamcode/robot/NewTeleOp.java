@@ -30,20 +30,16 @@
 package org.firstinspires.ftc.teamcode.robot;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
-
-import java.net.IDN;
 
 @Config
 @TeleOp(name = "NewTeleOp", group = "Test")
@@ -237,28 +233,32 @@ public class NewTeleOp extends MultiOpModeManager {
         switch (collectCmdState) {
             case IDLE:
                 if (gamepad2.left_bumper) {
-                    collectCmdState = collectCmd.COLLECT;
+                    collectCmdState = collectCmd.BEFORE_COLLECT;
                 }
+                break;
+            case BEFORE_COLLECT:
+                collectorTimer.reset();
+                collectCmdState = collectCmd.COLLECT;
                 break;
             case COLLECT:
                 if (!gamepad2.left_bumper) {
-                    collectCmdState = collectCmd.EJECT;
+                    collectCmdState = collectCmd.BEFORE_EJECT;
                 }
-                if (sensorCollector.isPressed()) {
+                if (sensorCollector.isPressed() && collectorTimer.seconds() > (Math.PI / 10)) {
                     collectorTimer.reset();
                     collectCmdState = collectCmd.SENSOR_DELAY;
                 }
                 break;
             case SENSOR_DELAY:
                 if (collectorTimer.seconds() > DELAY_TIME) {
-                    collectCmdState = collectCmd.EJECT;
+                    collectCmdState = collectCmd.BEFORE_EJECT;
                 }
                 break;
-            case EJECT:
+            case BEFORE_EJECT:
                 collectorTimer.reset();
-                collectCmdState = collectCmd.EJECT_DELAY;
+                collectCmdState = collectCmd.EJECT;
                 break;
-            case EJECT_DELAY:
+            case EJECT:
                 if (collectorTimer.seconds() > EJECT_TIME) {
                     collectCmdState = collectCmd.IDLE;
                 }
@@ -271,15 +271,17 @@ public class NewTeleOp extends MultiOpModeManager {
                 collectorArm.setPosition(COLLECTOR_UP);
                 collector.setPower(0);
                 break;
+            case BEFORE_COLLECT:
             case COLLECT:
+            case SENSOR_DELAY:
                 collectorArm.setPosition(COLLECTOR_DOWN);
                 collector.setPower(1);
-            case SENSOR_DELAY:
+                break;
+            case BEFORE_EJECT:
                 collectorArm.setPosition(COLLECTOR_UP);
-                collector.setPower(0.8);
+                collector.setPower(1);
                 break;
             case EJECT:
-            case EJECT_DELAY:
                 collectorArm.setPosition(COLLECTOR_UP);
                 collector.setPower(-1);
                 break;
@@ -287,7 +289,7 @@ public class NewTeleOp extends MultiOpModeManager {
         RobotLog.d("," + "Collector" + "," + getRuntime() + "," +
                 gamepad2.left_bumper + "," + collected + "," +
                 collectorArm.getPosition() + "," + collector.getPower() + "," +
-                collectorTimer.seconds());
+                collectorTimer.seconds() + "," + collectCmdState);
 
         // Capstone
         if (gamepad2.dpad_down) {
@@ -353,9 +355,10 @@ public class NewTeleOp extends MultiOpModeManager {
 
     enum collectCmd {
         IDLE,
+        BEFORE_COLLECT,
         COLLECT,
         SENSOR_DELAY,
-        EJECT,
-        EJECT_DELAY
+        BEFORE_EJECT,
+        EJECT
     }
 }
