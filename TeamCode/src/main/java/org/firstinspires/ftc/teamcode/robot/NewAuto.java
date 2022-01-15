@@ -41,7 +41,7 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
-//@Disabled
+@Disabled
 @Autonomous(name = "OldAuto", group = "Test")
 public class NewAuto extends MultiOpModeManager {
     // Hardware

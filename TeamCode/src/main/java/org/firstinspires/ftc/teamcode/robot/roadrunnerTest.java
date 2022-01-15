@@ -48,6 +48,7 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
+@Disabled
 @Autonomous(name = "roadrunnerTest", group = "Test")
 public class roadrunnerTest extends MultiOpModeManager {
     // Hardware

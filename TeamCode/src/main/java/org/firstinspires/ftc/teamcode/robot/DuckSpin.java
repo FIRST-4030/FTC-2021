@@ -44,7 +44,7 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
-//@Disabled
+@Disabled
 @TeleOp(name = "DuckSpin", group = "Test")
 public class DuckSpin extends OpMode {
     // Hardware
