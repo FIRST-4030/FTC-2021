@@ -70,11 +70,11 @@ public class NewNewAuto extends MultiOpModeManager {
     public static double r3wh = 100;
     public static double arcLength3wh = 50;
     public static double r3duck = 12;
-    public static double arcLength3duck = 37.25;
+    public static double arcLength3duck = 37.4;
     public static double r4duck = 0;
-    public static double arcLength4duck = 35.75;
+    public static double arcLength4duck = 36;
     public static double r5duck = 9.25;
-    public static double arcLength5duck = 36;
+    public static double arcLength5duck = 36.25;
     public static double arcLength6duck = Math.PI;
     public static double COLLECTOR_UP = 0.53;
     public static double COLLECTOR_DOWN = 0.90;
@@ -263,7 +263,11 @@ public class NewNewAuto extends MultiOpModeManager {
                 if (duckSide) {
                     drive.arcTo(r4duck, arcLength4duck, speedMin, speedMax);
                 } else {
-                    drive.arcTo(3, -4, -speedMin, -speedMax);
+                    if (redAlliance) {
+                        drive.arcTo(3, -4, -speedMin, -speedMax);
+                    } else {
+                        drive.arcTo(-3, -4, -speedMin, -speedMax);
+                    }
                 }
                 if (drive.isDone() && !drive.isBusy()) {
                     drive.setDoneFalse();

@@ -30,17 +30,14 @@
 package org.firstinspires.ftc.teamcode.robot;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.ftccommon.configuration.EditLegacyModuleControllerActivity;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
@@ -51,24 +48,26 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 @TeleOp(name = "Collector", group = "Test")
 public class Collector extends OpMode {
     // Hardware
-    private Servo arm = null;
+    private Servo collectorArm = null;
     private DcMotor collector = null;
     //private DistanceSensor distance = null;
-    private TouchSensor touchSensor = null;
+    private TouchSensor sensorCollector = null;
 
     // Config
     public static boolean DEBUG = false;
-    public static double ARM_UP = 0.65;
-    public static double ARM_DOWN = 0.90;
-    public static double SPEED = 1;
-    public static int DISTANCE = 10;
-    public static double EJECT_TIME = 7;
+    public static double COLLECTOR_UP = 0.53;
+    public static double COLLECTOR_DOWN = 0.90;
+    private static double SPEED = 1;
+    public static int DISTANCE = 30;
+    public static double DELAY_TIME = 1;
+    public static double EJECT_TIME = 2;
 
     // Members
     private boolean enabled = false;
     private InputHandler in;
     private ElapsedTime runtime = new ElapsedTime();
-    private AUTO_STATE state = AUTO_STATE.DONE;
+    private ElapsedTime collectorTimer = new ElapsedTime();
+    private collectCmd collectCmdState = collectCmd.IDLE;
 
     @Override
     public void init() {
@@ -77,10 +76,10 @@ public class Collector extends OpMode {
             collector = hardwareMap.get(DcMotor.class, "Collector");
             collector.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            arm = hardwareMap.get(Servo.class, "CollectorArm");
-            arm.setPosition(ARM_UP);
+            collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
+            collectorArm.setPosition(COLLECTOR_UP);
 
-            touchSensor = hardwareMap.get(TouchSensor.class, "DC");
+            sensorCollector = hardwareMap.get(TouchSensor.class, "DC");
             //distance = hardwareMap.get(DistanceSensor.class, "DC");
 
             Globals.opmode = this;
@@ -106,7 +105,7 @@ public class Collector extends OpMode {
             return;
         }
 
-        arm.setPosition(ARM_UP);
+        collectorArm.setPosition(COLLECTOR_UP);
     }
 
     @Override
@@ -123,49 +122,80 @@ public class Collector extends OpMode {
         collector.setPower(Range.clip(spin, SPEED, -SPEED));*/
 
         // Arm
-        telemetry.addData("collector pos", arm.getPosition());
-        telemetry.addData("collector pos", Math.round(arm.getPosition() * 100.0)/100.0);
-        telemetry.addData("State", state);
-        if (gamepad2.left_bumper && (Math.round(arm.getPosition() * 100.0)/100.0 == ARM_DOWN)) {
-            telemetry.log().add("Going to up now");
-            state = AUTO_STATE.UP;
-            runtime.reset();
-        } else if (gamepad2.left_bumper && (Math.round(arm.getPosition() * 100.0)/100.0 == ARM_UP)) {
-            telemetry.log().add("Going to down now");
-            state = AUTO_STATE.DOWN;
-        }
+        telemetry.addData("collector pos", collectorArm.getPosition());
+        telemetry.addData("collector pos", Math.round(collectorArm.getPosition() * 100.0)/100.0);
+        telemetry.addData("State", collectCmdState);
 
-        switch (state) {
-            case DOWN:
-                telemetry.log().add("In down now");
-                arm.setPosition(ARM_DOWN);
-                collector.setPower(SPEED);
-                state = AUTO_STATE.DONE;
-                break;
-            case UP:
-                telemetry.log().add("In up now");
-                if (runtime.seconds() > 1.5 && runtime.seconds() < EJECT_TIME) {
-                    arm.setPosition(ARM_UP);
-                    collector.setPower(-SPEED);
-                } else if (runtime.seconds() < 1.5 && runtime.seconds() < EJECT_TIME){
-                    arm.setPosition(ARM_DOWN);
-                    collector.setPower(SPEED);
-                } else {
-                    arm.setPosition(ARM_UP);
-                    collector.setPower(0);
-                    state = AUTO_STATE.DONE;
+        // Collector state
+        boolean collected = sensorCollector.isPressed();
+        telemetry.addData("Collected? ", collected);
+        switch (collectCmdState) {
+            case IDLE:
+                if (gamepad2.left_bumper) {
+                    collectCmdState = collectCmd.BEFORE_COLLECT;
                 }
                 break;
-            case DONE:
+            case BEFORE_COLLECT:
+                collectorTimer.reset();
+                collectCmdState = collectCmd.COLLECT;
+                break;
+            case COLLECT:
+                if (!gamepad2.left_bumper) {
+                    collectCmdState = collectCmd.BEFORE_EJECT;
+                }
+                if (sensorCollector.isPressed() && collectorTimer.seconds() > (Math.PI / 10)) {
+                    collectorTimer.reset();
+                    collectCmdState = collectCmd.SENSOR_DELAY;
+                }
+                break;
+            case SENSOR_DELAY:
+                if (collectorTimer.seconds() > DELAY_TIME) {
+                    collectCmdState = collectCmd.BEFORE_EJECT;
+                }
+                break;
+            case BEFORE_EJECT:
+                collectorTimer.reset();
+                collectCmdState = collectCmd.EJECT;
+                break;
+            case EJECT:
+                if (collectorTimer.seconds() > EJECT_TIME) {
+                    collectCmdState = collectCmd.IDLE;
+                }
                 break;
         }
+
+        // Collector commands
+        switch (collectCmdState) {
+            case IDLE:
+                collectorArm.setPosition(COLLECTOR_UP);
+                collector.setPower(0);
+                break;
+            case BEFORE_COLLECT:
+            case COLLECT:
+            case SENSOR_DELAY:
+                collectorArm.setPosition(COLLECTOR_DOWN);
+                collector.setPower(1);
+                break;
+            case BEFORE_EJECT:
+                collectorArm.setPosition(COLLECTOR_UP);
+                collector.setPower(1);
+                break;
+            case EJECT:
+                collectorArm.setPosition(COLLECTOR_UP);
+                collector.setPower(-1);
+                break;
+        }
+        RobotLog.d("," + "Collector" + "," + getRuntime() + "," +
+                gamepad2.left_bumper + "," + collected + "," +
+                collectorArm.getPosition() + "," + collector.getPower() + "," +
+                collectorTimer.seconds() + "," + collectCmdState);
 
         // Debug when requested
         if (DEBUG) {
             /*telemetry.addData("Collector Input", "R %.0f/%s",
                     range, inRange ? "+" : "-");*/
             telemetry.addData("Collector Output", "C %.2f/%d, A %.2f",
-                    collector.getPower(), collector.getCurrentPosition(), arm.getPosition());
+                    collector.getPower(), collector.getCurrentPosition(), collectorArm.getPosition());
         }
     }
 
@@ -173,13 +203,17 @@ public class Collector extends OpMode {
     public void stop() {
     }
 
-    enum AUTO_STATE implements OrderedEnum {
-        DOWN,
-        UP,
-        DONE;
+    public void autoCollect() {
+        collectCmdState = collectCmd.BEFORE_COLLECT;
+        loop();
+    }
 
-        public AUTO_STATE next() {
-            return OrderedEnumHelper.next(this);
-        }
+    enum collectCmd {
+        IDLE,
+        BEFORE_COLLECT,
+        COLLECT,
+        SENSOR_DELAY,
+        BEFORE_EJECT,
+        EJECT
     }
 }
