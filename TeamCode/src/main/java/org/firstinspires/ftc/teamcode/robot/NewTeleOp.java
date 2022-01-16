@@ -63,7 +63,7 @@ public class NewTeleOp extends MultiOpModeManager {
     public static double COLLECTOR_DOWN = 0.90;
     private static double SPEED = 1;
     public static int DISTANCE = 30;
-    public static double DELAY_TIME = 1;
+    public static double DELAY_TIME = 1.25;
     public static double EJECT_TIME = 2;
     private static double timerRatio = 0.0;
     public static double duckPowerMin = 0.63;  // min duck spinner speed (0 - 1.0)
@@ -260,6 +260,9 @@ public class NewTeleOp extends MultiOpModeManager {
                 break;
             case EJECT:
                 if (collectorTimer.seconds() > EJECT_TIME) {
+                    collectCmdState = collectCmd.IDLE;
+                }
+                if (gamepad2.right_bumper) {
                     collectCmdState = collectCmd.IDLE;
                 }
                 break;

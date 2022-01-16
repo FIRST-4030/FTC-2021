@@ -57,7 +57,7 @@ public class DuckSpin extends OpMode {
     public static double teleopRamp = 1.25;
     public static double autoMin = 0.445;
     public static double autoMax = 0.645;
-    public static double autoRamp = 1.7;
+    public static double autoRamp = 1.71;
 
     // Members
     public static boolean DEBUG = false;

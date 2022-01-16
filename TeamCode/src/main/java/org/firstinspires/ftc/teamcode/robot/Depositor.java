@@ -61,7 +61,7 @@ public class Depositor extends OpMode {
     // Config
     public static boolean DEBUG = false;
     public static double PREP_SPEED = 1;
-    public static double BELT_SPEED = 0.7;
+    public static double BELT_SPEED = 0.585;
     public static double RESET_BELT_SPEED = 0.27;
     public static double TILT_BACK = 0.47;
     public static double TILT_FORWARD = 0.18;
@@ -72,9 +72,9 @@ public class Depositor extends OpMode {
     public static double HIGH_OPEN = 0.13;
     public static double HIGH_INIT = 0.55;
     public static int INIT_PREP_POS = 390;
-    public static int LOW_PREP_POS = 560;
+    public static int LOW_PREP_POS = 550;
     public static int MID_PREP_POS = 690;
-    public static int HIGH_PREP_POS = 840;
+    public static int HIGH_PREP_POS = 820;
     public static int BELT_POSITION_DEADBAND = 15;
     public int num = 0;
     public boolean sensorTriggered = false;
@@ -183,6 +183,7 @@ public class Depositor extends OpMode {
                         case MID_DOOR:
                             belt.setTargetPosition(((belt.getCurrentPosition() / 927) * 927) + INIT_PREP_POS);
                             break;
+                        case NONE:
                         case HIGH_DOOR:
                             break;
                     }
@@ -205,6 +206,7 @@ public class Depositor extends OpMode {
                         case MID_DOOR:
                             belt.setTargetPosition((belt.getCurrentPosition() / 927 * 927) + MID_PREP_POS);
                             break;
+                        case NONE:
                         case HIGH_DOOR:
                             belt.setTargetPosition((belt.getCurrentPosition() / 927 * 927) + HIGH_PREP_POS);
                             break;
@@ -227,6 +229,7 @@ public class Depositor extends OpMode {
                             mid.setPosition(MID_OPEN);
                             belt.setTargetPosition((((belt.getCurrentPosition() / 927) + 1) * 927));
                             break;
+                        case NONE:
                         case HIGH_DOOR:
                             high.setPosition(HIGH_OPEN);
                             belt.setTargetPosition((((belt.getCurrentPosition() / 927) + 1) * 927) + INIT_PREP_POS);
@@ -269,7 +272,7 @@ public class Depositor extends OpMode {
                 break;
         }
 
-        if (state == AUTO_STATE.DONE) {
+        if (state == AUTO_STATE.DONE || gamepad2.dpad_down) {
             if (gamepad2.x) {
                 if (required_Door == DOOR_USED.LOW_DOOR) {
                     telemetry.addData("action: ", "going to low door open");

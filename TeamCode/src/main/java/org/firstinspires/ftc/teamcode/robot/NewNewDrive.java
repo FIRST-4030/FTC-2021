@@ -186,7 +186,7 @@ public class NewNewDrive extends OpMode {
             // speed is calculated using the curve defined above
             driveLeft.setPower(speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
             driveRight.setPower(speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
-            done = speedCurveL.isClamped() || speedCurveR.isClamped();
+            done = speedCurveL.isClamped() && speedCurveR.isClamped();
         }
 
         if (!started) {
@@ -339,7 +339,7 @@ public class NewNewDrive extends OpMode {
             // speed is calculated using the curve defined above
             driveLeft.setPower((leftTicks / midTicks) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
             driveRight.setPower((rightTicks / midTicks) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
-            done = speedCurveL.isClamped() || speedCurveR.isClamped();
+            done = speedCurveL.isClamped() && speedCurveR.isClamped();
         }
 
         if (!started) {
