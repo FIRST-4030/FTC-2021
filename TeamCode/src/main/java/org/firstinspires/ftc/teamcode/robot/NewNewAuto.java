@@ -220,7 +220,8 @@ public class NewNewAuto extends MultiOpModeManager {
 
                 case MOVE_OUT:
                     depositor.prep();
-                    drive.driveTo(speedMin, speedMax, distance1);
+                    //drive.driveTo(speedMin, speedMax, distance1);
+                    drive.arcTo(0, distance1, speedMin, speedMax);
                     collectorArm.setPosition(COLLECTOR_UP);
                     if (drive.isDone() && !drive.isBusy()) {
                         drive.setDoneFalse();

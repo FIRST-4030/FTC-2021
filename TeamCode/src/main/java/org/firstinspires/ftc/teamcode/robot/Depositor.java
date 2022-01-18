@@ -61,7 +61,7 @@ public class Depositor extends OpMode {
     // Config
     public static boolean DEBUG = false;
     public static double PREP_SPEED = 1;
-    public static double BELT_SPEED = 0.585;
+    public static double BELT_SPEED = 0.6;
     public static double RESET_BELT_SPEED = 0.27;
     public static double TILT_BACK = 0.47;
     public static double TILT_FORWARD = 0.18;
@@ -69,13 +69,13 @@ public class Depositor extends OpMode {
     public static double LOW_CLOSE = 0.125;
     public static double MID_OPEN = 0.59;
     public static double MID_CLOSE = 0.13;
-    public static double HIGH_OPEN = 0.13;
+    public static double HIGH_OPEN = 0.14;
     public static double HIGH_INIT = 0.55;
     public static int INIT_PREP_POS = 390;
-    public static int LOW_PREP_POS = 550;
+    public static int LOW_PREP_POS = 560;
     public static int MID_PREP_POS = 690;
-    public static int HIGH_PREP_POS = 820;
-    public static int BELT_POSITION_DEADBAND = 15;
+    public static int HIGH_PREP_POS = 840;
+    public static int BELT_POSITION_DEADBAND = 20;
     public int num = 0;
     public boolean sensorTriggered = false;
     public boolean prepPosSet = false;
@@ -181,16 +181,18 @@ public class Depositor extends OpMode {
                     switch (required_Door) {
                         case LOW_DOOR:
                         case MID_DOOR:
-                            belt.setTargetPosition(((belt.getCurrentPosition() / 927) * 927) + INIT_PREP_POS);
-                            break;
                         case NONE:
                         case HIGH_DOOR:
+                            belt.setTargetPosition(((belt.getTargetPosition() / 927) * 927) + INIT_PREP_POS);
                             break;
+                    }
+                    if (belt.getTargetPosition() < belt.getCurrentPosition()) {
+                        belt.setTargetPosition(belt.getTargetPosition() + 927);
                     }
                     belt.setPower(BELT_SPEED);
                     prepPosSet = true;
                 }
-                if (belt.getCurrentPosition() >= belt.getTargetPosition()) {
+                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < BELT_POSITION_DEADBAND) {
                     belt.setPower(0);
                     state = AUTO_STATE.DONE;
                     required_Door = DOOR_USED.NONE;
@@ -211,10 +213,14 @@ public class Depositor extends OpMode {
                             belt.setTargetPosition((belt.getCurrentPosition() / 927 * 927) + HIGH_PREP_POS);
                             break;
                     }
-                    belt.setPower(PREP_SPEED);
+                    if (belt.getTargetPosition() >= belt.getCurrentPosition()) {
+                        belt.setPower(PREP_SPEED);
+                    } else {
+                        belt.setPower(-PREP_SPEED);
+                    }
                     prepPosSet = true;
                 }
-                if (belt.getCurrentPosition() >= belt.getTargetPosition()) {
+                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < (BELT_POSITION_DEADBAND + 5)) {
                     state = AUTO_STATE.DONE;
                 }
                 break;
@@ -232,14 +238,38 @@ public class Depositor extends OpMode {
                         case NONE:
                         case HIGH_DOOR:
                             high.setPosition(HIGH_OPEN);
-                            belt.setTargetPosition((((belt.getCurrentPosition() / 927) + 1) * 927) + INIT_PREP_POS);
+                            belt.setTargetPosition((((belt.getCurrentPosition() / 927) + 1) * 927));
                             break;
+                    }
+                    if (belt.getTargetPosition() < belt.getCurrentPosition()) {
+                        belt.setTargetPosition(belt.getTargetPosition() + 927);
                     }
                     belt.setPower(BELT_SPEED);
                     prepPosSet = true;
                 }
-                if (belt.getCurrentPosition() >= belt.getTargetPosition()) {
+                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < BELT_POSITION_DEADBAND) {
                     state = AUTO_STATE.TILTED_FORWARD;
+                }
+                break;
+            case TILT_DOOR_OPEN:      // Open required door and run conveyor until the magnetic switch is active
+                if (!prepPosSet) {
+                    if (required_Door == DOOR_USED.HIGH_DOOR) {
+                        high.setPosition(HIGH_OPEN);
+                        low.setPosition(0.65);
+                        belt.setTargetPosition(((belt.getTargetPosition() / 927) * 927) + INIT_PREP_POS);
+                    }
+                    if (belt.getTargetPosition() < belt.getCurrentPosition()) {
+                        belt.setTargetPosition(belt.getTargetPosition() + 927);
+                    }
+                    belt.setPower(BELT_SPEED);
+                    prepPosSet = true;
+                }
+                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < BELT_POSITION_DEADBAND) {
+                    low.setPosition(LOW_CLOSE);
+                    mid.setPosition(MID_CLOSE);
+                    high.setPosition(HIGH_OPEN);
+                    tilt.setPosition(TILT_FORWARD);
+                    state = AUTO_STATE.DONE;
                 }
                 break;
             case TILT_BACK:
@@ -256,10 +286,14 @@ public class Depositor extends OpMode {
             case RESET_BELT:
                 if (!prepPosSet) {
                     belt.setTargetPosition((((belt.getCurrentPosition() / 927) + 1) * 927));
-                    belt.setPower(RESET_BELT_SPEED);
+                    if (belt.getTargetPosition() >= belt.getCurrentPosition()) {
+                        belt.setPower(RESET_BELT_SPEED);
+                    } else {
+                        belt.setPower(-RESET_BELT_SPEED);
+                    }
                     prepPosSet = true;
                 }
-                if (belt.getCurrentPosition() >= belt.getTargetPosition()) {
+                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < BELT_POSITION_DEADBAND) {
                     state = AUTO_STATE.DONE;
                 }
                 break;
@@ -272,7 +306,10 @@ public class Depositor extends OpMode {
                 break;
         }
 
-        if (state == AUTO_STATE.DONE || gamepad2.dpad_down) {
+        if (gamepad2.dpad_down) {
+            state = AUTO_STATE.DONE;
+        }
+        if (state == AUTO_STATE.DONE) {
             if (gamepad2.x) {
                 if (required_Door == DOOR_USED.LOW_DOOR) {
                     telemetry.addData("action: ", "going to low door open");
@@ -301,6 +338,10 @@ public class Depositor extends OpMode {
                     setDoor(DOOR_USED.HIGH_DOOR);
                     telemetry.addData("action: ", "going to high door prep");
                     state = AUTO_STATE.DOOR_PREP;
+                }
+            } else if (gamepad2.right_bumper) {
+                if (required_Door == DOOR_USED.HIGH_DOOR) {
+                    state = AUTO_STATE.TILT_DOOR_OPEN;
                 }
             }
             if (gamepad2.dpad_left) {
@@ -355,6 +396,7 @@ public class Depositor extends OpMode {
         TILTED_FORWARD,     // Tilt forward, move flipper to start position
         DOOR_PREP,          // Move the flipper to below the required door
         DOOR_OPEN,          // Open the required door and run conveyor a small amount
+        TILT_DOOR_OPEN,
         TILT_BACK,
         TILT_FORWARD,
         REVERSE_RUN,        // Run the belt in reverse for a set time (for TeleOp only)

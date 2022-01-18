@@ -22,6 +22,7 @@ import java.util.List;
 @Autonomous(name = "TFOD_MAIN", group = "Test")
 public class TFODMain extends OpMode {
 
+    private boolean enabled = false;
     //illustration key
     private static final String VUFORIA_KEY = "AV9rwXT/////AAABma+8TAirNkVYosxu9qv0Uz051FVEjKU+nkH+MaIvGuHMijrdgoZYBZwCW2aG8P3+eZecZZPq9UKsZiTHAg73h09NT48122Ui10c8DsPe0Tx5Af6VaBklR898w8xCTdOUa7AlBEOa4KfWX6zDngegeZT5hBLfJKE1tiDmYhJezVDlITIh7SHBv0xBvoQuXhemlzL/OmjrnLuWoKVVW0kLanImI7yra+L8eOCLLp1BBD/Iaq2irZCdvgziZPnMLeTUEO9XUbuW8txq9i51anvlwY8yvMXLvIenNC1xg4KFhMmFzZ8xnpx4nWZZtyRBxaDU99aXm7cQgkVP0VD/eBIDYN4AcB0/Pa7V376m6tRJ5UZh";
 
@@ -82,11 +83,31 @@ public class TFODMain extends OpMode {
 
     @Override
     public void init() {
+        boolean error = false;
         isBusy = true;
 
-        initVuforia();
-        initTensorFlow();
-        initObjectRecognitionVariables();
+        try {
+            initVuforia();
+            enabled = true;
+        } catch (Exception e) {
+            telemetry.log().add(getClass().getSimpleName() + ": Vuforia could not initialize");
+            error = true;
+        }
+
+        try {
+            initTensorFlow();
+            enabled = true;
+        } catch (Exception e) {
+            telemetry.log().add(getClass().getSimpleName() + ": TensorFlow could not initialize");
+            error = true;
+        }
+        try {
+            initObjectRecognitionVariables();
+            enabled = true;
+        } catch (Exception e) {
+            telemetry.log().add(getClass().getSimpleName() + ": ObjectDetection could not initialize");
+            error = true;
+        }
 
         if (tfod != null) {
             tfod.activate();
@@ -100,6 +121,14 @@ public class TFODMain extends OpMode {
         l270.setupFrustum();
 
         isBusy = false;
+
+        // Initialization status
+        telemetry.addData("Initialized? ", enabled);
+        String status = "Ready";
+        if (error) {
+            status = "Hardware Error";
+        }
+        telemetry.addData("Status", status);
     }
 
     @Override

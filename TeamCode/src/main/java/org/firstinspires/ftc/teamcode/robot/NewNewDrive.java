@@ -365,7 +365,7 @@ public class NewNewDrive extends OpMode {
             speedCurveR.reset();
         }
 
-        telemetry.log().add(getClass().getSimpleName() + "::arcToTicks(): Motors in use");
+        telemetry.log().add(getClass().getSimpleName() + "::arcTo(): Motors in use");
         telemetry.addData("left ticks", driveLeft.getCurrentPosition());
         telemetry.addData("right ticks", driveRight.getCurrentPosition());
         telemetry.addData("leftVel", driveLeft.getPower());

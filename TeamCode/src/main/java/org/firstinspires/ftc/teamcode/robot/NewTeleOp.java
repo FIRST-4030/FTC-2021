@@ -63,7 +63,7 @@ public class NewTeleOp extends MultiOpModeManager {
     public static double COLLECTOR_DOWN = 0.90;
     private static double SPEED = 1;
     public static int DISTANCE = 30;
-    public static double DELAY_TIME = 1.25;
+    public static double DELAY_TIME = 1.15;
     public static double EJECT_TIME = 2;
     private static double timerRatio = 0.0;
     public static double duckPowerMin = 0.63;  // min duck spinner speed (0 - 1.0)
@@ -84,6 +84,7 @@ public class NewTeleOp extends MultiOpModeManager {
     collectCmd collectCmdState = collectCmd.IDLE;
 
     private static boolean collectorActive = false;
+    private static boolean collected = false;
 
     // Servo position test constants
     private float servoPos = 0.4f;
@@ -228,7 +229,7 @@ public class NewTeleOp extends MultiOpModeManager {
         depositor.loop();
 
         // Collector state
-        boolean collected = sensorCollector.isPressed();
+        collected = sensorCollector.isPressed();
         telemetry.addData("Collected? ", collected);
         switch (collectCmdState) {
             case IDLE:
@@ -244,12 +245,13 @@ public class NewTeleOp extends MultiOpModeManager {
                 if (!gamepad2.left_bumper) {
                     collectCmdState = collectCmd.BEFORE_EJECT;
                 }
-                if (sensorCollector.isPressed() && collectorTimer.seconds() > (Math.PI / 10)) {
+                if (collected && collectorTimer.seconds() > (Math.PI / 10)) {
                     collectorTimer.reset();
                     collectCmdState = collectCmd.SENSOR_DELAY;
                 }
                 break;
             case SENSOR_DELAY:
+                collected = false;
                 if (collectorTimer.seconds() > DELAY_TIME) {
                     collectCmdState = collectCmd.BEFORE_EJECT;
                 }
