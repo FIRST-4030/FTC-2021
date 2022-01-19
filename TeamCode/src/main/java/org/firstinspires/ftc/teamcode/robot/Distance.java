@@ -163,6 +163,11 @@ public class Distance extends OpMode {
                 break;
         }
 
+        telemetry.addData("Left Distance(inches): ", left.getDistance(DistanceUnit.INCH));
+        telemetry.addData("Right Distance(inches): ", right.getDistance(DistanceUnit.INCH));
+        telemetry.addData("Left Distance(mm): ", left.getDistance(DistanceUnit.MM));
+        telemetry.addData("Right Distance(mm): ", right.getDistance(DistanceUnit.MM));
+
         // Debug when requested
         if (DEBUG) {
             telemetry.addData("Distance State", state);
@@ -185,6 +190,14 @@ public class Distance extends OpMode {
     public void startScan() {
         reset();
         state = AUTO_STATE.START_LEFT;
+    }
+
+    public double leftDistanceMM() {
+        return left.getDistance(DistanceUnit.MM);
+    }
+
+    public double rightDistanceMM() {
+        return right.getDistance(DistanceUnit.MM);
     }
 
     // Export the result, including "no valid result"

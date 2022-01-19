@@ -31,33 +31,34 @@ package org.firstinspires.ftc.teamcode.robot;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
+import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
+import org.firstinspires.ftc.teamcode.utils.DelayTimerManager;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
-@Disabled
-@Autonomous(name = "autoTest", group = "Test")
-public class autoTest extends MultiOpModeManager {
+@Autonomous(name = "NewDriveTest", group = "Test")
+public class NewDriveTest extends MultiOpModeManager {
     // Hardware
-    private Drive drive;
+    private NewNewDrive drive;
+    private Servo collectorArm = null;
     private Distance distance;
     private Depositor depositor;
+    private DuckSpin duck;
 
     // Constants
-    private static float DRIVE_POWER = 0.4f;
-    private static double TURN_RATIO = 6.375;
-    private int num = 0;
+    public static double speedMin = 0.2;
+    public static double speedMax = 0.5;
+    public static double COLLECTOR_UP = 0.6;
+    public static int num = 0;
 
     // Members
-    private ElapsedTime runtime = new ElapsedTime();
     private AUTO_STATE state = AUTO_STATE.DONE;
-    private boolean redAlliance = false;
-    private boolean duckSide = false;
     private InputHandler in;
 
     @Override
@@ -67,23 +68,48 @@ public class autoTest extends MultiOpModeManager {
 
         try {
             super.register(new Depositor());
-            super.register(new Drive());
+            super.register(new Capstone());
             super.register(new Distance());
+            super.register(new DuckSpin());
 
-            drive = new Drive();
-            super.register(drive);
             distance = new Distance();
             super.register(distance);
             depositor = new Depositor();
             super.register(depositor);
+            duck = new DuckSpin();
+            super.register(duck);
 
+            Globals.opmode = this;
             in = Globals.input(this);
+            in.register("+", GAMEPAD.driver2, PAD_KEY.dpad_up);
+            in.register("-", GAMEPAD.driver2, PAD_KEY.dpad_down);
 
+            DelayTimerManager.makeInstance();
             distance.startScan();
 
             super.init();
         } catch (Exception e) {
             telemetry.log().add(String.valueOf(e));
+            error = true;
+        }
+
+        try {
+            super.register(new NewNewDrive());
+
+            drive = new NewNewDrive();
+            super.register(drive);
+
+            super.init();
+        } catch (Exception e) {
+            telemetry.log().add(String.valueOf(e));
+            error = true;
+        }
+
+        try {
+            collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
+            //collector = hardwareMap.get(DcMotor.class, "Collector");
+        } catch (Exception e) {
+            telemetry.log().add("Could not find collector");
             error = true;
         }
 
@@ -93,16 +119,12 @@ public class autoTest extends MultiOpModeManager {
             status = "Hardware Error";
         }
         telemetry.addData("Status", status);
+        drive.enableLogging();
     }
 
     @Override
     public void init_loop() {
-        if (gamepad1.dpad_right) redAlliance = true;
-        if (gamepad1.dpad_left) redAlliance = false;
-        if (gamepad1.dpad_up) duckSide = true;
-        if (gamepad1.dpad_down) duckSide = false;
-        telemetry.addData("Alliance", redAlliance ? "Red" : "Blue");
-        telemetry.addData("Direction", duckSide ? "Duck" : "Warehouse");
+        in.loop();
         super.init_loop();
     }
 
@@ -110,69 +132,31 @@ public class autoTest extends MultiOpModeManager {
     public void start() {
         super.start();
         num = 0;
-        driveStop();
         distance.startScan();
-        state = AUTO_STATE.BARCODE;
+        drive.setDoneFalse();
+        state = AUTO_STATE.TEST_MOVE1;
     }
 
     @Override
     public void loop() {
-        // Stop when the autoSteps are complete
-        /*if (state == AUTO_STATE.DONE) {
-            requestOpModeStop();
-            return;
-        }*/
-
-        distance.loop();
         depositor.loop();
-
+        distance.loop();
+        duck.loop();
         in.loop();
-
-        telemetry.addData("TURN_RATIO: ", TURN_RATIO);
-        telemetry.addData("LDrive Pos: ", drive.leftDrivePos());
-        telemetry.addData("RDrive Pos: ", drive.rightDrivePos());
 
         // Step through the auto commands
         switch (state) {
-            // new routine
-            case BARCODE:
-                if (distance.state() == Distance.AUTO_STATE.DONE) {
-                    if (distance.position() == Distance.BARCODE.LEFT) {
-                        depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
-                    } else if (distance.position() == Distance.BARCODE.CENTER) {
-                        depositor.setDoor(Depositor.DOOR_USED.MID_DOOR);
-                    } else if (distance.position() == Distance.BARCODE.RIGHT){
-                        depositor.setDoor(Depositor.DOOR_USED.HIGH_DOOR);
-                    } else {
-                        if (!duckSide) {
-                            if (redAlliance) {
-                                depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
-                            } else {
-                                depositor.setDoor(Depositor.DOOR_USED.HIGH_DOOR);
-                            }
-                        }
-                    }
+            case TEST_MOVE1:
+                //drive.driveTo(speedMin, speedMax, distance1);
+                drive.combinedCurves(0, 10, speedMin, speedMax, 0, 10, speedMin, speedMax);
+                collectorArm.setPosition(COLLECTOR_UP);
+                if (drive.isDone() && !drive.isBusy()) {
+                    drive.setDoneFalse();
                     state = state.next();
                 }
                 break;
-
-            case PREP:
-                depositor.prep();
-                if (depositor.isDone()) {
-                    state = state.next();
-                }
-                break;
-
-            case DEPOSIT:
-                depositor.deposit();
-                if (depositor.isDone()) {
-                    state = state.next();
-                }
-                break;
-
             // Stop processing
             case DONE:
-                driveStop();
                 break;
         }
 
@@ -186,18 +170,11 @@ public class autoTest extends MultiOpModeManager {
     }
 
     enum AUTO_STATE implements OrderedEnum {
-        BARCODE,
-        PREP,
-        DEPOSIT,
+        TEST_MOVE1,
         DONE;
 
-        public autoTest.AUTO_STATE next() {
+        public AUTO_STATE next() {
             return OrderedEnumHelper.next(this);
         }
-    }
-
-    public void driveStop() {
-        // Zero the drive encoders, and enable RUN_TO_POSITION
-        drive.driveStop();
     }
 }
