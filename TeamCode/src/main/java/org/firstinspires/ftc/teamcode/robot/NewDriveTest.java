@@ -32,12 +32,12 @@ package org.firstinspires.ftc.teamcode.robot;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
-import org.firstinspires.ftc.teamcode.utils.DelayTimerManager;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
@@ -56,10 +56,13 @@ public class NewDriveTest extends MultiOpModeManager {
     public static double speedMax = 0.5;
     public static double COLLECTOR_UP = 0.6;
     public static int num = 0;
+    public static int waitTime = 1;
 
     // Members
     private AUTO_STATE state = AUTO_STATE.DONE;
+    private AUTO_STATE oldState = AUTO_STATE.DONE;
     private InputHandler in;
+    private final ElapsedTime waitTimer = new ElapsedTime();
 
     @Override
     public void init() {
@@ -84,7 +87,6 @@ public class NewDriveTest extends MultiOpModeManager {
             in.register("+", GAMEPAD.driver2, PAD_KEY.dpad_up);
             in.register("-", GAMEPAD.driver2, PAD_KEY.dpad_down);
 
-            DelayTimerManager.makeInstance();
             distance.startScan();
 
             super.init();
@@ -124,8 +126,6 @@ public class NewDriveTest extends MultiOpModeManager {
 
     @Override
     public void init_loop() {
-        in.loop();
-        super.init_loop();
     }
 
     @Override
@@ -144,15 +144,37 @@ public class NewDriveTest extends MultiOpModeManager {
         duck.loop();
         in.loop();
 
+        if (state != oldState && state != AUTO_STATE.WAIT) {
+            oldState = state;
+        }
         // Step through the auto commands
         switch (state) {
             case TEST_MOVE1:
-                //drive.driveTo(speedMin, speedMax, distance1);
-                drive.combinedCurves(0, 10, speedMin, speedMax, 0, 10, speedMin, speedMax);
+                drive.arcTo(0, 30, speedMin, speedMax);
+                //drive.combinedCurves(0, 10, speedMin, speedMax, 0, 10, speedMin, speedMax);
                 collectorArm.setPosition(COLLECTOR_UP);
                 if (drive.isDone() && !drive.isBusy()) {
+                    waitTimer.reset();
+                    state = AUTO_STATE.WAIT;
+                }
+                break;
+            case TEST_MOVE2:
+                drive.arcTo(0, -30, -speedMin, -speedMax);
+                //drive.combinedCurves(0, 10, speedMin, speedMax, 0, 10, speedMin, speedMax);
+                collectorArm.setPosition(COLLECTOR_UP);
+                if (drive.isDone() && !drive.isBusy()) {
+                    waitTimer.reset();
+                    state = AUTO_STATE.WAIT;
+                }
+                break;
+            case WAIT:
+                if (waitTimer.seconds() >= waitTime) {
                     drive.setDoneFalse();
-                    state = state.next();
+                    if (oldState == AUTO_STATE.TEST_MOVE2) {
+                        state = AUTO_STATE.TEST_MOVE1;
+                    } else if (oldState == AUTO_STATE.TEST_MOVE1) {
+                        state = AUTO_STATE.TEST_MOVE2;
+                    }
                 }
                 break;
             // Stop processing
@@ -162,15 +184,19 @@ public class NewDriveTest extends MultiOpModeManager {
 
         //log what state it currently is in
         telemetry.addData("Auto Step: ", state);
+        telemetry.update();
     }
 
     @Override
     public void stop() {
+        state = AUTO_STATE.DONE;
         super.stop();
     }
 
     enum AUTO_STATE implements OrderedEnum {
         TEST_MOVE1,
+        TEST_MOVE2,
+        WAIT,
         DONE;
 
         public AUTO_STATE next() {

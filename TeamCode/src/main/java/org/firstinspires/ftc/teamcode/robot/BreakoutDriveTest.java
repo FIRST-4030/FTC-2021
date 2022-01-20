@@ -5,13 +5,11 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
-import org.firstinspires.ftc.teamcode.utils.PiecewiseFunction;
 
 @Config
 @TeleOp(name = "BreakoutDriveTest", group = "Test")
@@ -22,8 +20,8 @@ public class BreakoutDriveTest extends OpMode {
     public static double TICKS_PER_INCH = 40.75;
     public static double trackWidth = 15.25;
     public static double trackWidthHalf = trackWidth / 2.0;
-    private int leftPower = 0;
-    private int rightPower = 0;
+    private double leftPower = 0;
+    private double rightPower = 0;
     private boolean leftSide = false;
     private static double INCREMENT = 0.01;
 
@@ -34,10 +32,7 @@ public class BreakoutDriveTest extends OpMode {
     // Members
     private boolean enabled = false;
     private InputHandler in;
-    final private ElapsedTime rampTimer = new ElapsedTime();
     private boolean loggingEnabled = false;
-    private PiecewiseFunction speedCurveL;
-    private PiecewiseFunction speedCurveR;
 
     // Standard methods
     @Override
@@ -47,12 +42,12 @@ public class BreakoutDriveTest extends OpMode {
             driveLeft = hardwareMap.get(DcMotor.class, "BL");
             driveLeft.setDirection(DcMotorSimple.Direction.FORWARD);
             driveLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            driveLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
             driveRight = hardwareMap.get(DcMotor.class, "BR");
             driveRight.setDirection(DcMotorSimple.Direction.FORWARD);
             driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            driveRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
             Globals.opmode = this;
             in = Globals.input(this);
@@ -61,8 +56,6 @@ public class BreakoutDriveTest extends OpMode {
 
             enabled = true;
 
-            speedCurveL = new PiecewiseFunction();
-            speedCurveR = new PiecewiseFunction();
         } catch (Exception e) {
             telemetry.log().add(getClass().getSimpleName() + ": Could not initialize");
         }
@@ -72,10 +65,6 @@ public class BreakoutDriveTest extends OpMode {
 
     @Override
     public void init_loop() {
-        if (gamepad1.dpad_up) leftSide = true;
-        if (gamepad1.dpad_down) leftSide = false;
-
-        telemetry.addData("Drive Side: ", leftSide ? "Left" : "Right");
     }
 
     @Override
@@ -90,6 +79,11 @@ public class BreakoutDriveTest extends OpMode {
         if (!enabled) {
             return;
         }
+        if (gamepad1.dpad_left) leftSide = true;
+        if (gamepad1.dpad_right) leftSide = false;
+
+        telemetry.addData("Drive Side: ", leftSide ? "Left" : "Right");
+
         // Input
         in.loop();
         telemetry.addData("Left Power", leftPower);
@@ -98,21 +92,21 @@ public class BreakoutDriveTest extends OpMode {
             // Moving the servo position and number should increase
             if (in.down("+")) {
                 leftPower += INCREMENT;
-                leftPower = Math.min(1, leftPower);
+                leftPower = Math.min(1.0, leftPower);
             // Moving the servo position and number should decrease
             } else if (in.down("-")) {
                 leftPower -= INCREMENT;
-                leftPower = Math.max(-1, leftPower);
+                leftPower = Math.max(-1.0, leftPower);
             }
         } else {
             // Moving the servo position and number should increase
             if (in.down("+")) {
                 rightPower += INCREMENT;
-                rightPower = Math.min(1, rightPower);
+                rightPower = Math.min(1.0, rightPower);
             // Moving the servo position and number should decrease
             } else if (in.down("-")) {
                 rightPower -= INCREMENT;
-                rightPower = Math.max(-1, rightPower);
+                rightPower = Math.max(-1.0, rightPower);
             }
         }
         driveLeft.setPower(leftPower);
@@ -128,6 +122,7 @@ public class BreakoutDriveTest extends OpMode {
         // Stop the drive motors
         driveLeft.setPower(0);
         driveRight.setPower(0);
+        super.stop();
     }
 
     // Custom methods

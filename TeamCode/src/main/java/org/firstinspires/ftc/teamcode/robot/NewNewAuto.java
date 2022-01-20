@@ -47,7 +47,6 @@ import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 import org.firstinspires.ftc.teamcode.roadrunner.util.DashboardUtil;
-import org.firstinspires.ftc.teamcode.utils.DelayTimerManager;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
@@ -117,9 +116,6 @@ public class NewNewAuto extends MultiOpModeManager {
             in.register("+", GAMEPAD.driver2, PAD_KEY.dpad_up);
             in.register("-", GAMEPAD.driver2, PAD_KEY.dpad_down);
 
-            DelayTimerManager.makeInstance();
-            distance.startScan();
-
             super.init();
         } catch (Exception e) {
             telemetry.log().add(String.valueOf(e));
@@ -172,6 +168,9 @@ public class NewNewAuto extends MultiOpModeManager {
         telemetry.addData("Alliance", redAlliance ? "Red" : "Blue");
         telemetry.addData("Direction", duckSide ? "Duck" : "Warehouse");
         telemetry.addData("DelayTime (seconds) ", delayTime);
+        if (distance.isDone()) {
+            distance.startScan();
+        }
         super.init_loop();
     }
 
@@ -179,7 +178,6 @@ public class NewNewAuto extends MultiOpModeManager {
     public void start() {
         super.start();
         num = 0;
-        distance.startScan();
         drive.setDoneFalse();
         state = AUTO_STATE.BARCODE;
         delayTimer.reset();

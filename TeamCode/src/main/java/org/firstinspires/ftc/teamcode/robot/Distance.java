@@ -234,6 +234,10 @@ public class Distance extends OpMode {
         return state;
     }
 
+    public boolean isDone() {
+        return (state == AUTO_STATE.DONE || state == AUTO_STATE.IDLE);
+    }
+
     enum AUTO_STATE implements OrderedEnum {
         IDLE,
         START_LEFT,

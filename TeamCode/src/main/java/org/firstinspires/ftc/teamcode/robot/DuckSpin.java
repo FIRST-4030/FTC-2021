@@ -30,11 +30,9 @@
 package org.firstinspires.ftc.teamcode.robot;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
@@ -44,7 +42,7 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
-@Disabled
+//@Disabled
 @TeleOp(name = "DuckSpin", group = "Test")
 public class DuckSpin extends OpMode {
     // Hardware
@@ -52,12 +50,15 @@ public class DuckSpin extends OpMode {
     private DcMotor duck2 = null;
 
     // Config
-    public static double teleopMin = 0.63;
-    public static double teleopMax = 0.88;
-    public static double teleopRamp = 1.25;
+    public static double teleopMin = 0.75;
+    public static double teleopMax = 1;
+    public static double teleopRamp = 1.2;
     public static double autoMin = 0.445;
     public static double autoMax = 0.645;
     public static double autoRamp = 1.71;
+
+    private boolean started;
+    private boolean done;
 
     // Members
     public static boolean DEBUG = false;
@@ -67,7 +68,7 @@ public class DuckSpin extends OpMode {
     public static double speedMin = teleopMin;  // min duck spinner speed (0 - 1.0)
     public static double speedMax = teleopMax;  // max duck spinner speed (0 - 1.0)
     public static double rampTime = teleopRamp;  // duck spinner ramp time (seconds, >0)
-    private ElapsedTime timer = new ElapsedTime();
+    private final ElapsedTime timer = new ElapsedTime();
     private AUTO_STATE state = AUTO_STATE.IDLE;
 
     @Override
@@ -179,7 +180,33 @@ public class DuckSpin extends OpMode {
                 }
                 duck2.setPower(speed);
                 break;
+            case NEW_SPIN1:
+                duckRampS(teleopMin, teleopMax, teleopRamp, true);
+                if (done && duck.getPower() == 0) {
+                    state = AUTO_STATE.DONE;
+                }
+                break;
+            case NEW_SPIN2:
+                duckRampS(teleopMin, teleopMax, teleopRamp, false);
+                if (done && duck.getPower() == 0) {
+                    state = AUTO_STATE.DONE;
+                }
+                break;
+            case NEW_SPIN3:
+                duckRampInvS(teleopMin, teleopMax, teleopRamp, true);
+                if (done && duck.getPower() == 0) {
+                    state = AUTO_STATE.DONE;
+                }
+                break;
+            case NEW_SPIN4:
+                duckRampInvS(teleopMin, teleopMax, teleopRamp, false);
+                if (done && duck.getPower() == 0) {
+                    state = AUTO_STATE.DONE;
+                }
+                break;
             case DONE:
+                duck.setPower(0);
+                duck2.setPower(0);
                 break;
         }
 
@@ -190,8 +217,8 @@ public class DuckSpin extends OpMode {
                     duck.getPower(), duck.getCurrentPosition());
         }
 
-        telemetry.addData("speedMin:", speedMin);
-        telemetry.addData("speedMax:", speedMax);
+        telemetry.addData("speedMin:", teleopMin);
+        telemetry.addData("speedMax:", teleopMax);
         /*
          * TODO: This is a great place to use the InputHandler.auto() method
          ** It's specifically meant for this sort of incremental manual control
@@ -207,10 +234,146 @@ public class DuckSpin extends OpMode {
          * You should also be able to adjust speedMax/speedMin directly in the dashboard
          * Tuning controls on the gamepad can be useful, but the dashboard requires less code
          */
+
+        if (gamepad1.x) {
+            state = AUTO_STATE.NEW_SPIN1;
+        }
+        if (gamepad1.y) {
+            state = AUTO_STATE.NEW_SPIN2;
+        }
+        if (gamepad1.left_bumper) {
+            state = AUTO_STATE.NEW_SPIN3;
+        }
+        if (gamepad1.right_bumper) {
+            state = AUTO_STATE.NEW_SPIN4;
+        }
     }
 
     @Override
     public void stop() {
+    }
+
+    // duck spin s curve ramp taken from sin curve
+    // put in speedMin and speedMax, -1 to 1
+    // time is the total time of one routine
+    // boolean full: true means a half period of sin curve
+    //               false means a quarter period of sin curve
+    public void duckRampS(double speedMin, double speedMax, double time, boolean full) {
+        if (time == 0) {
+            return;
+        }
+
+        speedMin = Math.max(-1, speedMin);
+        speedMin = Math.min(1, speedMin);
+        speedMax = Math.max(-1, speedMax);
+        speedMax = Math.min(1, speedMax);
+        double y = 0;
+
+        if (full) {
+            double a = Math.PI / Math.abs(time);
+            double b = Math.abs(speedMax - speedMin) / 2;
+            double c = Math.abs(time) / 2;
+            double d = Math.abs(speedMax + speedMin) / 2;
+            double x = timer.seconds() / time;
+            if (timer.seconds() <= time) {
+                //y = 3 * Math.pow(timer.seconds() / time, 2) - 2 * Math.pow(timer.seconds() / time, 3);
+                y = b * Math.sin(a * (x - c)) + d;
+            }
+        } else {
+            double a = Math.PI / (2 * Math.abs(time));
+            double b = Math.abs(speedMax - speedMin);
+            double x = timer.seconds() / time;
+            if (timer.seconds() <= time) {
+                y = b * Math.sin(a * x) + speedMin;
+            }
+        }
+
+        if (!done && started) {
+            // speed is calculated using the curve defined above
+            if (speedMax > 0) {
+                duck.setPower(y);
+                duck2.setPower(y);
+            } else {
+                duck.setPower(-y);
+                duck2.setPower(-y);
+            }
+            done = (timer.seconds() > time);
+        }
+
+        if (!started) {
+            timer.reset();
+            started = true;
+            done = false;
+        } else if (done) {
+            duck.setPower(0);
+            duck2.setPower(0);
+            started = false;
+        }
+
+        telemetry.log().add(getClass().getSimpleName() + "::duckRampS(): Motors in use");
+        telemetry.addData("Vel1", duck.getPower());
+        telemetry.addData("Vel2", duck2.getPower());
+    }
+
+    // duck spin inverse s curve ramp taken from arcsin curve
+    // put in speedMin and speedMax, -1 to 1
+    // time is the total time of one routine
+    // boolean full: true means a half period of inverse sin curve
+    //               false means a quarter period of inverse sin curve
+    public void duckRampInvS(double speedMin, double speedMax, double time, boolean full) {
+        if (time == 0) {
+            return;
+        }
+
+        speedMin = Math.max(-1, speedMin);
+        speedMin = Math.min(1, speedMin);
+        speedMax = Math.max(-1, speedMax);
+        speedMax = Math.min(1, speedMax);
+        double y = 0;
+
+        if (!full) {
+            double a = 2 * Math.abs(speedMax - speedMin) / Math.PI;
+            double b = 1 / time;
+            double x = timer.seconds() / time;
+            if (timer.seconds() <= time) {
+                y = a * Math.asin(b * x) + speedMin;
+            }
+        } else {
+            double a = 2 / time;
+            double b = Math.abs(speedMax - speedMin) / Math.PI;
+            double c = Math.abs(time) / 2;
+            double d = Math.abs(speedMax + speedMin) / 2;
+            double x = timer.seconds() / time;
+            if (timer.seconds() <= time) {
+                y = b * Math.asin(a * (x - c)) + d;
+            }
+        }
+
+        if (!done && started) {
+            // speed is calculated using the curve defined above
+            if (speedMax > 0) {
+                duck.setPower(y);
+                duck2.setPower(y);
+            } else {
+                duck.setPower(-y);
+                duck2.setPower(-y);
+            }
+            done = (timer.seconds() > time);
+        }
+
+        if (!started) {
+            timer.reset();
+            started = true;
+            done = false;
+        } else if (done) {
+            duck.setPower(0);
+            duck2.setPower(0);
+            started = false;
+        }
+
+        telemetry.log().add(getClass().getSimpleName() + "::duckRampInvS(): Motors in use");
+        telemetry.addData("Vel1", duck.getPower());
+        telemetry.addData("Vel2", duck2.getPower());
     }
 
     enum AUTO_STATE implements OrderedEnum {
@@ -219,6 +382,10 @@ public class DuckSpin extends OpMode {
         BLUE,
         SPIN_BLUE,
         SPIN_RED,
+        NEW_SPIN1,
+        NEW_SPIN2,
+        NEW_SPIN3,
+        NEW_SPIN4,
         DONE;
 
         public AUTO_STATE next() {

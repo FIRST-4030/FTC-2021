@@ -38,7 +38,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.apache.commons.math3.analysis.function.Abs;
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
@@ -62,14 +61,14 @@ public class Depositor extends OpMode {
     public static boolean DEBUG = false;
     public static double PREP_SPEED = 1;
     public static double BELT_SPEED = 0.6;
-    public static double RESET_BELT_SPEED = 0.27;
+    public static double RESET_BELT_SPEED = 0.3;
     public static double TILT_BACK = 0.47;
     public static double TILT_FORWARD = 0.18;
     public static double LOW_OPEN = 0.6;
     public static double LOW_CLOSE = 0.125;
     public static double MID_OPEN = 0.59;
     public static double MID_CLOSE = 0.13;
-    public static double HIGH_OPEN = 0.14;
+    public static double HIGH_OPEN = 0.15;
     public static double HIGH_INIT = 0.55;
     public static int INIT_PREP_POS = 390;
     public static int LOW_PREP_POS = 560;
@@ -367,7 +366,7 @@ public class Depositor extends OpMode {
             } else {
                 low.setPosition(LOW_CLOSE);
             }
-            belt.setPower(gamepad2.right_stick_y * 0.8);
+            belt.setPower(gamepad2.right_stick_y * 0.85);
         }
 
         // Debug when requested

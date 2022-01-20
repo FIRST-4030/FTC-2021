@@ -308,7 +308,7 @@ public class NewNewDrive extends OpMode {
         double leftTicks;
         double rightTicks;
         // it should be, but ensure that the radius is positive
-        double angle = 0;
+        double angle;
 
         if (r == 0) {
             arcLengthL = arcLength;
@@ -348,11 +348,11 @@ public class NewNewDrive extends OpMode {
             // initialize speedCurve to have motor ticks be the X coordinate and motor speed be the Y coordinate
             speedCurveL.setClampLimits(true);
             speedCurveR.setClampLimits(true);
-            speedCurveL.addElement(driveLeft.getCurrentPosition() - 0.05 * leftTicks, speedMin);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + - 0.05 * leftTicks, speedMin);
             speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.375 * leftTicks, speedMax);
             speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.625 * leftTicks, speedMax);
             speedCurveL.addElement(driveLeft.getCurrentPosition() + 1.00 * leftTicks, speedMin);
-            speedCurveR.addElement(driveRight.getCurrentPosition() - 0.05 * rightTicks, speedMin);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + - 0.05 * rightTicks, speedMin);
             speedCurveR.addElement(driveRight.getCurrentPosition() + 0.375 * rightTicks, speedMax);
             speedCurveR.addElement(driveRight.getCurrentPosition() + 0.625 * rightTicks, speedMax);
             speedCurveR.addElement(driveRight.getCurrentPosition() + 1.00 * rightTicks, speedMin);
