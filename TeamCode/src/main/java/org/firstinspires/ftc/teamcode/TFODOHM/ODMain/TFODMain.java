@@ -11,10 +11,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Matrix4fBuilder;
+import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.TFMathExtension;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector2f;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector3f;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -63,6 +65,7 @@ public class TFODMain extends OpMode {
     private HashMap<String, Boolean> objHMDetected;
     private ArrayList<Float> bbLeft = null, bbRight = null, bbTop = null, bbBottom = null; //coordinates for debugging
     private ArrayList<Vector2f> bbTopLeft = null, bbBottomRight = null; //in the NDC standard for graphics
+    private ArrayList<Vector2f> bbMarkerTL = null, bbMarkerBR = null;
     private Vector3f bbLocalPos = new Vector3f();
 
     //object to describe the camera frustum
@@ -143,11 +146,7 @@ public class TFODMain extends OpMode {
 
     @Override
     public void loop() {
-        scan();
-        Vector2f bb = calculateBBVector();
-        if (bb.getY() == -2) {
-            bbLocalPos = l270.convertIMGCoord(bb);
-        }
+        calculateBBPos();
 
         if (isBusy == false && debug == true) {
             telemetry.addData("Object List Size: ", objsListSize);
@@ -159,7 +158,6 @@ public class TFODMain extends OpMode {
             telemetry.addData("BBTOPLEFT: ", bbTopLeft);
             telemetry.addData("BBBOTRIGHT: ", bbBottomRight);
             telemetry.addData("Null? [bbTopLeft, bbBottomRight]: ", "[" + (bbTopLeft == null) + ", " + (bbBottomRight == null) + "]");
-            telemetry.addData("BBClosest: ", bb);
             telemetry.addData("BB to Local: ", bbLocalPos);
             telemetry.addData("Cam HFOV: ", l270.gethFOV());
             telemetry.addData("Cam VFOV: ", l270.getvFOV());
@@ -240,14 +238,14 @@ public class TFODMain extends OpMode {
                                 break;
                             case "MARKER":
                                 objHMDetected.put(LABELS[3], true); //Market
+                                bbMarkerTL.add(normalizedTL);
+                                bbMarkerBR.add(normalizedBR);
                                 break;
                         }
                     }
                 }
             }
-
         }
-
         isBusy = false; //set the state of the scan to be not busy since it's finished
     }
 
@@ -289,6 +287,41 @@ public class TFODMain extends OpMode {
 
         isBusy = false;
         return new Vector2f(0, -2); //if we can't find the nearest, return a vector out of bounds
+    }
+
+    public void calculateBBPos(){
+        scan();
+        Vector2f bb = calculateBBVector();
+        if (bb.getY() == -2) {
+            bbLocalPos = l270.convertIMGCoord(bb);
+        }
+    }
+
+    public Vector2f calculateMarkerPos(){
+        if ((bbMarkerTL != null) && (bbMarkerBR != null)){
+            if ((bbMarkerTL.size() > 1) && (bbMarkerBR.size() > 1)){
+                int min_length = Math.max(bbMarkerTL.size(), bbMarkerBR.size()), index;
+                ArrayList<Vector3f> cachedMarkerPoints = new ArrayList<>();
+                Vector2f bbCenter;
+                Vector3f lineBegin, lineMid, lineEnd, lineNormal, startPos, temp;
+
+                for (int i = 0; i < min_length; i++){
+                    bbCenter = Vector2f.div(Vector2f.add(bbMarkerTL.get(i), bbMarkerBR.get(i)), 2);
+                    cachedMarkerPoints.add(l270.convertIMGCoord(bbCenter));
+                }
+
+                //since the markers are likely on the same line, we don't have to sort
+                index = cachedMarkerPoints.get(0).length() <= cachedMarkerPoints.get(1).length() ? 0 : 1;
+                lineBegin = cachedMarkerPoints.get(index == 0 ? 0 : 1);
+                lineEnd = cachedMarkerPoints.get(index == 0 ? 1 : 0);
+
+                temp = Vector3f.sub(lineEnd, lineBegin).normalized();
+                lineNormal = new Vector3f(-temp.getY(), 0, temp.getX());
+
+                lineMid = Vector3f.div(Vector3f.add(lineBegin, lineEnd), 2);
+            }
+        }
+        return null;
     }
 
 
@@ -355,6 +388,8 @@ public class TFODMain extends OpMode {
         //initialize vector list
         bbTopLeft = new ArrayList<>();
         bbBottomRight = new ArrayList<>();
+        bbMarkerTL = new ArrayList<>();
+        bbMarkerBR = new ArrayList<>();
 
         //Detection List for Debugging
         objHMDetected = new HashMap<>();

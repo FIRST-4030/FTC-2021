@@ -178,7 +178,7 @@ public class TFMathExtension {
      * @param t
      * @return
      */
-    public static Vector2f gen2fBezierCurve(ArrayList<Vector2f> controlPoints, float t){
+    public static Vector2f bezierCurveGen(ArrayList<Vector2f> controlPoints, float t){
         ArrayList<Vector2f> cachedPoints = controlPoints, newCachedPoints = new ArrayList<>();
         Vector2f tempPoint = new Vector2f();
 
@@ -201,5 +201,62 @@ public class TFMathExtension {
         }
 
         return cachedPoints.get(0); //the result is in a size one array, so get the first and only element of it
+    }
+
+    /**
+     * This method interpolates through a quadratic bezier curve given a 't' scalar value
+     * @param begin
+     * @param control
+     * @param end
+     * @param t
+     * @return output
+     */
+    public Vector2f bezierCurveQ(Vector2f begin, Vector2f control, Vector2f end, float t){
+        Vector2f p0p1Diff = Vector2f.sub(begin, control);
+        Vector2f p2p1Diff = Vector2f.sub(end, control);
+        float t1Squared = (1 - t) * (1 - t);
+        float tSquared = t * t;
+
+        Vector2f output = Vector2f.add(control, Vector2f.add(Vector2f.mul(p0p1Diff, t1Squared),Vector2f.mul(p2p1Diff, tSquared)));
+        return output;
+    }
+
+    /**
+     * This method interpolates through the derivative of a quadratic bezier curve given a 't' scalar value
+     * @param begin
+     * @param control
+     * @param end
+     * @param t
+     * @return
+     */
+    public Vector2f bezierCurveQD(Vector2f begin, Vector2f control, Vector2f end, float t){
+        Vector2f p1p0Diff = Vector2f.sub(begin, control);
+        Vector2f p2p1Diff = Vector2f.sub(end, control);
+        float t1 = 2 * (1 - t);
+
+        Vector2f output = Vector2f.add(Vector2f.mul(p1p0Diff, t1), Vector2f.mul(p2p1Diff, 2 * t));
+        return output;
+    }
+
+
+    public Vector2f[] bezierCurveQArray(Vector2f begin, Vector2f control, Vector2f end, int steps){
+        Vector2f p0p1Diff = Vector2f.sub(begin, control);
+        Vector2f p2p1Diff = Vector2f.sub(end, control);
+        Vector2f[] output = new Vector2f[steps];
+
+        float incr = 1 / steps;
+        float t = 0, t1Squared, tSquared;
+
+        for (int i = 0; i < steps; i++) {
+            t1Squared = (1 - t) * (1 - t);
+            tSquared = t * t;
+
+            output[i] = Vector2f.add(control, Vector2f.add(Vector2f.mul(p0p1Diff, t1Squared),Vector2f.mul(p2p1Diff, tSquared)));
+
+            t += incr;
+        }
+
+
+        return null;
     }
 }
