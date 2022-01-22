@@ -257,6 +257,6 @@ public class TFMathExtension {
         }
 
 
-        return null;
+        return output;
     }
 }

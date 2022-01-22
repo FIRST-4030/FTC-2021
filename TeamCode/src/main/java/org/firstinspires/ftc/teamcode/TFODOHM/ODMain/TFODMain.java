@@ -253,7 +253,7 @@ public class TFODMain extends OpMode {
      * Calculates the center of the bounding boxes and find which are the closest to the center of screen space
      * @return closest Vector2f to the center of the image
      */
-    public Vector2f calculateBBVector(){
+    public Vector2f sortBB(){
         isBusy = true;
         //check for null pointers because those are always sneaky
         if ((bbTopLeft.size() != 0 && bbTopLeft != null) && (bbBottomRight.size() != 0 && bbBottomRight != null)){
@@ -291,37 +291,42 @@ public class TFODMain extends OpMode {
 
     public void calculateBBPos(){
         scan();
-        Vector2f bb = calculateBBVector();
+        Vector2f bb = sortBB();
         if (bb.getY() == -2) {
             bbLocalPos = l270.convertIMGCoord(bb);
         }
     }
 
-    public Vector2f calculateMarkerPos(){
-        if ((bbMarkerTL != null) && (bbMarkerBR != null)){
-            if ((bbMarkerTL.size() > 1) && (bbMarkerBR.size() > 1)){
-                int min_length = Math.max(bbMarkerTL.size(), bbMarkerBR.size()), index;
-                ArrayList<Vector3f> cachedMarkerPoints = new ArrayList<>();
-                Vector2f bbCenter;
-                Vector3f lineBegin, lineMid, lineEnd, lineNormal, startPos, temp;
+    public void calculatePosFromMarker(){
 
-                for (int i = 0; i < min_length; i++){
-                    bbCenter = Vector2f.div(Vector2f.add(bbMarkerTL.get(i), bbMarkerBR.get(i)), 2);
-                    cachedMarkerPoints.add(l270.convertIMGCoord(bbCenter));
-                }
+        markerToLocalSpace(null ,null, 15);
+    }
 
-                //since the markers are likely on the same line, we don't have to sort
-                index = cachedMarkerPoints.get(0).length() <= cachedMarkerPoints.get(1).length() ? 0 : 1;
-                lineBegin = cachedMarkerPoints.get(index == 0 ? 0 : 1);
-                lineEnd = cachedMarkerPoints.get(index == 0 ? 1 : 0);
+    public Vector2f markerToLocalSpace(Vector2f a, Vector2f b, float offset){
+        isBusy = true;
+        //get the line direction from (b - a) normalized
+        Vector2f lineDir = Vector2f.sub(b, a).normalized();
+        Vector2f lineNormal = new Vector2f(-lineDir.getY(), lineDir.getX());
 
-                temp = Vector3f.sub(lineEnd, lineBegin).normalized();
-                lineNormal = new Vector3f(-temp.getY(), 0, temp.getX());
+        //rotate by 90 to get vector normal of the line
+        Vector2f m = lineNormal;
 
-                lineMid = Vector3f.div(Vector3f.add(lineBegin, lineEnd), 2);
-            }
-        }
-        return null;
+        //multiply it by offset to indicate how far the start position is from the marker
+        m.mul(offset);
+
+        //position vector m relative to the line AB
+        m.add(Vector2f.div(Vector2f.add(a, b), 2));
+
+        //flip m
+        m.mul(-1);
+
+        //calculate the projection of the origin to the normals of vector m and flip it to get projected position
+        float kh = -1 * Vector2f.dot(lineDir, m);
+        float kv = -1 * Vector2f.dot(lineNormal, m);
+
+        isBusy = false;
+        //use projection as actual positions
+        return new Vector2f(kh, kv);
     }
 
 
