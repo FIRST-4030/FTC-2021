@@ -22,6 +22,11 @@ public class NewNewDrive extends OpMode {
     public static double ACCEL_CONSTANT = 0.4;
     public static double trackWidth = 15.25;
     public static double trackWidthHalf = trackWidth / 2.0;
+    public static double firstRampPoint = -0.025;
+    public static double secondRampPoint = 0.375;
+    public static double thirdRampPoint = 0.675;
+    public static double lastRampPoint = 1.0;
+    public static double accelMax = 0.025;
     private double ogPosL = 0;
     private double ogPosR = 0;
 
@@ -53,11 +58,13 @@ public class NewNewDrive extends OpMode {
             driveLeft.setDirection(DcMotorSimple.Direction.FORWARD);
             driveLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             driveLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            driveLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
             driveRight = hardwareMap.get(DcMotor.class, "BR");
             driveRight.setDirection(DcMotorSimple.Direction.FORWARD);
             driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             driveRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            driveRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
             in.register("DRIVE_LEFT", GAMEPAD.driver1, PAD_KEY.left_stick_y);
             in.register("DRIVE_RIGHT", GAMEPAD.driver1, PAD_KEY.right_stick_y);
@@ -344,18 +351,39 @@ public class NewNewDrive extends OpMode {
             done = speedCurveL.isClamped() && speedCurveR.isClamped();
         }
 
+        double accelLeft = Math.abs(speedMax - speedMin) / (secondRampPoint * (leftTicks / TICKS_PER_INCH));
+        double accelRight = Math.abs(speedMax - speedMin) / (secondRampPoint * (rightTicks/ TICKS_PER_INCH));
+        if (r > 0) {
+            secondRampPoint = Math.abs(speedMax - speedMin) / (accelMax * (leftTicks / TICKS_PER_INCH));
+            secondRampPoint = Math.min(0.5, secondRampPoint);
+            speedMax = (secondRampPoint * (accelMax * (leftTicks / TICKS_PER_INCH)) + Math.abs(speedMin)) * Math.signum(speedMax);
+        } else if (r < 0) {
+            secondRampPoint = Math.abs(speedMax - speedMin) / (accelMax * (rightTicks/ TICKS_PER_INCH));
+            secondRampPoint = Math.min(0.5, secondRampPoint);
+            speedMax = (secondRampPoint * (accelMax * (rightTicks/ TICKS_PER_INCH)) + Math.abs(speedMin)) * Math.signum(speedMax);
+        }
+        thirdRampPoint = lastRampPoint - secondRampPoint;
+
+        speedMin = Math.max(-1, speedMin);
+        speedMin = Math.min(1, speedMin);
+        speedMax = Math.max(-1, speedMax);
+        speedMax = Math.min(1, speedMax);
+
         if (!started) {
             // initialize speedCurve to have motor ticks be the X coordinate and motor speed be the Y coordinate
             speedCurveL.setClampLimits(true);
             speedCurveR.setClampLimits(true);
-            speedCurveL.addElement(driveLeft.getCurrentPosition() + - 0.05 * leftTicks, speedMin);
-            speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.375 * leftTicks, speedMax);
-            speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.625 * leftTicks, speedMax);
-            speedCurveL.addElement(driveLeft.getCurrentPosition() + 1.00 * leftTicks, speedMin);
-            speedCurveR.addElement(driveRight.getCurrentPosition() + - 0.05 * rightTicks, speedMin);
-            speedCurveR.addElement(driveRight.getCurrentPosition() + 0.375 * rightTicks, speedMax);
-            speedCurveR.addElement(driveRight.getCurrentPosition() + 0.625 * rightTicks, speedMax);
-            speedCurveR.addElement(driveRight.getCurrentPosition() + 1.00 * rightTicks, speedMin);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + firstRampPoint * leftTicks, speedMin);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + secondRampPoint * leftTicks, speedMax);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + thirdRampPoint * leftTicks, speedMax);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + lastRampPoint * leftTicks, speedMin);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + firstRampPoint * rightTicks, speedMin);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + secondRampPoint * rightTicks, speedMax);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + thirdRampPoint * rightTicks, speedMax);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + lastRampPoint * rightTicks, speedMin);
+
+            ogPosL = driveLeft.getCurrentPosition();
+            ogPosR = driveRight.getCurrentPosition();
 
             started = true;
             done = false;
@@ -372,11 +400,13 @@ public class NewNewDrive extends OpMode {
         telemetry.addData("right ticks", driveRight.getCurrentPosition());
         telemetry.addData("leftVel", driveLeft.getPower());
         telemetry.addData("rightVel", driveRight.getPower());
+        telemetry.addData("AccelLeft", accelLeft);
+        telemetry.addData("AccelRight", accelRight);
         logData("arcTo()", started + "," + done + "," +
                 speedCurveL.isValid() + "," + speedCurveL.getSize() + "," +
                 speedCurveR.isValid() + "," + speedCurveR.getSize() + "," +
                 arcLengthL + "," + arcLengthR + "," +
-                leftTicks + "," + rightTicks + "," + midTicks + "," + maxRatio);
+                leftTicks + "," + rightTicks + "," + midTicks + "," + maxRatio + "," + accelLeft + "," + accelRight);
     }
 
     public void combinedCurves(double r1, double arcLength1, double speedMin1, double speedMax1, double r2, double arcLength2, double speedMin2, double speedMax2) {
@@ -464,15 +494,15 @@ public class NewNewDrive extends OpMode {
             speedCurveR.setClampLimits(true);
             speedCurveL.addElement(driveLeft.getCurrentPosition() - 0.05 * leftTicks1, speedMin1);
             speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.5 * leftTicks1, speedMax1);
-            speedCurveL.addElement(driveLeft.getCurrentPosition() + 1.00 * leftTicks1, (speedMax1 + speedMax2)/2.0);
-            speedCurveL.addElement(driveLeft.getCurrentPosition() - 0.05 * leftTicks2 + leftTicks1, (speedMax1 + speedMax2)/2.0);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + 1.00 * leftTicks1, (speedMax1 + speedMax2) / 2.0);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() - 0.05 * leftTicks2 + leftTicks1, (speedMax1 + speedMax2) / 2.0);
             speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.5 * leftTicks2 + leftTicks1, speedMax2);
             speedCurveL.addElement(driveLeft.getCurrentPosition() + 1.00 * leftTicks2 + leftTicks1, speedMin2);
 
             speedCurveR.addElement(driveLeft.getCurrentPosition() - 0.05 * rightTicks1, speedMin1);
             speedCurveR.addElement(driveLeft.getCurrentPosition() + 0.5 * rightTicks1, speedMax1);
-            speedCurveR.addElement(driveLeft.getCurrentPosition() + 1.00 * rightTicks1, (speedMax1 + speedMax2)/2.0);
-            speedCurveR.addElement(driveLeft.getCurrentPosition() - 0.05 * rightTicks2 + rightTicks1, (speedMax1 + speedMax2)/2.0);
+            speedCurveR.addElement(driveLeft.getCurrentPosition() + 1.00 * rightTicks1, (speedMax1 + speedMax2) / 2.0);
+            speedCurveR.addElement(driveLeft.getCurrentPosition() - 0.05 * rightTicks2 + rightTicks1, (speedMax1 + speedMax2) / 2.0);
             speedCurveR.addElement(driveLeft.getCurrentPosition() + 0.5 * rightTicks2 + rightTicks1, speedMax2);
             speedCurveR.addElement(driveLeft.getCurrentPosition() + 1.00 * rightTicks2 + rightTicks1, speedMin2);
 
@@ -499,6 +529,114 @@ public class NewNewDrive extends OpMode {
                 speedCurveR.isValid() + "," + speedCurveR.getSize() + "," +
                 arcLengthL1 + "," + arcLengthR1 + "," +
                 leftTicks1 + "," + rightTicks1 + "," + midTicks1 + "," + maxRatio);
+    }
+
+    public void circle(double r, double speedMin, double speedMax) {
+        if (r == 0) {
+            return;
+        }
+        double arcLengthL;
+        double arcLengthR;
+        double arcLengthInner;
+        double arcLengthOuter;
+        double leftTicks;
+        double rightTicks;
+        // it should be, but ensure that the radius is positive
+        double angle = 360;
+
+            double arcLength = 2 * Math.PI * Math.abs(r);
+            arcLengthInner = Math.toRadians(angle) * (Math.abs(r) - trackWidthHalf);
+            arcLengthOuter = Math.toRadians(angle) * (Math.abs(r) + trackWidthHalf);
+
+            if (r > 0) {
+                // if radius is greater than zero, we are moving to the left, so the right side is on the outside
+                arcLengthL = arcLengthInner;
+                arcLengthR = arcLengthOuter;
+            } else {
+                // if radius is greater than zero, we are moving to the left, so the right side is on the inside
+                arcLengthL = arcLengthOuter;
+                arcLengthR = arcLengthInner;
+            }
+
+        leftTicks = arcLengthL * TICKS_PER_INCH;
+        rightTicks = arcLengthR * TICKS_PER_INCH;
+        double midTicks = arcLength * TICKS_PER_INCH;
+        if (midTicks == 0) {
+            midTicks = 1;
+        }
+
+        double maxRatio = Math.max(Math.abs(leftTicks), Math.abs(rightTicks)) / Math.abs(midTicks);
+        if ((isBusy() || !done) && speedCurveL.isValid() && speedCurveR.isValid() && started) {
+            // speed is calculated using the curve defined above
+            driveLeft.setPower((leftTicks / midTicks) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
+            driveRight.setPower((rightTicks / midTicks) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
+            done = speedCurveL.isClamped() && speedCurveR.isClamped();
+        }
+
+        double accelLeft = Math.abs(speedMax - speedMin) / (secondRampPoint * leftTicks);
+        double accelRight = Math.abs(speedMax - speedMin) / (secondRampPoint * rightTicks);
+        /* if (r > 0) {
+            secondRampPoint = Math.abs(speedMax - speedMin) / (accelMax * leftTicks);
+            secondRampPoint = Math.min(0.5, secondRampPoint);
+            speedMax = (secondRampPoint * (accelMax * leftTicks) + Math.abs(speedMin)) * Math.signum(speedMax);
+        } else if (r < 0) {
+            secondRampPoint = Math.abs(speedMax - speedMin) / (accelMax * rightTicks);
+            secondRampPoint = Math.min(0.5, secondRampPoint);
+            speedMax = (secondRampPoint * (accelRight * rightTicks) + Math.abs(speedMin)) * Math.signum(speedMax);
+        }
+        thirdRampPoint = lastRampPoint - secondRampPoint; */
+
+        if (!started) {
+            // initialize speedCurve to have motor ticks be the X coordinate and motor speed be the Y coordinate
+            speedCurveL.setClampLimits(true);
+            speedCurveR.setClampLimits(true);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + firstRampPoint * leftTicks, speedMin);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + secondRampPoint * leftTicks, speedMax);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + thirdRampPoint * leftTicks, speedMax);
+            speedCurveL.addElement(driveLeft.getCurrentPosition() + lastRampPoint * leftTicks, speedMin);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + firstRampPoint * rightTicks, speedMin);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + secondRampPoint * rightTicks, speedMax);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + thirdRampPoint * rightTicks, speedMax);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + lastRampPoint * rightTicks, speedMin);
+
+            ogPosL = driveLeft.getCurrentPosition();
+            ogPosR = driveRight.getCurrentPosition();
+
+            started = true;
+            done = false;
+        } else if (done) {
+            driveLeft.setPower(0);
+            driveRight.setPower(0);
+            started = false;
+            speedCurveL.reset();
+            speedCurveR.reset();
+        }
+
+        telemetry.log().add(getClass().getSimpleName() + "::arcTo(): Motors in use");
+        telemetry.addData("left ticks", driveLeft.getCurrentPosition());
+        telemetry.addData("right ticks", driveRight.getCurrentPosition());
+        telemetry.addData("leftVel", driveLeft.getPower());
+        telemetry.addData("rightVel", driveRight.getPower());
+        telemetry.addData("AccelLeft", accelLeft);
+        telemetry.addData("AccelRight", accelRight);
+        logData("arcTo()", started + "," + done + "," +
+                speedCurveL.isValid() + "," + speedCurveL.getSize() + "," +
+                speedCurveR.isValid() + "," + speedCurveR.getSize() + "," +
+                arcLengthL + "," + arcLengthR + "," +
+                leftTicks + "," + rightTicks + "," + midTicks + "," + maxRatio + "," + accelLeft + "," + accelRight);
+    }
+
+    public double leftPos() {
+        return (driveLeft.getCurrentPosition() / TICKS_PER_INCH);
+    }
+    public double rightPos() {
+        return (driveRight.getCurrentPosition() / TICKS_PER_INCH);
+    }
+    public double leftVel() {
+        return driveLeft.getPower();
+    }
+    public double rightVel() {
+        return driveRight.getPower();
     }
 
     public void setDoneFalse() {

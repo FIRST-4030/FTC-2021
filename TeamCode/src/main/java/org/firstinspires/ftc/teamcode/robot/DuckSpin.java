@@ -51,7 +51,7 @@ public class DuckSpin extends OpMode {
 
     // Config
     public static double teleopMin = 0.75;
-    public static double teleopMax = 1;
+    public static double teleopMax = 0.9;
     public static double teleopRamp = 1.2;
     public static double autoMin = 0.445;
     public static double autoMax = 0.645;
@@ -274,17 +274,21 @@ public class DuckSpin extends OpMode {
             double b = Math.abs(speedMax - speedMin) / 2;
             double c = Math.abs(time) / 2;
             double d = Math.abs(speedMax + speedMin) / 2;
-            double x = timer.seconds() / time;
+            double x = timer.seconds();
             if (timer.seconds() <= time) {
                 //y = 3 * Math.pow(timer.seconds() / time, 2) - 2 * Math.pow(timer.seconds() / time, 3);
                 y = b * Math.sin(a * (x - c)) + d;
+            } else {
+                y = 0;
             }
         } else {
             double a = Math.PI / (2 * Math.abs(time));
             double b = Math.abs(speedMax - speedMin);
-            double x = timer.seconds() / time;
+            double x = timer.seconds();
             if (timer.seconds() <= time) {
                 y = b * Math.sin(a * x) + speedMin;
+            } else {
+                y = 0;
             }
         }
 
@@ -334,19 +338,73 @@ public class DuckSpin extends OpMode {
         if (!full) {
             double a = 2 * Math.abs(speedMax - speedMin) / Math.PI;
             double b = 1 / time;
-            double x = timer.seconds() / time;
+            double x = timer.seconds();
             if (timer.seconds() <= time) {
                 y = a * Math.asin(b * x) + speedMin;
+            } else {
+                y = 0;
             }
         } else {
             double a = 2 / time;
             double b = Math.abs(speedMax - speedMin) / Math.PI;
             double c = Math.abs(time) / 2;
             double d = Math.abs(speedMax + speedMin) / 2;
-            double x = timer.seconds() / time;
+            double x = timer.seconds();
             if (timer.seconds() <= time) {
                 y = b * Math.asin(a * (x - c)) + d;
+            } else {
+                y = 0;
             }
+        }
+
+        if (!done && started) {
+            // speed is calculated using the curve defined above
+            if (speedMax > 0) {
+                duck.setPower(y);
+                duck2.setPower(y);
+            } else {
+                duck.setPower(-y);
+                duck2.setPower(-y);
+            }
+            done = (timer.seconds() > time);
+        }
+
+        if (!started) {
+            timer.reset();
+            started = true;
+            done = false;
+        } else if (done) {
+            duck.setPower(0);
+            duck2.setPower(0);
+            started = false;
+        }
+
+        telemetry.log().add(getClass().getSimpleName() + "::duckRampInvS(): Motors in use");
+        telemetry.addData("Vel1", duck.getPower());
+        telemetry.addData("Vel2", duck2.getPower());
+    }
+
+    // duck spin inverse s curve ramp taken from arcsin curve
+    // put in speedMin and speedMax, -1 to 1
+    // time is the total time of one routine
+    // boolean full: true means a half period of inverse sin curve
+    //               false means a quarter period of inverse sin curve
+    public void duckRampPoly(double speedMin, double speedMax, double time, double pow) {
+        if (time == 0) {
+            return;
+        }
+
+        speedMin = Math.max(-1, speedMin);
+        speedMin = Math.min(1, speedMin);
+        speedMax = Math.max(-1, speedMax);
+        speedMax = Math.min(1, speedMax);
+        double y = 0;
+
+        double x = timer.seconds();
+        if (timer.seconds() <= time) {
+            y = Math.pow(time, -pow) * Math.abs(speedMax - speedMin) * Math.pow(x, pow) + speedMin;
+        } else {
+            y = 0;
         }
 
         if (!done && started) {

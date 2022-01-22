@@ -64,7 +64,7 @@ public class NewNewAuto extends MultiOpModeManager {
     private DuckSpin duck;
 
     // Constants
-    public static double speedMin = 0.2;
+    public static double speedMin = 0.3;
     public static double speedMax = 0.5;
     public static double distance1 = 14;
     public static double r2 = 14;

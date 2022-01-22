@@ -36,16 +36,14 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
-import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
-@Autonomous(name = "NewDriveTest", group = "Test")
-public class NewDriveTest extends MultiOpModeManager {
+@Autonomous(name = "straightTest", group = "Test")
+public class straightTest extends MultiOpModeManager {
     // Hardware
     private NewNewDrive drive;
     private Servo collectorArm = null;
@@ -57,7 +55,7 @@ public class NewDriveTest extends MultiOpModeManager {
     public static double speedMin = 0.3;
     public static double speedMax = 0.5;
     public static double COLLECTOR_UP = 0.6;
-    public static double moveDistance = 30;
+    public static double moveDistance = 15;
     public static int num = 0;
     public static int waitTime = 1;
 
@@ -71,32 +69,6 @@ public class NewDriveTest extends MultiOpModeManager {
     public void init() {
         boolean error = false;
         telemetry.addData("Status", "Initializing...");
-
-        /*try {
-            super.register(new Depositor());
-            super.register(new Capstone());
-            super.register(new Distance());
-            super.register(new DuckSpin());
-
-            distance = new Distance();
-            super.register(distance);
-            depositor = new Depositor();
-            super.register(depositor);
-            duck = new DuckSpin();
-            super.register(duck);
-
-            Globals.opmode = this;
-            in = Globals.input(this);
-            in.register("+", GAMEPAD.driver2, PAD_KEY.dpad_up);
-            in.register("-", GAMEPAD.driver2, PAD_KEY.dpad_down);
-
-            distance.startScan();
-
-            super.init();
-        } catch (Exception e) {
-            telemetry.log().add(String.valueOf(e));
-            error = true;
-        }*/
 
         try {
             super.register(new NewNewDrive());
@@ -143,14 +115,7 @@ public class NewDriveTest extends MultiOpModeManager {
 
     @Override
     public void loop() {
-        /*depositor.loop();
-        distance.loop();
-        duck.loop();
-        in.loop();*/
 
-        if (state != oldState && state != AUTO_STATE.WAIT) {
-            oldState = state;
-        }
         // Step through the auto commands
         switch (state) {
             case TEST_MOVE1:
@@ -159,26 +124,7 @@ public class NewDriveTest extends MultiOpModeManager {
                 collectorArm.setPosition(COLLECTOR_UP);
                 if (drive.isDone() && !drive.isBusy()) {
                     waitTimer.reset();
-                    state = AUTO_STATE.WAIT;
-                }
-                break;
-            case TEST_MOVE2:
-                drive.arcTo(0, -moveDistance, -speedMin, -speedMax);
-                //drive.combinedCurves(0, 10, speedMin, speedMax, 0, 10, speedMin, speedMax);
-                collectorArm.setPosition(COLLECTOR_UP);
-                if (drive.isDone() && !drive.isBusy()) {
-                    waitTimer.reset();
-                    state = AUTO_STATE.WAIT;
-                }
-                break;
-            case WAIT:
-                if (waitTimer.seconds() >= waitTime) {
-                    drive.setDoneFalse();
-                    if (oldState == AUTO_STATE.TEST_MOVE2) {
-                        state = AUTO_STATE.TEST_MOVE1;
-                    } else if (oldState == AUTO_STATE.TEST_MOVE1) {
-                        state = AUTO_STATE.TEST_MOVE2;
-                    }
+                    state = AUTO_STATE.DONE;
                 }
                 break;
             // Stop processing
@@ -203,8 +149,6 @@ public class NewDriveTest extends MultiOpModeManager {
 
     enum AUTO_STATE implements OrderedEnum {
         TEST_MOVE1,
-        TEST_MOVE2,
-        WAIT,
         DONE;
 
         public AUTO_STATE next() {
