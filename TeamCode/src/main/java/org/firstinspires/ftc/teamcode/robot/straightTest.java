@@ -52,8 +52,10 @@ public class straightTest extends MultiOpModeManager {
     private DuckSpin duck;
 
     // Constants
-    public static double speedMin = 0.3;
+    public static double r = 20;
+    public static double speedMin = 0.1;
     public static double speedMax = 0.5;
+    public static double arcLength = 2 * Math.PI * Math.abs(r) * 1.05;
     public static double COLLECTOR_UP = 0.6;
     public static double moveDistance = 15;
     public static int num = 0;
@@ -119,7 +121,7 @@ public class straightTest extends MultiOpModeManager {
         // Step through the auto commands
         switch (state) {
             case TEST_MOVE1:
-                drive.arcTo(0, moveDistance, speedMin, speedMax);
+                drive.arcTo(r, arcLength, speedMin, speedMax);
                 //drive.combinedCurves(0, 10, speedMin, speedMax, 0, 10, speedMin, speedMax);
                 collectorArm.setPosition(COLLECTOR_UP);
                 if (drive.isDone() && !drive.isBusy()) {

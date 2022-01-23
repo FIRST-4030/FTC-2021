@@ -18,12 +18,12 @@ public class NewNewDrive extends OpMode {
     public static boolean DEBUG = false;
     private static final int INPUT_SCALING_EXPONENT = 3;
     private static final double MAX_VELOCITY = 40.0; // inches per second
-    public static double TICKS_PER_INCH = 40.75;
+    public static double TICKS_PER_INCH = 44.5;
     public static double ACCEL_CONSTANT = 0.4;
     public static double trackWidth = 15.25;
     public static double trackWidthHalf = trackWidth / 2.0;
     public static double firstRampPoint = -0.025;
-    public static double secondRampPoint = 0.375;
+    public static double secondRampPoint = 0.5;
     public static double thirdRampPoint = 0.675;
     public static double lastRampPoint = 1.0;
     public static double accelMax = 0.025;
@@ -353,7 +353,7 @@ public class NewNewDrive extends OpMode {
 
         double accelLeft = Math.abs(speedMax - speedMin) / (secondRampPoint * (leftTicks / TICKS_PER_INCH));
         double accelRight = Math.abs(speedMax - speedMin) / (secondRampPoint * (rightTicks/ TICKS_PER_INCH));
-        if (r > 0) {
+        /* if (r > 0) {
             secondRampPoint = Math.abs(speedMax - speedMin) / (accelMax * (leftTicks / TICKS_PER_INCH));
             secondRampPoint = Math.min(0.5, secondRampPoint);
             speedMax = (secondRampPoint * (accelMax * (leftTicks / TICKS_PER_INCH)) + Math.abs(speedMin)) * Math.signum(speedMax);
@@ -361,8 +361,8 @@ public class NewNewDrive extends OpMode {
             secondRampPoint = Math.abs(speedMax - speedMin) / (accelMax * (rightTicks/ TICKS_PER_INCH));
             secondRampPoint = Math.min(0.5, secondRampPoint);
             speedMax = (secondRampPoint * (accelMax * (rightTicks/ TICKS_PER_INCH)) + Math.abs(speedMin)) * Math.signum(speedMax);
-        }
-        thirdRampPoint = lastRampPoint - secondRampPoint;
+        } */
+        //thirdRampPoint = lastRampPoint - secondRampPoint;
 
         speedMin = Math.max(-1, speedMin);
         speedMin = Math.min(1, speedMin);
@@ -375,11 +375,11 @@ public class NewNewDrive extends OpMode {
             speedCurveR.setClampLimits(true);
             speedCurveL.addElement(driveLeft.getCurrentPosition() + firstRampPoint * leftTicks, speedMin);
             speedCurveL.addElement(driveLeft.getCurrentPosition() + secondRampPoint * leftTicks, speedMax);
-            speedCurveL.addElement(driveLeft.getCurrentPosition() + thirdRampPoint * leftTicks, speedMax);
+            //speedCurveL.addElement(driveLeft.getCurrentPosition() + thirdRampPoint * leftTicks, speedMax);
             speedCurveL.addElement(driveLeft.getCurrentPosition() + lastRampPoint * leftTicks, speedMin);
             speedCurveR.addElement(driveRight.getCurrentPosition() + firstRampPoint * rightTicks, speedMin);
             speedCurveR.addElement(driveRight.getCurrentPosition() + secondRampPoint * rightTicks, speedMax);
-            speedCurveR.addElement(driveRight.getCurrentPosition() + thirdRampPoint * rightTicks, speedMax);
+            //speedCurveR.addElement(driveRight.getCurrentPosition() + thirdRampPoint * rightTicks, speedMax);
             speedCurveR.addElement(driveRight.getCurrentPosition() + lastRampPoint * rightTicks, speedMin);
 
             ogPosL = driveLeft.getCurrentPosition();
@@ -531,7 +531,7 @@ public class NewNewDrive extends OpMode {
                 leftTicks1 + "," + rightTicks1 + "," + midTicks1 + "," + maxRatio);
     }
 
-    public void circle(double r, double speedMin, double speedMax) {
+    public void circle(double r, double angle, double speedMin, double speedMax) {
         if (r == 0) {
             return;
         }
@@ -542,7 +542,6 @@ public class NewNewDrive extends OpMode {
         double leftTicks;
         double rightTicks;
         // it should be, but ensure that the radius is positive
-        double angle = 360;
 
             double arcLength = 2 * Math.PI * Math.abs(r);
             arcLengthInner = Math.toRadians(angle) * (Math.abs(r) - trackWidthHalf);

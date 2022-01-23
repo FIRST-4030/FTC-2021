@@ -54,7 +54,7 @@ public class NewDriveTest extends MultiOpModeManager {
     private DuckSpin duck;
 
     // Constants
-    public static double speedMin = 0.3;
+    public static double speedMin = 0.1;
     public static double speedMax = 0.5;
     public static double COLLECTOR_UP = 0.6;
     public static double moveDistance = 30;

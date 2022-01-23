@@ -70,6 +70,7 @@ public class Collector extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime collectorTimer = new ElapsedTime();
     private collectCmd collectCmdState = collectCmd.IDLE;
+    private boolean collected = false;
 
     @Override
     public void init() {
@@ -129,7 +130,7 @@ public class Collector extends OpMode {
         telemetry.addData("State", collectCmdState);
 
         // Collector state
-        boolean collected = sensorCollector.isPressed();
+        collected = sensorCollector.isPressed();
         telemetry.addData("Collected? ", collected);
         switch (collectCmdState) {
             case IDLE:
@@ -145,12 +146,13 @@ public class Collector extends OpMode {
                 if (!gamepad2.left_bumper) {
                     collectCmdState = collectCmd.BEFORE_EJECT;
                 }
-                if (sensorCollector.isPressed() && collectorTimer.seconds() > (Math.PI / 10)) {
+                if (collected && collectorTimer.seconds() > (Math.PI / 10)) {
                     collectorTimer.reset();
                     collectCmdState = collectCmd.SENSOR_DELAY;
                 }
                 break;
             case SENSOR_DELAY:
+                collected = false;
                 if (collectorTimer.seconds() > DELAY_TIME) {
                     collectCmdState = collectCmd.BEFORE_EJECT;
                 }
@@ -203,6 +205,10 @@ public class Collector extends OpMode {
 
     @Override
     public void stop() {
+    }
+
+    public void collect() {
+        collectCmdState = collectCmd.BEFORE_COLLECT;
     }
 
     public void autoCollect() {

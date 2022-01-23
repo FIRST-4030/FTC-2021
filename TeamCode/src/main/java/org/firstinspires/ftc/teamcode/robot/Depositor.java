@@ -62,8 +62,8 @@ public class Depositor extends OpMode {
     public static double PREP_SPEED = 1;
     public static double BELT_SPEED = 0.6;
     public static double RESET_BELT_SPEED = 0.3;
-    public static double TILT_BACK = 0.47;
-    public static double TILT_FORWARD = 0.18;
+    public static double TILT_BACK = 0.36;
+    public static double TILT_FORWARD = 0.06;
     public static double LOW_OPEN = 0.6;
     public static double LOW_CLOSE = 0.125;
     public static double MID_OPEN = 0.59;

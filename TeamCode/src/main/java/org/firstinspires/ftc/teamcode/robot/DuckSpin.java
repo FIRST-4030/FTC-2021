@@ -50,13 +50,14 @@ public class DuckSpin extends OpMode {
     private DcMotor duck2 = null;
 
     // Config
-    public static double teleopMin = 0.75;
-    public static double teleopMax = 0.9;
+    public static double teleopMin = 0.72;
+    public static double teleopMax = 1;
     public static double teleopRamp = 1.2;
     public static double autoMin = 0.445;
     public static double autoMax = 0.645;
     public static double autoRamp = 1.71;
 
+    public static double pow = 13;
     private boolean started;
     private boolean done;
 
@@ -181,25 +182,31 @@ public class DuckSpin extends OpMode {
                 duck2.setPower(speed);
                 break;
             case NEW_SPIN1:
-                duckRampS(teleopMin, teleopMax, teleopRamp, true);
+                duckRampS(-teleopMin, -teleopMax, teleopRamp, true);
                 if (done && duck.getPower() == 0) {
                     state = AUTO_STATE.DONE;
                 }
                 break;
             case NEW_SPIN2:
-                duckRampS(teleopMin, teleopMax, teleopRamp, false);
+                duckRampS(-teleopMin, -teleopMax, teleopRamp, false);
                 if (done && duck.getPower() == 0) {
                     state = AUTO_STATE.DONE;
                 }
                 break;
             case NEW_SPIN3:
-                duckRampInvS(teleopMin, teleopMax, teleopRamp, true);
+                duckRampInvS(-teleopMin, -teleopMax, teleopRamp, true);
                 if (done && duck.getPower() == 0) {
                     state = AUTO_STATE.DONE;
                 }
                 break;
             case NEW_SPIN4:
-                duckRampInvS(teleopMin, teleopMax, teleopRamp, false);
+                duckRampInvS(-teleopMin, -teleopMax, teleopRamp, false);
+                if (done && duck.getPower() == 0) {
+                    state = AUTO_STATE.DONE;
+                }
+                break;
+            case NEW_SPIN5:
+                duckRampPoly(-teleopMin, -teleopMax, teleopRamp, pow);
                 if (done && duck.getPower() == 0) {
                     state = AUTO_STATE.DONE;
                 }
@@ -246,6 +253,9 @@ public class DuckSpin extends OpMode {
         }
         if (gamepad1.right_bumper) {
             state = AUTO_STATE.NEW_SPIN4;
+        }
+        if (gamepad1.dpad_up) {
+            state = AUTO_STATE.NEW_SPIN5;
         }
     }
 
@@ -398,24 +408,19 @@ public class DuckSpin extends OpMode {
         speedMin = Math.min(1, speedMin);
         speedMax = Math.max(-1, speedMax);
         speedMax = Math.min(1, speedMax);
-        double y = 0;
+        double y;
 
         double x = timer.seconds();
         if (timer.seconds() <= time) {
-            y = Math.pow(time, -pow) * Math.abs(speedMax - speedMin) * Math.pow(x, pow) + speedMin;
+            y = Math.pow(time, -pow) * (speedMax - speedMin) * Math.pow(x, pow) + speedMin;
         } else {
             y = 0;
         }
 
         if (!done && started) {
             // speed is calculated using the curve defined above
-            if (speedMax > 0) {
-                duck.setPower(y);
-                duck2.setPower(y);
-            } else {
-                duck.setPower(-y);
-                duck2.setPower(-y);
-            }
+            duck.setPower(y);
+            duck2.setPower(y);
             done = (timer.seconds() > time);
         }
 
@@ -444,6 +449,7 @@ public class DuckSpin extends OpMode {
         NEW_SPIN2,
         NEW_SPIN3,
         NEW_SPIN4,
+        NEW_SPIN5,
         DONE;
 
         public AUTO_STATE next() {

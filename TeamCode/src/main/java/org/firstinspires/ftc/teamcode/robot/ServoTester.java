@@ -50,6 +50,7 @@ public class ServoTester extends OpMode{
     private Servo collectorArm = null;
     private Servo mid = null;
     private Servo low = null;
+    private Servo tilt = null;
     // Constants used for hardware
     private static double COLLECTOR_UP = 0.37;
     private static double COLLECTOR_DOWN = 0.9;
@@ -72,6 +73,7 @@ public class ServoTester extends OpMode{
             collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
             mid = hardwareMap.get(Servo.class, "Depmid");
             low = hardwareMap.get(Servo.class, "Deplow");
+            tilt = hardwareMap.get(Servo.class, "Deptilt");
             Globals.opmode = this;
             in = Globals.input(this);
             in.register("+", GAMEPAD.driver1, PAD_KEY.dpad_up);
@@ -112,7 +114,7 @@ public class ServoTester extends OpMode{
             servoPos = Math.max(0.0f, servoPos);
         }
         // Set position of desired servo
-        collectorArm.setPosition(servoPos);
+        tilt.setPosition(servoPos);
     }
 
     @Override

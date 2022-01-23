@@ -67,10 +67,10 @@ public class NewNewAuto extends MultiOpModeManager {
     public static double speedMin = 0.3;
     public static double speedMax = 0.5;
     public static double distance1 = 14;
-    public static double r2 = 14;
-    public static double arcLength2 = 17;
-    public static double r3wh = 100;
-    public static double arcLength3wh = 50;
+    public static double r2 = 40;
+    public static double arcLength2 = 30;
+    public static double r3wh = 90;
+    public static double arcLength3wh = 60;
     public static double r3duck = 12;
     public static double arcLength3duck = 37.8;
     public static double r4duck = 0;
@@ -216,7 +216,7 @@ public class NewNewAuto extends MultiOpModeManager {
                     }
                     break;
 
-                case MOVE_OUT:
+                /* case MOVE_OUT:
                     depositor.prep();
                     //drive.driveTo(speedMin, speedMax, distance1);
                     drive.arcTo(0, distance1, speedMin, speedMax);
@@ -225,19 +225,20 @@ public class NewNewAuto extends MultiOpModeManager {
                         drive.setDoneFalse();
                         state = state.next();
                     }
-                    break;
+                    break;*/
                 case ARC:
+                    depositor.prep();
                     if (duckSide) {
                         if (redAlliance) {
                             drive.arcTo(-r2, arcLength2, speedMin, speedMax);
                         } else {
-                            drive.arcTo(r2 - 0.1, arcLength2 + 0.25, speedMin, speedMax);
+                            drive.arcTo(r2, arcLength2, speedMin, speedMax);
                         }
                     } else {
                         if (redAlliance) {
                             drive.arcTo(r2, arcLength2, speedMin, speedMax);
                         } else {
-                            drive.arcTo(-r2, arcLength2 + 0.15, speedMin, speedMax);
+                            drive.arcTo(-r2, arcLength2, speedMin, speedMax);
                         }
                     }
                     if (drive.isDone() && !drive.isBusy()) {
@@ -259,13 +260,13 @@ public class NewNewAuto extends MultiOpModeManager {
                 case PARK:
                     if (duckSide) {
                         if (redAlliance) {
-                            drive.arcTo(-r3duck, -arcLength3duck - 0.1, -speedMin, -speedMax);
+                            drive.arcTo(-r3duck, -arcLength3duck, -speedMin, -speedMax);
                         } else {
-                            drive.arcTo(r3duck, -36.9, -speedMin, -speedMax);
+                            drive.arcTo(r3duck, -arcLength3duck, -speedMin, -speedMax);
                         }
                     } else {
                         if (redAlliance) {
-                            drive.arcTo(-r3wh + 10, -arcLength3wh, -speedMin, -speedMax);
+                            drive.arcTo(-r3wh, -arcLength3wh, -speedMin, -speedMax);
                         } else {
                             drive.arcTo(r3wh, -arcLength3wh, -speedMin, -speedMax);
                         }
@@ -354,7 +355,7 @@ public class NewNewAuto extends MultiOpModeManager {
 
     enum AUTO_STATE implements OrderedEnum {
         BARCODE,
-        MOVE_OUT,
+        //MOVE_OUT,
         ARC,
         PREP_WAIT,
         DEPOSIT,
