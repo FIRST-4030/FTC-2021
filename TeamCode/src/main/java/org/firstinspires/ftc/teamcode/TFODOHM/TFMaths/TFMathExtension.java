@@ -287,6 +287,6 @@ public class TFMathExtension {
 
         double angle = Math.atan2(diff.getY(), diff.getX());
 
-        return new float[]{output.getX(), (float) ((angle > 180 ? angle - 360 : angle) * output.getX())};
+        return new float[]{output.getX(), (float) ((angle > 180 ? -1 * (360 - angle) : angle) * output.getX())};
     }
 }
