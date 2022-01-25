@@ -352,7 +352,7 @@ public class NewNewDrive extends OpMode {
         }
 
         double accelLeft = Math.abs(speedMax - speedMin) / (secondRampPoint * (leftTicks / TICKS_PER_INCH));
-        double accelRight = Math.abs(speedMax - speedMin) / (secondRampPoint * (rightTicks/ TICKS_PER_INCH));
+        double accelRight = Math.abs(speedMax - speedMin) / (secondRampPoint * (rightTicks / TICKS_PER_INCH));
         /* if (r > 0) {
             secondRampPoint = Math.abs(speedMax - speedMin) / (accelMax * (leftTicks / TICKS_PER_INCH));
             secondRampPoint = Math.min(0.5, secondRampPoint);
@@ -543,19 +543,19 @@ public class NewNewDrive extends OpMode {
         double rightTicks;
         // it should be, but ensure that the radius is positive
 
-            double arcLength = 2 * Math.PI * Math.abs(r);
-            arcLengthInner = Math.toRadians(angle) * (Math.abs(r) - trackWidthHalf);
-            arcLengthOuter = Math.toRadians(angle) * (Math.abs(r) + trackWidthHalf);
+        double arcLength = 2 * Math.PI * Math.abs(r);
+        arcLengthInner = Math.toRadians(angle) * (Math.abs(r) - trackWidthHalf);
+        arcLengthOuter = Math.toRadians(angle) * (Math.abs(r) + trackWidthHalf);
 
-            if (r > 0) {
-                // if radius is greater than zero, we are moving to the left, so the right side is on the outside
-                arcLengthL = arcLengthInner;
-                arcLengthR = arcLengthOuter;
-            } else {
-                // if radius is greater than zero, we are moving to the left, so the right side is on the inside
-                arcLengthL = arcLengthOuter;
-                arcLengthR = arcLengthInner;
-            }
+        if (r > 0) {
+            // if radius is greater than zero, we are moving to the left, so the right side is on the outside
+            arcLengthL = arcLengthInner;
+            arcLengthR = arcLengthOuter;
+        } else {
+            // if radius is greater than zero, we are moving to the left, so the right side is on the inside
+            arcLengthL = arcLengthOuter;
+            arcLengthR = arcLengthInner;
+        }
 
         leftTicks = arcLengthL * TICKS_PER_INCH;
         rightTicks = arcLengthR * TICKS_PER_INCH;
@@ -628,12 +628,15 @@ public class NewNewDrive extends OpMode {
     public double leftPos() {
         return (driveLeft.getCurrentPosition() / TICKS_PER_INCH);
     }
+
     public double rightPos() {
         return (driveRight.getCurrentPosition() / TICKS_PER_INCH);
     }
+
     public double leftVel() {
         return driveLeft.getPower();
     }
+
     public double rightVel() {
         return driveRight.getPower();
     }
