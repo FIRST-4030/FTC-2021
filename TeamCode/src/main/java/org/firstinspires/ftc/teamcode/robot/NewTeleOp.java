@@ -56,6 +56,7 @@ public class NewTeleOp extends MultiOpModeManager {
     private DistanceSensor distanceRight = null;
     private TouchSensor sensorCollector = null;
     private Depositor depositor;
+    private DuckSpin duckSpin;
 
     // Constants used for hardware
     private static double DUCK_POWER = 0.0;
@@ -118,6 +119,9 @@ public class NewTeleOp extends MultiOpModeManager {
             duckSpinner.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             duckSpinner2 = hardwareMap.get(DcMotor.class, "duck2");
             duckSpinner2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            /* super.register(new DuckSpin());
+            duckSpin = new DuckSpin();
+            super.register(duckSpin);*/
         } catch (Exception e) {
             telemetry.log().add("Could not find duck spinner");
             error = true;

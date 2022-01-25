@@ -50,14 +50,15 @@ public class DuckSpin extends OpMode {
     private DcMotor duck2 = null;
 
     // Config
-    public static double teleopMin = 0.72;
+    public static double teleopMin = 0.66;
     public static double teleopMax = 1;
-    public static double teleopRamp = 1.2;
+    public static double teleopRamp = 1.1;
+    public static double teleopRampStop = 1;
     public static double autoMin = 0.445;
     public static double autoMax = 0.645;
     public static double autoRamp = 1.71;
 
-    public static double pow = 13;
+    public static double pow = 6;
     private boolean started;
     private boolean done;
 
@@ -411,9 +412,12 @@ public class DuckSpin extends OpMode {
         double y;
 
         double x = timer.seconds();
-        if (timer.seconds() <= time) {
-            y = Math.pow(time, -pow) * (speedMax - speedMin) * Math.pow(x, pow) + speedMin;
-        } else {
+        if (timer.seconds() <= teleopRampStop) {
+            y = Math.pow(teleopRampStop, -pow) * (speedMax - speedMin) * Math.pow(x, pow) + speedMin;
+        } else if (timer.seconds() <= time) {
+            y = speedMax;
+        }
+        else {
             y = 0;
         }
 

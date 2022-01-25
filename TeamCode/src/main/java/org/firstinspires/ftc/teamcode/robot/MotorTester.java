@@ -61,7 +61,9 @@ public class MotorTester extends OpMode{
         // Collector
         try {
             duck = hardwareMap.get(DcMotor.class, "duck");
+            duck.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             duck2 = hardwareMap.get(DcMotor.class, "duck2");
+            duck2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             Globals.opmode = this;
             in = Globals.input(this);
             in.register("+", GAMEPAD.driver1, PAD_KEY.dpad_up);
