@@ -382,6 +382,10 @@ public class NewNewDrive extends OpMode {
             //speedCurveR.addElement(driveRight.getCurrentPosition() + thirdRampPoint * rightTicks, speedMax);
             speedCurveR.addElement(driveRight.getCurrentPosition() + lastRampPoint * rightTicks, speedMin);
 
+            // Ramp-and-hold
+            //rampAndHold(speedCurveL, (int)leftTicks, driveLeft.getCurrentPosition(), speedMin, speedMax);
+            //rampAndHold(speedCurveR, (int)rightTicks, driveRight.getCurrentPosition(), speedMin, speedMax);
+
             ogPosL = driveLeft.getCurrentPosition();
             ogPosR = driveRight.getCurrentPosition();
 
@@ -623,6 +627,28 @@ public class NewNewDrive extends OpMode {
                 speedCurveR.isValid() + "," + speedCurveR.getSize() + "," +
                 arcLengthL + "," + arcLengthR + "," +
                 leftTicks + "," + rightTicks + "," + midTicks + "," + maxRatio + "," + accelLeft + "," + accelRight);
+    }
+
+    // Build a 3-point or 4-point piecewise function for linear-ramp-and-hold command curves
+    private void rampAndHold(
+            PiecewiseFunction pfunc,
+            int totalTicks, int currentTicks,
+            double speedMin, double speedMax) {
+        int rampUpTicks = 150;
+        int rampDownTicks = 150;
+
+        if (rampUpTicks + rampDownTicks >= totalTicks) {
+            // 3 ramp points at 0%, 50% and 100%
+            pfunc.addElement(currentTicks, speedMin);
+            pfunc.addElement(currentTicks + totalTicks / 2, speedMax);
+            pfunc.addElement(currentTicks + totalTicks, speedMin);
+        } else {
+            // 4 ramp points at 0%, rampUpTicks, rampDownTicks, and 100%
+            pfunc.addElement(currentTicks, speedMin);
+            pfunc.addElement(currentTicks + rampUpTicks, speedMax);
+            pfunc.addElement(currentTicks + totalTicks - rampDownTicks, speedMax);
+            pfunc.addElement(currentTicks + totalTicks, speedMin);
+        }
     }
 
     public double leftPos() {
