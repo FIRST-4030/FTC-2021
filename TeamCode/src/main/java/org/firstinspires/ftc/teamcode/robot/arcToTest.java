@@ -36,20 +36,16 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
-@Autonomous(name = "straightTest", group = "Test")
-public class straightTest extends MultiOpModeManager {
+@Autonomous(name = "arcToTest", group = "Test")
+public class arcToTest extends MultiOpModeManager {
     // Hardware
     private NewNewDrive drive;
     private Servo collectorArm = null;
-    private Distance distance;
-    private Depositor depositor;
-    private DuckSpin duck;
 
     // Constants
     public static double r = 20;
@@ -57,14 +53,10 @@ public class straightTest extends MultiOpModeManager {
     public static double speedMax = 0.5;
     public static double arcLength = 2 * Math.PI * Math.abs(r) * 1.05;
     public static double COLLECTOR_UP = 0.6;
-    public static double moveDistance = 15;
     public static int num = 0;
-    public static int waitTime = 1;
 
     // Members
     private AUTO_STATE state = AUTO_STATE.DONE;
-    private AUTO_STATE oldState = AUTO_STATE.DONE;
-    private InputHandler in;
     private final ElapsedTime waitTimer = new ElapsedTime();
 
     @Override
@@ -112,7 +104,7 @@ public class straightTest extends MultiOpModeManager {
         super.start();
         num = 0;
         drive.setDoneFalse();
-        state = AUTO_STATE.TEST_MOVE1;
+        state = AUTO_STATE.TEST_MOVE;
     }
 
     @Override
@@ -120,7 +112,7 @@ public class straightTest extends MultiOpModeManager {
 
         // Step through the auto commands
         switch (state) {
-            case TEST_MOVE1:
+            case TEST_MOVE:
                 drive.arcTo(r, arcLength, speedMin, speedMax);
                 //drive.combinedCurves(0, 10, speedMin, speedMax, 0, 10, speedMin, speedMax);
                 collectorArm.setPosition(COLLECTOR_UP);
@@ -150,7 +142,7 @@ public class straightTest extends MultiOpModeManager {
     }
 
     enum AUTO_STATE implements OrderedEnum {
-        TEST_MOVE1,
+        TEST_MOVE,
         DONE;
 
         public AUTO_STATE next() {
