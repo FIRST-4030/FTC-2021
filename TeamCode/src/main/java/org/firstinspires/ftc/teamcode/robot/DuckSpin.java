@@ -40,6 +40,7 @@ import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
+import org.firstinspires.ftc.teamcode.utils.PiecewiseFunction;
 
 @Config
 //@Disabled
@@ -441,6 +442,34 @@ public class DuckSpin extends OpMode {
         telemetry.log().add(getClass().getSimpleName() + "::duckRampInvS(): Motors in use");
         telemetry.addData("Vel1", duck.getPower());
         telemetry.addData("Vel2", duck2.getPower());
+    }
+
+    // An encoder-synchronized piecewise function for unloading ducks quickly
+    private void rampBarThrow(PiecewiseFunction pfunc, int currentTicks) {
+        // A speed slow enough for a safe start
+        double speedStart = teleopMin;
+        // The maximum speed at which ducks can safely travel
+        double speedMax = 0.83; // TODO: Calculate from measurements
+        // The best speed for removing ducks from the spinner
+        double speedEject = teleopMax;
+
+        // Minimum number of ticks until it's safe to run at speedMax
+        int startTicks = 500; // TODO: Approximate the best observed ramp rate
+        // Maximum number of ticks from duck-start to duck-on-bar
+        // Spinner will move as quickly as ramp limits allow into this position
+        int barTicks = 15000; // TODO: Measure travel distance in ticks from start to bar
+        // Maximum number of ticks from duck-on-bar to duck-ejected
+        // Spinner will move this additional distance at ejection speeds
+        int ejectTicks = 5000; // TODO: Estimate the overrun needed to eject
+
+        pfunc.addElement(currentTicks, speedStart);
+        pfunc.addElement(currentTicks + startTicks, speedMax);
+        pfunc.addElement(currentTicks + barTicks - 1, speedMax);
+        pfunc.addElement(currentTicks + barTicks, speedEject);
+        pfunc.addElement(currentTicks + barTicks + ejectTicks, 0);
+
+        // Enable first/last element clamping in case the encoder values drift outside the model
+        pfunc.setClampLimits(true);
     }
 
     enum AUTO_STATE implements OrderedEnum {
