@@ -417,8 +417,7 @@ public class DuckSpin extends OpMode {
             y = Math.pow(teleopRampStop, -pow) * (speedMax - speedMin) * Math.pow(x, pow) + speedMin;
         } else if (timer.seconds() <= time) {
             y = speedMax;
-        }
-        else {
+        } else {
             y = 0;
         }
 
@@ -445,7 +444,7 @@ public class DuckSpin extends OpMode {
     }
 
     // An encoder-synchronized piecewise function for unloading ducks quickly
-    private void rampBarThrow(PiecewiseFunction pfunc, int currentTicks) {
+    private int rampBarThrow(PiecewiseFunction pfunc, int currentTicks) {
         // A speed slow enough for a safe start
         double speedStart = teleopMin;
         // The maximum speed at which ducks can safely travel
@@ -466,10 +465,14 @@ public class DuckSpin extends OpMode {
         pfunc.addElement(currentTicks + startTicks, speedMax);
         pfunc.addElement(currentTicks + barTicks - 1, speedMax);
         pfunc.addElement(currentTicks + barTicks, speedEject);
+        pfunc.addElement(currentTicks + barTicks + ejectTicks - 1, speedEject);
         pfunc.addElement(currentTicks + barTicks + ejectTicks, 0);
 
         // Enable first/last element clamping in case the encoder values drift outside the model
         pfunc.setClampLimits(true);
+
+        // Return the cycle-complete tick count, for upstream progress monitoring
+        return currentTicks + barTicks + ejectTicks;
     }
 
     enum AUTO_STATE implements OrderedEnum {
