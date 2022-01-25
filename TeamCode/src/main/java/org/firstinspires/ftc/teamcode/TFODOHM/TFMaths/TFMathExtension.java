@@ -285,9 +285,8 @@ public class TFMathExtension {
 
         Vector2f diff = Vector2f.sub(int2f, output);
 
-        double angle = Math.atan2(Math.abs(diff.getY()), diff.getX());
-        double sign = Math.signum(diff.getY());
+        double angle = Math.atan2(diff.getY(), diff.getX());
 
-        return new float[]{output.getX(), (float) (sign * angle * output.getX())};
+        return new float[]{output.getX(), (float) ((angle > 180 ? angle - 360 : angle) * output.getX())};
     }
 }
