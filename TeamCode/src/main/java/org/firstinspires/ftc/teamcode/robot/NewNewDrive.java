@@ -630,25 +630,35 @@ public class NewNewDrive extends OpMode {
     }
 
     // Build a 3-point or 4-point piecewise function for linear-ramp-and-hold command curves
+    // If ramp up/down ticks were parameters this could be a method in PiecewiseFunction
+    // That would provide both a sample of code usage and of different control models
     private void rampAndHold(
             PiecewiseFunction pfunc,
-            int totalTicks, int currentTicks,
+            int pathTicks, int currentTicks,
             double speedMin, double speedMax) {
+        // How many ticks does it take to ramp up/down between speedMin and speedMax
+        // Higher values correlate with longer ramp times and smaller acceleration
+        // Usually experiment and measurement can determine an approximate value
         int rampUpTicks = 150;
         int rampDownTicks = 150;
 
-        if (rampUpTicks + rampDownTicks >= totalTicks) {
+        if (rampUpTicks + rampDownTicks >= pathTicks) {
+            // Path is shorter than the ramp up/down intervals
             // 3 ramp points at 0%, 50% and 100%
             pfunc.addElement(currentTicks, speedMin);
-            pfunc.addElement(currentTicks + totalTicks / 2, speedMax);
-            pfunc.addElement(currentTicks + totalTicks, speedMin);
+            pfunc.addElement(currentTicks + pathTicks / 2, speedMax);
+            pfunc.addElement(currentTicks + pathTicks, speedMin);
         } else {
-            // 4 ramp points at 0%, rampUpTicks, rampDownTicks, and 100%
+            // Path is long enough to ramp to full speed
+            // 4 ramp points at 0%, rampUpTicks, 100% - rampDownTicks, and 100%
             pfunc.addElement(currentTicks, speedMin);
             pfunc.addElement(currentTicks + rampUpTicks, speedMax);
-            pfunc.addElement(currentTicks + totalTicks - rampDownTicks, speedMax);
-            pfunc.addElement(currentTicks + totalTicks, speedMin);
+            pfunc.addElement(currentTicks + pathTicks - rampDownTicks, speedMax);
+            pfunc.addElement(currentTicks + pathTicks, speedMin);
         }
+
+        // Enable first/last element clamping in case the encoder values drift outside the model
+        pfunc.setClampLimits(true);
     }
 
     public double leftPos() {
