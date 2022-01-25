@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Matrix4fBuilder;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.TFMathExtension;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector2f;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector3f;
+import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector4f;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -71,8 +72,8 @@ public class TFODMain extends OpMode {
     //object to describe the camera frustum
     private FrustumInterpolator l270;
     //camera attributes (with testing defaults)
-    private Vector3f localPos = new Vector3f(3.8f, 7.4f, 6.8f);
-    private double localPitch, localYaw, localRoll;
+    private Vector3f localPos = new Vector3f(3.8f, 12, 6.8f);
+    private double localPitch = 315, localYaw = 0, localRoll = 0;
 
     public TFODMain(){init();}
 
@@ -120,7 +121,7 @@ public class TFODMain extends OpMode {
         l270 = FrustumInterpolator.Logitech_C270; //get preset for the Logitech C270 webcam that includes the FOV for both Vertical & Horizontal
 
         l270.setCamPos(this.localPos); //describe the position of the camera ***lens***
-        l270.setCamRot(Matrix4fBuilder.buildGenRot(localPitch, localYaw, localRoll)); //describe the rotation of the camera ***lens***
+        l270.setCamRot(Matrix4fBuilder.buildGenRot(-45, 0, 0)); //describe the rotation of the camera ***lens***
         l270.setupFrustum();
 
         isBusy = false;
@@ -146,9 +147,14 @@ public class TFODMain extends OpMode {
 
     @Override
     public void loop() {
-        calculateBBPos();
+        scan();
+        Vector2f bb = sortBB();
+        if (bb.getY() == -2) {
+            bbLocalPos = l270.convertIMGCoord(bb);
+        }
 
-        if (isBusy == false && debug == true) {
+        if (debug == true) {
+            /*
             telemetry.addData("Object List Size: ", objsListSize);
             telemetry.addData("Objects Detected: ", objHMDetected.toString());
             telemetry.addData("BBLeft: ", bbLeft);
@@ -158,13 +164,16 @@ public class TFODMain extends OpMode {
             telemetry.addData("BBTOPLEFT: ", bbTopLeft);
             telemetry.addData("BBBOTRIGHT: ", bbBottomRight);
             telemetry.addData("Null? [bbTopLeft, bbBottomRight]: ", "[" + (bbTopLeft == null) + ", " + (bbBottomRight == null) + "]");
-            telemetry.addData("BB to Local: ", bbLocalPos);
+             */
+            telemetry.addData("Sorted BB: ", bb);
+            telemetry.addData("BB to Local: ", l270.convertIMGCoord(bb));
             telemetry.addData("Cam HFOV: ", l270.gethFOV());
             telemetry.addData("Cam VFOV: ", l270.getvFOV());
             telemetry.addData("Bottom: ", l270.getFplane_bottom());
             telemetry.addData("Right:", l270.getFplane_right());
             telemetry.addData("Center: ", l270.getFplane_center());
             telemetry.addData("Cam Rot Matrix: ", l270.getCamRot());
+            telemetry.addData("Cam IMG to Local Matrix: ", l270.getImgToLocal());
         }
     }
 
@@ -290,11 +299,13 @@ public class TFODMain extends OpMode {
     }
 
     public void calculateBBPos(){
+        isBusy = true;
         scan();
         Vector2f bb = sortBB();
         if (bb.getY() == -2) {
             bbLocalPos = l270.convertIMGCoord(bb);
         }
+        isBusy = false;
     }
 
     public void calculatePosFromMarker(){

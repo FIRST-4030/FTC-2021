@@ -61,24 +61,29 @@ public class FrustumInterpolator {
      * Usually a method called in the constructor and setters to update the matrices used
      * <br> However, this method is available because this class doesn't work with MOMM
      */
-    public void setupFrustum(){
-        double angV = Math.toRadians(vFOV) / 2;
-        double angH = Math.toRadians(hFOV) / 2;
 
-        float fpDistance = 100;
+    public float fpr_, fpb_;
+    public void setupFrustum() {
+        double angV = vFOV * 0.5;
+        double angH = hFOV * 0.5;
 
-        Vector3f temp = this.camPos;
+        float fpDistance = 1000;
 
-        fplane_right = camRot.matMul(new Vector4f((float) Math.tan(0.5 * Math.toRadians(hFOV)) * fpDistance, 0, 0, 1));
-        fplane_bottom = camRot.matMul(new Vector4f(0, (float) -Math.tan(0.5 * Math.toRadians(vFOV)) * fpDistance, 0, 1));
+        float fpr = (float) (Math.tan(angH) * fpDistance);
+        float fpb = (float) (Math.tan(angV) * -1 * fpDistance);
+
+        this.fpr_ = fpr; this.fpb_ = fpb;
+
+        fplane_right = camRot.matMul(new Vector4f(fpr, 0, 0, 1));
+        fplane_bottom = camRot.matMul(new Vector4f(0, fpb, 0, 1));
         fplane_center = camRot.matMul(new Vector4f(0, 0, fpDistance, 1));
 
         imgToLocal = new Matrix4f(new float[]
                 {fplane_right.getX(), fplane_bottom.getX(), fplane_center.getX(), camPos.getX(),
-                 fplane_right.getY(), fplane_bottom.getY(), fplane_center.getY(), camPos.getY(),
-                 fplane_right.getZ(), fplane_bottom.getZ(), fplane_center.getZ(), camPos.getZ(),
-                                   0,                    0,                    0,             1}
-                );
+                        fplane_right.getY(), fplane_bottom.getY(), fplane_center.getY(), camPos.getY(),
+                        fplane_right.getZ(), fplane_bottom.getZ(), fplane_center.getZ(), camPos.getZ(),
+                        0, 0, 0, 1}
+        );
     }
 
     /**
@@ -87,7 +92,8 @@ public class FrustumInterpolator {
      * @return XZ & bb_pos intersection
      */
     public Vector3f convertIMGCoord(Vector2f bb_pos){
-        Vector3f output = this.cardinalAxisPlane.getVector3fInt(camPos, this.imgToLocal.matMul(new Vector4f(bb_pos.getX(), bb_pos.getY(), 1, 1)).getAsVec3f());
+        Vector3f castedVector = this.imgToLocal.matMul(new Vector4f(bb_pos.getX(), bb_pos.getY(), 1, 1)).getAsVec3f();
+        Vector3f output = this.cardinalAxisPlane.getVector3fInt(camPos, castedVector);
         return output;
     }
 

@@ -49,7 +49,7 @@ public class Matrix4fBuilder {
     }
 
     /**
-     * Builds a rotation matrix on the X axis ('Roll')
+     * Builds a rotation matrix on the X axis ('Pitch')
      * @param angle_deg
      * @return
      */
@@ -65,7 +65,7 @@ public class Matrix4fBuilder {
     }
 
     /**
-     * Builds a rotation matrix on the Y axis ('Pitch')
+     * Builds a rotation matrix on the Y axis ('Yaw')
      * @param angle_deg
      * @return
      */
@@ -81,7 +81,7 @@ public class Matrix4fBuilder {
     }
 
     /**
-     * Builds a rotation matrix on the Z axis ('Yaw')
+     * Builds a rotation matrix on the Z axis ('Roll')
      * @param angle_deg
      * @return
      */
@@ -110,12 +110,12 @@ public class Matrix4fBuilder {
         float sina = (float) Math.sin(Math.toRadians(yaw_deg));
 
         //handles pitch rot
-        float cosb = (float) Math.cos(Math.toRadians(pitch_deg));
-        float sinb = (float) Math.sin(Math.toRadians(pitch_deg));
+        float cosr = (float) Math.cos(Math.toRadians(pitch_deg));
+        float sinr = (float) Math.sin(Math.toRadians(pitch_deg));
 
         //handles roll rot
-        float cosr = (float) Math.cos(Math.toRadians(roll_deg));
-        float sinr = (float) Math.sin(Math.toRadians(roll_deg));
+        float cosb = (float) Math.cos(Math.toRadians(roll_deg));
+        float sinb = (float) Math.sin(Math.toRadians(roll_deg));
 
         return new Matrix4f(
                 new float[]{cosa * cosb, cosa * sinb * sinr - sina * cosr, cosa * sinb * cosr + sina * sinr, 0,
