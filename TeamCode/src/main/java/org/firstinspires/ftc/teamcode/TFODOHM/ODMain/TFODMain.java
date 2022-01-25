@@ -341,8 +341,6 @@ public class TFODMain extends OpMode {
     }
 
 
-
-
     /**
      * INITIALIZERS UNDER HERE
      */

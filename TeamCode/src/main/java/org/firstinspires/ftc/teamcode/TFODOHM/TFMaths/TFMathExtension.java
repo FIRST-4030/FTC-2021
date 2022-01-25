@@ -288,6 +288,6 @@ public class TFMathExtension {
         double angle = Math.atan2(Math.abs(diff.getY()), diff.getX());
         double sign = Math.signum(diff.getY());
 
-        return new float[]{output.getX(), (float) (angle * output.getX())};
+        return new float[]{output.getX(), (float) (sign * angle * output.getX())};
     }
 }
