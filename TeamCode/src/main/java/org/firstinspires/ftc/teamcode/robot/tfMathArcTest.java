@@ -58,7 +58,11 @@ public class tfMathArcTest extends MultiOpModeManager {
     public static double arcLength;// = 2 * Math.PI * Math.abs(r) * 1.05;
     public static double COLLECTOR_UP = 0.6;
     public static int num = 0;
-    private TFMathExtension tfMath = new TFMathExtension();
+    
+    //vector element array to test arcs in all quadrants in one build & run session; code is needed to increment the individual element indices though
+    //Warning: giving it axis aligned vector (points along the axis line itself) it might return a null value in one(or both) element(s) or just return wrong values
+    public static float[] arrayX = new float[] {10, -7, 10,  15, 8, -9, -16, -10};
+    public static float[] arrayY = new float[] {20, 2, -10, -10, 7, 13, -16, -15};
 
     // Members
     private AUTO_STATE state = AUTO_STATE.DONE;
@@ -115,7 +119,7 @@ public class tfMathArcTest extends MultiOpModeManager {
     @Override
     public void loop() {
 
-        float[] f = tfMath.makeArc(new Vector2f(x, y));
+        float[] f = TFMathExtension.makeArc(new Vector2f(arrayX[0], arrayY[0]));
         r = f[0];
         arcLength = f[1];
         // Step through the auto commands
