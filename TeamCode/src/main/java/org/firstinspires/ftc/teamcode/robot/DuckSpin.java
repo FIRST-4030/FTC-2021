@@ -52,14 +52,15 @@ public class DuckSpin extends OpMode {
 
     // Config
     public static double teleopMin = 0.66;
-    public static double teleopMax = 1;
-    public static double teleopRamp = 1.1;
+    public static double teleopMax = 0.78;
+    public static double teleopRamp = 1.4;
     public static double teleopRampStop = 1;
-    public static double autoMin = 0.445;
-    public static double autoMax = 0.645;
-    public static double autoRamp = 1.71;
+    public static double autoMin = 0.45;
+    public static double autoMax = 0.6;
+    public static double autoRamp = 2.2;
+    public static double autoRampStop = 1.55;
 
-    public static double pow = 6;
+    public static double pow = 3;
     private boolean started;
     private boolean done;
 
@@ -139,11 +140,11 @@ public class DuckSpin extends OpMode {
 
         // Override the current auto state with driver commands
         // Technically we should only trigger on button-down, not repeatedly while held
-        if (in.down("DUCK_RED")) {
+        /* if (in.down("DUCK_RED")) {
             teleop(true);
         } else if (in.down("DUCK_BLUE")) {
             teleop(false);
-        }
+        } */
 
         // Run the auto cycle (including translated driver commands)
         switch (state) {
@@ -183,32 +184,14 @@ public class DuckSpin extends OpMode {
                 }
                 duck2.setPower(speed);
                 break;
-            case NEW_SPIN1:
-                duckRampS(-teleopMin, -teleopMax, teleopRamp, true);
-                if (done && duck.getPower() == 0) {
-                    state = AUTO_STATE.DONE;
-                }
-                break;
-            case NEW_SPIN2:
-                duckRampS(-teleopMin, -teleopMax, teleopRamp, false);
-                if (done && duck.getPower() == 0) {
-                    state = AUTO_STATE.DONE;
-                }
-                break;
-            case NEW_SPIN3:
-                duckRampInvS(-teleopMin, -teleopMax, teleopRamp, true);
-                if (done && duck.getPower() == 0) {
-                    state = AUTO_STATE.DONE;
-                }
-                break;
-            case NEW_SPIN4:
-                duckRampInvS(-teleopMin, -teleopMax, teleopRamp, false);
-                if (done && duck.getPower() == 0) {
-                    state = AUTO_STATE.DONE;
-                }
-                break;
-            case NEW_SPIN5:
+            case NEW_SPIN_RED:
                 duckRampPoly(-teleopMin, -teleopMax, teleopRamp, pow);
+                if (done && duck.getPower() == 0) {
+                    state = AUTO_STATE.DONE;
+                }
+                break;
+            case NEW_SPIN_BLUE:
+                duckRampPoly(teleopMin, teleopMax, teleopRamp, pow);
                 if (done && duck.getPower() == 0) {
                     state = AUTO_STATE.DONE;
                 }
@@ -244,21 +227,13 @@ public class DuckSpin extends OpMode {
          * Tuning controls on the gamepad can be useful, but the dashboard requires less code
          */
 
-        if (gamepad1.x) {
-            state = AUTO_STATE.NEW_SPIN1;
+        if (gamepad1.a) {
+            state = AUTO_STATE.NEW_SPIN_BLUE;
         }
-        if (gamepad1.y) {
-            state = AUTO_STATE.NEW_SPIN2;
+        if (gamepad1.b) {
+            state = AUTO_STATE.NEW_SPIN_RED;
         }
-        if (gamepad1.left_bumper) {
-            state = AUTO_STATE.NEW_SPIN3;
-        }
-        if (gamepad1.right_bumper) {
-            state = AUTO_STATE.NEW_SPIN4;
-        }
-        if (gamepad1.dpad_up) {
-            state = AUTO_STATE.NEW_SPIN5;
-        }
+
     }
 
     @Override
@@ -416,7 +391,7 @@ public class DuckSpin extends OpMode {
         if (timer.seconds() <= teleopRampStop) {
             y = Math.pow(teleopRampStop, -pow) * (speedMax - speedMin) * Math.pow(x, pow) + speedMin;
         } else if (timer.seconds() <= time) {
-            y = speedMax;
+            y = (1 - speedMax) / (time - teleopRampStop) * (timer.seconds() - teleopRamp) + speedMax;
         } else {
             y = 0;
         }
@@ -481,11 +456,8 @@ public class DuckSpin extends OpMode {
         BLUE,
         SPIN_BLUE,
         SPIN_RED,
-        NEW_SPIN1,
-        NEW_SPIN2,
-        NEW_SPIN3,
-        NEW_SPIN4,
-        NEW_SPIN5,
+        NEW_SPIN_RED,
+        NEW_SPIN_BLUE,
         DONE;
 
         public AUTO_STATE next() {

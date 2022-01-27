@@ -36,67 +36,38 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
-import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
-import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
+import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.TFMathExtension;
+import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector2f;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
-@Autonomous(name = "NewDriveTest", group = "Test")
-public class NewDriveTest extends MultiOpModeManager {
+@Autonomous(name = "tfMathArcTest", group = "Test")
+public class tfMathArcTest extends MultiOpModeManager {
     // Hardware
     private NewNewDrive drive;
     private Servo collectorArm = null;
-    private Distance distance;
-    private Depositor depositor;
-    private DuckSpin duck;
 
     // Constants
+    public static double r;// = 20;
+    public static float x = 10;
+    public static float y = 20;
     public static double speedMin = 0.1;
-    public static double speedMax = 0.9;
+    public static double speedMax = 0.5;
+    public static double arcLength;// = 2 * Math.PI * Math.abs(r) * 1.05;
     public static double COLLECTOR_UP = 0.6;
-    public static double moveDistance = 30;
     public static int num = 0;
-    public static int waitTime = 1;
+    private TFMathExtension tfMath = new TFMathExtension();
 
     // Members
     private AUTO_STATE state = AUTO_STATE.DONE;
-    private AUTO_STATE oldState = AUTO_STATE.DONE;
-    private InputHandler in;
     private final ElapsedTime waitTimer = new ElapsedTime();
 
     @Override
     public void init() {
         boolean error = false;
         telemetry.addData("Status", "Initializing...");
-
-        /*try {
-            super.register(new Depositor());
-            super.register(new Capstone());
-            super.register(new Distance());
-            super.register(new DuckSpin());
-
-            distance = new Distance();
-            super.register(distance);
-            depositor = new Depositor();
-            super.register(depositor);
-            duck = new DuckSpin();
-            super.register(duck);
-
-            Globals.opmode = this;
-            in = Globals.input(this);
-            in.register("+", GAMEPAD.driver2, PAD_KEY.dpad_up);
-            in.register("-", GAMEPAD.driver2, PAD_KEY.dpad_down);
-
-            distance.startScan();
-
-            super.init();
-        } catch (Exception e) {
-            telemetry.log().add(String.valueOf(e));
-            error = true;
-        }*/
 
         try {
             super.register(new NewNewDrive());
@@ -138,47 +109,24 @@ public class NewDriveTest extends MultiOpModeManager {
         super.start();
         num = 0;
         drive.setDoneFalse();
-        state = AUTO_STATE.TEST_MOVE1;
+        state = AUTO_STATE.TEST_MOVE;
     }
 
     @Override
     public void loop() {
-        /*depositor.loop();
-        distance.loop();
-        duck.loop();
-        in.loop();*/
 
-        if (state != oldState && state != AUTO_STATE.WAIT) {
-            oldState = state;
-        }
+        float[] f = tfMath.makeArc(new Vector2f(x, y));
+        r = f[0];
+        arcLength = f[1];
         // Step through the auto commands
         switch (state) {
-            case TEST_MOVE1:
-                drive.arcTo(0, moveDistance, speedMin, speedMax);
+            case TEST_MOVE:
+                drive.arcTo(r, arcLength, speedMin, speedMax);
                 //drive.combinedCurves(0, 10, speedMin, speedMax, 0, 10, speedMin, speedMax);
                 collectorArm.setPosition(COLLECTOR_UP);
                 if (drive.isDone() && !drive.isBusy()) {
                     waitTimer.reset();
-                    state = AUTO_STATE.WAIT;
-                }
-                break;
-            case TEST_MOVE2:
-                drive.arcTo(0, -moveDistance, -speedMin, -speedMax);
-                //drive.combinedCurves(0, 10, speedMin, speedMax, 0, 10, speedMin, speedMax);
-                collectorArm.setPosition(COLLECTOR_UP);
-                if (drive.isDone() && !drive.isBusy()) {
-                    waitTimer.reset();
-                    state = AUTO_STATE.WAIT;
-                }
-                break;
-            case WAIT:
-                if (waitTimer.seconds() >= waitTime) {
-                    drive.setDoneFalse();
-                    if (oldState == AUTO_STATE.TEST_MOVE2) {
-                        state = AUTO_STATE.TEST_MOVE1;
-                    } else if (oldState == AUTO_STATE.TEST_MOVE1) {
-                        state = AUTO_STATE.TEST_MOVE2;
-                    }
+                    state = AUTO_STATE.DONE;
                 }
                 break;
             // Stop processing
@@ -202,9 +150,7 @@ public class NewDriveTest extends MultiOpModeManager {
     }
 
     enum AUTO_STATE implements OrderedEnum {
-        TEST_MOVE1,
-        TEST_MOVE2,
-        WAIT,
+        TEST_MOVE,
         DONE;
 
         public AUTO_STATE next() {

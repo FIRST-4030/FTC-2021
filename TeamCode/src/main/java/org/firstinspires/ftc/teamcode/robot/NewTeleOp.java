@@ -115,13 +115,14 @@ public class NewTeleOp extends MultiOpModeManager {
 
         // Duck Spinner
         try {
-            duckSpinner = hardwareMap.get(DcMotor.class, "duck");
+            /*duckSpinner = hardwareMap.get(DcMotor.class, "duck");
             duckSpinner.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             duckSpinner2 = hardwareMap.get(DcMotor.class, "duck2");
-            duckSpinner2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            /* super.register(new DuckSpin());
+            duckSpinner2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);*/
+            super.register(new DuckSpin());
             duckSpin = new DuckSpin();
-            super.register(duckSpin);*/
+            super.register(duckSpin);
+            duckSpin.init();
         } catch (Exception e) {
             telemetry.log().add("Could not find duck spinner");
             error = true;
@@ -212,7 +213,7 @@ public class NewTeleOp extends MultiOpModeManager {
         rightDrive.setPower(RIGHT_DRIVE_POW * fastFactor2);
 
         // Duck spinner
-        if (gamepad1.a) {
+        /* if (gamepad1.a) {
             DUCK_POWER = duckPowerMin;
             duckTimer.reset();
         } else if (gamepad1.b) {
@@ -227,7 +228,8 @@ public class NewTeleOp extends MultiOpModeManager {
             DUCK_POWER = 0.0;
         }
         duckSpinner.setPower(DUCK_POWER);
-        duckSpinner2.setPower(DUCK_POWER);
+        duckSpinner2.setPower(DUCK_POWER); */
+        duckSpin.loop();
 
         // Depositor
         depositor.loop();
@@ -336,9 +338,9 @@ public class NewTeleOp extends MultiOpModeManager {
         telemetry.addData("Drive", "L %.2f/%d, R %.2f/%d",
                 leftDrive.getPower(), leftDrive.getCurrentPosition(),
                 rightDrive.getPower(), rightDrive.getCurrentPosition());
-        telemetry.addData("Duck/Collector", "D %.2f, C (%.2f)",
+        /* telemetry.addData("Duck/Collector", "D %.2f, C (%.2f)",
                 duckSpinner.getPower(), collector.getPower());
-        /* telemetry.addData("Depositor", "B %.2f, L %.2f, M %.2f",
+        telemetry.addData("Depositor", "B %.2f, L %.2f, M %.2f",
                 depBelt.getPower(), depLow.getPosition(), depMid.getPosition());
         telemetry.addData("Spin", spin);
         telemetry.addData("Dep Belt Pos: ", depBelt.getCurrentPosition()); */

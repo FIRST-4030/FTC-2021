@@ -219,7 +219,7 @@ public class Depositor extends OpMode {
                     }
                     prepPosSet = true;
                 }
-                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < (BELT_POSITION_DEADBAND + 5)) {
+                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < (BELT_POSITION_DEADBAND + 10)) {
                     state = AUTO_STATE.DONE;
                 }
                 break;

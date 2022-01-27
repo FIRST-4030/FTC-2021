@@ -7,10 +7,12 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector2f;
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.utils.PiecewiseFunction;
+import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.TFMathExtension;
 
 @Config
 public class NewNewDrive extends OpMode {
@@ -27,6 +29,7 @@ public class NewNewDrive extends OpMode {
     public static double thirdRampPoint = 0.675;
     public static double lastRampPoint = 1.0;
     public static double accelMax = 0.025;
+    public static double rampMaxTicks = 668;
     private double ogPosL = 0;
     private double ogPosR = 0;
 
@@ -371,7 +374,7 @@ public class NewNewDrive extends OpMode {
 
         if (!started) {
             // initialize speedCurve to have motor ticks be the X coordinate and motor speed be the Y coordinate
-            speedCurveL.setClampLimits(true);
+            /* speedCurveL.setClampLimits(true);
             speedCurveR.setClampLimits(true);
             speedCurveL.addElement(driveLeft.getCurrentPosition() + firstRampPoint * leftTicks, speedMin);
             speedCurveL.addElement(driveLeft.getCurrentPosition() + secondRampPoint * leftTicks, speedMax);
@@ -380,11 +383,11 @@ public class NewNewDrive extends OpMode {
             speedCurveR.addElement(driveRight.getCurrentPosition() + firstRampPoint * rightTicks, speedMin);
             speedCurveR.addElement(driveRight.getCurrentPosition() + secondRampPoint * rightTicks, speedMax);
             //speedCurveR.addElement(driveRight.getCurrentPosition() + thirdRampPoint * rightTicks, speedMax);
-            speedCurveR.addElement(driveRight.getCurrentPosition() + lastRampPoint * rightTicks, speedMin);
+            speedCurveR.addElement(driveRight.getCurrentPosition() + lastRampPoint * rightTicks, speedMin);*/
 
             // Ramp-and-hold
-            //rampAndHold(speedCurveL, (int)leftTicks, driveLeft.getCurrentPosition(), speedMin, speedMax);
-            //rampAndHold(speedCurveR, (int)rightTicks, driveRight.getCurrentPosition(), speedMin, speedMax);
+            rampAndHold(speedCurveL, (int)leftTicks, driveLeft.getCurrentPosition(), speedMin, speedMax);
+            rampAndHold(speedCurveR, (int)rightTicks, driveRight.getCurrentPosition(), speedMin, speedMax);
 
             ogPosL = driveLeft.getCurrentPosition();
             ogPosR = driveRight.getCurrentPosition();
@@ -535,100 +538,6 @@ public class NewNewDrive extends OpMode {
                 leftTicks1 + "," + rightTicks1 + "," + midTicks1 + "," + maxRatio);
     }
 
-    public void circle(double r, double angle, double speedMin, double speedMax) {
-        if (r == 0) {
-            return;
-        }
-        double arcLengthL;
-        double arcLengthR;
-        double arcLengthInner;
-        double arcLengthOuter;
-        double leftTicks;
-        double rightTicks;
-        // it should be, but ensure that the radius is positive
-
-        double arcLength = 2 * Math.PI * Math.abs(r);
-        arcLengthInner = Math.toRadians(angle) * (Math.abs(r) - trackWidthHalf);
-        arcLengthOuter = Math.toRadians(angle) * (Math.abs(r) + trackWidthHalf);
-
-        if (r > 0) {
-            // if radius is greater than zero, we are moving to the left, so the right side is on the outside
-            arcLengthL = arcLengthInner;
-            arcLengthR = arcLengthOuter;
-        } else {
-            // if radius is greater than zero, we are moving to the left, so the right side is on the inside
-            arcLengthL = arcLengthOuter;
-            arcLengthR = arcLengthInner;
-        }
-
-        leftTicks = arcLengthL * TICKS_PER_INCH;
-        rightTicks = arcLengthR * TICKS_PER_INCH;
-        double midTicks = arcLength * TICKS_PER_INCH;
-        if (midTicks == 0) {
-            midTicks = 1;
-        }
-
-        double maxRatio = Math.max(Math.abs(leftTicks), Math.abs(rightTicks)) / Math.abs(midTicks);
-        if ((isBusy() || !done) && speedCurveL.isValid() && speedCurveR.isValid() && started) {
-            // speed is calculated using the curve defined above
-            driveLeft.setPower((leftTicks / midTicks) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
-            driveRight.setPower((rightTicks / midTicks) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
-            done = speedCurveL.isClamped() && speedCurveR.isClamped();
-        }
-
-        double accelLeft = Math.abs(speedMax - speedMin) / (secondRampPoint * leftTicks);
-        double accelRight = Math.abs(speedMax - speedMin) / (secondRampPoint * rightTicks);
-        /* if (r > 0) {
-            secondRampPoint = Math.abs(speedMax - speedMin) / (accelMax * leftTicks);
-            secondRampPoint = Math.min(0.5, secondRampPoint);
-            speedMax = (secondRampPoint * (accelMax * leftTicks) + Math.abs(speedMin)) * Math.signum(speedMax);
-        } else if (r < 0) {
-            secondRampPoint = Math.abs(speedMax - speedMin) / (accelMax * rightTicks);
-            secondRampPoint = Math.min(0.5, secondRampPoint);
-            speedMax = (secondRampPoint * (accelRight * rightTicks) + Math.abs(speedMin)) * Math.signum(speedMax);
-        }
-        thirdRampPoint = lastRampPoint - secondRampPoint; */
-
-        if (!started) {
-            // initialize speedCurve to have motor ticks be the X coordinate and motor speed be the Y coordinate
-            speedCurveL.setClampLimits(true);
-            speedCurveR.setClampLimits(true);
-            speedCurveL.addElement(driveLeft.getCurrentPosition() + firstRampPoint * leftTicks, speedMin);
-            speedCurveL.addElement(driveLeft.getCurrentPosition() + secondRampPoint * leftTicks, speedMax);
-            speedCurveL.addElement(driveLeft.getCurrentPosition() + thirdRampPoint * leftTicks, speedMax);
-            speedCurveL.addElement(driveLeft.getCurrentPosition() + lastRampPoint * leftTicks, speedMin);
-            speedCurveR.addElement(driveRight.getCurrentPosition() + firstRampPoint * rightTicks, speedMin);
-            speedCurveR.addElement(driveRight.getCurrentPosition() + secondRampPoint * rightTicks, speedMax);
-            speedCurveR.addElement(driveRight.getCurrentPosition() + thirdRampPoint * rightTicks, speedMax);
-            speedCurveR.addElement(driveRight.getCurrentPosition() + lastRampPoint * rightTicks, speedMin);
-
-            ogPosL = driveLeft.getCurrentPosition();
-            ogPosR = driveRight.getCurrentPosition();
-
-            started = true;
-            done = false;
-        } else if (done) {
-            driveLeft.setPower(0);
-            driveRight.setPower(0);
-            started = false;
-            speedCurveL.reset();
-            speedCurveR.reset();
-        }
-
-        telemetry.log().add(getClass().getSimpleName() + "::arcTo(): Motors in use");
-        telemetry.addData("left ticks", driveLeft.getCurrentPosition());
-        telemetry.addData("right ticks", driveRight.getCurrentPosition());
-        telemetry.addData("leftVel", driveLeft.getPower());
-        telemetry.addData("rightVel", driveRight.getPower());
-        telemetry.addData("AccelLeft", accelLeft);
-        telemetry.addData("AccelRight", accelRight);
-        logData("arcTo()", started + "," + done + "," +
-                speedCurveL.isValid() + "," + speedCurveL.getSize() + "," +
-                speedCurveR.isValid() + "," + speedCurveR.getSize() + "," +
-                arcLengthL + "," + arcLengthR + "," +
-                leftTicks + "," + rightTicks + "," + midTicks + "," + maxRatio + "," + accelLeft + "," + accelRight);
-    }
-
     // Build a 3-point or 4-point piecewise function for linear-ramp-and-hold command curves
     // If ramp up/down ticks were parameters this could be a method in PiecewiseFunction
     // That would provide both a sample of code usage and of different control models
@@ -639,14 +548,18 @@ public class NewNewDrive extends OpMode {
         // How many ticks does it take to ramp up/down between speedMin and speedMax
         // Higher values correlate with longer ramp times and smaller acceleration
         // Usually experiment and measurement can determine an approximate value
-        int rampUpTicks = 150;
-        int rampDownTicks = 150;
+        double rampUpTicks = rampMaxTicks * Math.abs(speedMax - speedMin) / 0.9;
+        double rampDownTicks = rampMaxTicks * Math.abs(speedMax - speedMin) / 0.9;
 
-        if (rampUpTicks + rampDownTicks >= pathTicks) {
+        rampUpTicks *= Math.signum(pathTicks);
+        rampDownTicks *= Math.signum(pathTicks);
+
+        if (Math.abs(rampUpTicks + rampDownTicks) >= Math.abs(pathTicks)) {
             // Path is shorter than the ramp up/down intervals
             // 3 ramp points at 0%, 50% and 100%
+            speedMax = ((speedMax - speedMin) * (pathTicks / 2f) / rampUpTicks) + speedMin;
             pfunc.addElement(currentTicks, speedMin);
-            pfunc.addElement(currentTicks + pathTicks / 2, speedMax);
+            pfunc.addElement(currentTicks + pathTicks / 2f, speedMax);
             pfunc.addElement(currentTicks + pathTicks, speedMin);
         } else {
             // Path is long enough to ramp to full speed
