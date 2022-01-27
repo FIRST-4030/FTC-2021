@@ -11,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Matrix4f;
+import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Matrix4fBuilder;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector2f;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector3f;
 
@@ -69,8 +70,8 @@ public class TFODMain extends OpMode {
     //object to describe the camera frustum
     private FrustumInterpolator l270;
     //camera attributes (with testing defaults)
-    private Vector3f lensLocalPos = new Vector3f();
-    private Matrix4f lensLocalRotation = new Matrix4f();
+    private Vector3f lensLocalPos = new Vector3f(4.1f, 6.2f, -7.2f);
+    private Matrix4f lensLocalRotation = Matrix4fBuilder.buildGenRot(-50, -5, 180);
 
     public TFODMain(){init();}
 
