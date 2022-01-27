@@ -265,7 +265,7 @@ public class TFMathExtension {
      * @param target
      * @return
      */
-    public float[] makeArc(Vector2f target){
+    public static float[] makeArc(Vector2f target){
         Vector2f int2f = target;
 
         //get the direction that the point from (0,0)
