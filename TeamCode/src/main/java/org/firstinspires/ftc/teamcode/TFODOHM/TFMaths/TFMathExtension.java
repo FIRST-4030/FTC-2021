@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.TFODOHM.TFMaths;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 public class TFMathExtension {
 
@@ -262,7 +261,7 @@ public class TFMathExtension {
 
     /**
      * Make an arc from (0,0) and the given point
-     * <br>the output is [0] = radius; [1] = angle
+     * <br>the output is [0] = radius; [1] = arc length
      * @param target
      * @return
      */
@@ -277,11 +276,11 @@ public class TFMathExtension {
         Vector2f int2fNorm270 = new Vector2f(int2fDir.getY(), -int2fDir.getX());
 
         //compare the direction of the normals using the dot product
-        Vector2f closestToXAxis = Vector2f.add(int2fNorm90, int2f).normalized().dot(new Vector2f(0, 1)) <= Vector2f.add(int2fNorm270, int2f).normalized().dot(new Vector2f(0, 1)) ? int2fNorm90 : int2fNorm270;
+        Vector2f closestToXAxis = int2fDir.getX() <= 0 ? (int2fDir.getY() >= 0 ? int2fNorm90 : int2fNorm270) : (int2fDir.getY() <= 0 ? int2fNorm90 : int2fNorm270);
         closestToXAxis.mul(1000);
         closestToXAxis.add(int2f);
 
-        Vector2f output = TFMathExtension.llInt2d(new Vector2f(1000, 0), new Vector2f(-1000,0), closestToXAxis, int2f);
+        Vector2f output = TFMathExtension.llInt2d(new Vector2f(int2f.length() * 1000, 0), new Vector2f(int2f.length() * -1000,0), closestToXAxis, int2f);
 
         Vector2f diff = Vector2f.sub(int2f, output);
 

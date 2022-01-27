@@ -10,14 +10,11 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Matrix4fBuilder;
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.TFMathExtension;
+import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Matrix4f;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector2f;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector3f;
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector4f;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -72,16 +69,14 @@ public class TFODMain extends OpMode {
     //object to describe the camera frustum
     private FrustumInterpolator l270;
     //camera attributes (with testing defaults)
-    private Vector3f localPos = new Vector3f(3.8f, 12, 6.8f);
-    private double localPitch = 315, localYaw = 0, localRoll = 0;
+    private Vector3f lensLocalPos = new Vector3f();
+    private Matrix4f lensLocalRotation = new Matrix4f();
 
     public TFODMain(){init();}
 
-    public TFODMain(Vector3f camLocalPos, double camPitch, double camYaw, double camRoll){
-        localPos = camLocalPos;
-        localPitch = camPitch;
-        localYaw = camYaw;
-        localRoll = camRoll;
+    public TFODMain(Vector3f camLensLocalPos, Matrix4f camLensLocalRotation){
+        lensLocalPos = camLensLocalPos;
+        lensLocalRotation = camLensLocalRotation;
         init();
     }
 
@@ -90,6 +85,7 @@ public class TFODMain extends OpMode {
         boolean error = false;
         isBusy = true;
 
+        //initialize Vuforia and check for errors
         try {
             initVuforia();
             enabled = true;
@@ -98,6 +94,7 @@ public class TFODMain extends OpMode {
             error = true;
         }
 
+        //initialize TensorFlow and check for errors
         try {
             initTensorFlow();
             enabled = true;
@@ -105,6 +102,8 @@ public class TFODMain extends OpMode {
             telemetry.log().add(getClass().getSimpleName() + ": TensorFlow could not initialize");
             error = true;
         }
+
+        //initialize all the Object Recognition variables and check for errors
         try {
             initObjectRecognitionVariables();
             enabled = true;
@@ -120,8 +119,8 @@ public class TFODMain extends OpMode {
 
         l270 = FrustumInterpolator.Logitech_C270; //get preset for the Logitech C270 webcam that includes the FOV for both Vertical & Horizontal
 
-        l270.setCamPos(this.localPos); //describe the position of the camera ***lens***
-        l270.setCamRot(Matrix4fBuilder.buildGenRot(-45, 0, 0)); //describe the rotation of the camera ***lens***
+        l270.setCamPos(this.lensLocalPos); //describe the position of the camera ***lens***
+        l270.setCamRot(this.lensLocalRotation); //describe the rotation of the camera ***lens***
         l270.setupFrustum();
 
         isBusy = false;
