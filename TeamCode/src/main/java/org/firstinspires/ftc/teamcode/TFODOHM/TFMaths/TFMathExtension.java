@@ -155,6 +155,18 @@ public class TFMathExtension {
     public static double quickLengthD(float x1, float y1, float x2, float y2){
         return Math.sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) - (y2 - y1)));
     }
+    
+    /**
+     * Get the cross product of two input Vector3f 
+     * <br> Side Note: this is used for finding the normal vector (order does matter)
+     * <br> Right hand rule: thumb points up, index forward, middle finger left; a is index, b is middle, thumb is the crossproduct of a and b
+     */
+    public static Vector3f crossProduct3f(Vector3f a, Vector3f b){
+        float cx = (a.getY() * b.getZ()) − (a.getZ() * b.getY());
+        float cy = (a.getZ() * b.getX()) − (a.getX() * b.getZ());
+        float cz = (a.getX() * b.getY()) − (a.getY() * b.getX());
+        return new Vector3f(cx, cy, cz);
+    }
 
     /**
      * This method converts the sensor width, sensor height, and focal length of a camera into horizontal & vertical FOV
