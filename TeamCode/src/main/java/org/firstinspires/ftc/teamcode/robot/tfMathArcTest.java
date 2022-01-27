@@ -119,7 +119,9 @@ public class tfMathArcTest extends MultiOpModeManager {
     @Override
     public void loop() {
 
-        float[] f = TFMathExtension.makeArc(new Vector2f(arrayX[0], arrayY[0]));
+        Vector2f targetVector = new Vector2f(arrayX[0], arrayY[0]);
+        
+        float[] f = TFMathExtension.makeArc(targetVector);
         r = f[0];
         arcLength = f[1];
         // Step through the auto commands
@@ -140,10 +142,21 @@ public class tfMathArcTest extends MultiOpModeManager {
 
         //log what state it currently is in
         telemetry.addData("Auto Step: ", state);
-        telemetry.addData("left ticks", drive.leftPos());
-        telemetry.addData("right ticks", drive.rightPos());
-        telemetry.addData("leftVel", drive.leftVel());
-        telemetry.addData("rightVel", drive.rightVel());
+        
+        //log the encoder ticks of the motors
+        telemetry.addData("Left Ticks: ", drive.leftPos());
+        telemetry.addData("Right Ticks: ", drive.rightPos());
+        
+        //log the velocity of the individual motors
+        telemetry.addData("leftVel: ", drive.leftVel());
+        telemetry.addData("rightVel: ", drive.rightVel());
+        
+        //log the input and output of the method
+        telemetry.addData("Input Target Vector: ", targetVector);
+        telemetry.addData("Output Arc Radius: ", r);
+        telemetry.addData("Output Arc Length: ", arcLength);
+        
+        //force update telemetry
         telemetry.update();
     }
 
