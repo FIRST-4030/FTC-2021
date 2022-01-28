@@ -30,12 +30,11 @@ public class Plane3f {
      * @return position of the intersection
      */
     public Vector3f getVector3fInt(Vector3f lineStart, Vector3f lineEnd){
-        float plane_d = Vector3f.dot(this.normal, this.position);
+        float plane_d = -Vector3f.dot(this.normal, this.position);
         float ad = Vector3f.dot(lineStart, this.normal);
         float bd = Vector3f.dot(lineEnd, this.normal);
-        float t = (plane_d - ad) / (bd - ad);
-        Vector3f lineStartToEnd = Vector3f.sub(lineEnd, lineStart);
-        Vector3f intersection = Vector3f.mul(lineStartToEnd, t);
+        float t = (-plane_d - ad) / (bd - ad);
+        Vector3f intersection = TFMathExtension.lerp(lineStart, lineEnd, t);
         return intersection;
     }
 
