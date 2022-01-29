@@ -149,7 +149,7 @@ public class TFODMain extends OpMode {
     public void loop() {
         scan();
         Vector2f bb = sortBB();
-        if (bb.getY() == -2) {
+        if (bb.getY() != -2) {
             bbLocalPos = l270.convertIMGCoord(bb);
         }
 
@@ -425,5 +425,9 @@ public class TFODMain extends OpMode {
      */
     public boolean isBusy(){
         return isBusy;
+    }
+
+    public Vector3f getBBToLocal(){
+        return this.bbLocalPos;
     }
 }

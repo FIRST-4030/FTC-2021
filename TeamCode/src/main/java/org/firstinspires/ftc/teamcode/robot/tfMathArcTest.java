@@ -36,8 +36,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.TFODOHM.ODMain.TFODMain;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.TFMathExtension;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector2f;
+import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector3f;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
@@ -64,12 +66,15 @@ public class tfMathArcTest extends MultiOpModeManager {
     //Warning: giving it axis aligned vector (points along the axis line itself) it might return a null value in one(or both) element(s) or just return wrong values
     public static float[] arrayX = new float[] {10, -7, 10,  15, 8, -9, -16, -10};
     public static float[] arrayY = new float[] {20, 2, -10, -10, 7, 13, -16, -15};
-    public static int index = 0;
+    public static int index = 5;
     public static int version_control = 1;
 
     // Members
     private AUTO_STATE state = AUTO_STATE.DONE;
     private final ElapsedTime waitTimer = new ElapsedTime();
+
+    //TF
+    private TFODMain tfodMain;
 
     @Override
     public void init() {
@@ -98,12 +103,16 @@ public class tfMathArcTest extends MultiOpModeManager {
             error = true;
         }
 
+        tfodMain = new TFODMain();
+        tfodMain.init();
+
         // Initialization status
         String status = "Ready";
         if (error) {
             status = "Hardware Error";
         }
         telemetry.addData("Status", status);
+        telemetry.log().add("" + tfodMain.isBusy());
         drive.enableLogging();
     }
 
@@ -119,28 +128,40 @@ public class tfMathArcTest extends MultiOpModeManager {
         state = AUTO_STATE.TEST_MOVE;
     }
 
+
+
     @Override
     public void loop() {
+        if (tfodMain.isBusy() != true) {
+            tfodMain.loop();
+        }
 
-        Vector2f targetVector = new Vector2f(arrayX[index], arrayY[index]);
-        
-        float[] f = TFMathExtension.makeArc(targetVector, version_control);
-        r = f[0];
-        arcLength = f[1];
-        // Step through the auto commands
-        switch (state) {
-            case TEST_MOVE:
-                //drive.arcTo(r, arcLength, speedMin, speedMax);
-                //drive.combinedCurves(0, 10, speedMin, speedMax, 0, 10, speedMin, speedMax);
-                collectorArm.setPosition(COLLECTOR_UP);
-                if (drive.isDone() && !drive.isBusy()) {
-                    waitTimer.reset();
-                    state = AUTO_STATE.DONE;
-                }
-                break;
-            // Stop processing
-            case DONE:
-                break;
+        Vector2f targetVector = new Vector2f();
+
+        if (tfodMain.isBusy() != true) {
+            Vector3f temp = tfodMain.getBBToLocal();
+
+            targetVector = new Vector2f(temp.getX(), temp.getZ());
+
+            float[] f = TFMathExtension.makeArc(targetVector, version_control);
+
+            r = f[0];
+            arcLength = f[1];
+            // Step through the auto commands
+            switch (state) {
+                case TEST_MOVE:
+                    drive.arcTo(r, arcLength, speedMin, speedMax);
+                    //drive.combinedCurves(0, 10, speedMin, speedMax, 0, 10, speedMin, speedMax);
+                    collectorArm.setPosition(COLLECTOR_UP);
+                    if (drive.isDone() && !drive.isBusy()) {
+                        waitTimer.reset();
+                        state = AUTO_STATE.DONE;
+                    }
+                    break;
+                // Stop processing
+                case DONE:
+                    break;
+            }
         }
 
         //log what state it currently is in

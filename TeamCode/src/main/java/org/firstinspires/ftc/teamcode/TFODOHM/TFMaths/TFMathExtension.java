@@ -335,7 +335,7 @@ public class TFMathExtension {
         double sign = Math.signum(target.getX());
         double theta = Math.atan2(Math.abs(target.getY()), Math.abs(target.getX()));
         double radius = (length / Math.cos(theta)) * -sign;
-        double arcLength = (2 * radius * ((pi/2) - theta)) * Math.signum(target.getY());
+        double arcLength = (2 * radius * ((pi/2) - theta));
 
         return new float[]{(float) radius, (float) arcLength};
     }
