@@ -19,7 +19,7 @@ public class FrustumInterpolator {
     private Vector4f fplane_right = new Vector4f(), fplane_bottom = new Vector4f(), fplane_center = new Vector4f();
 
     private Vector3f camPos = new Vector3f();
-    private Plane3f cardinalAxisPlane = Plane3f.X_PLANE;
+    private Plane3f cardinalAxisPlane = Plane3f.XZ_PLANE;
 
     //presets for listed cameras
     public static FrustumInterpolator Logitech_C270 = new FrustumInterpolator(TFMathExtension.findFOV(3.58, 2.02, 4.11));

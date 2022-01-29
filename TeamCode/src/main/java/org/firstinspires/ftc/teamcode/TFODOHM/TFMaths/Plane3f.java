@@ -7,13 +7,13 @@ public class Plane3f {
     //these are the preset planes for the cardinal axes X, Y, Z
 
     //Make a plane resting along the XZ axes
-    public static Plane3f X_PLANE = new Plane3f(new Vector3f(0, 1, 0), new Vector3f(0, 0, 0));
+    public static Plane3f XZ_PLANE = new Plane3f(new Vector3f(0, 1, 0), new Vector3f(0, 0, 0));
 
     //Make a plane resting along the YZ axes
-    public static Plane3f Y_PLANE = new Plane3f(new Vector3f(1, 0, 0), new Vector3f(0, 0, 0));
+    public static Plane3f YZ_PLANE = new Plane3f(new Vector3f(1, 0, 0), new Vector3f(0, 0, 0));
 
     //Make a plane resting along the XY axes
-    public static Plane3f Z_PLANE = new Plane3f(new Vector3f(0, 0, 1), new Vector3f(0, 0, 0));
+    public static Plane3f XY_PLANE = new Plane3f(new Vector3f(0, 0, 1), new Vector3f(0, 0, 0));
 
     public Plane3f(){
         this.normal = new Vector3f(0, 1, 0);

@@ -287,7 +287,7 @@ public class TFMathExtension {
      * @param target
      * @return
      */
-    public static float[] makeArc(Vector2f target){
+    public static float[] makeArcV1(Vector2f target){
         Vector2f int2f = target;
 
         //get the direction that the point from (0,0)
@@ -321,12 +321,42 @@ public class TFMathExtension {
      * @return
      */
     public static float[] makeArcV2(Vector2f target){
-        float length = target.length();
+        double length = target.length();
         double alpha = Math.atan2(target.getX(), target.getY());
-        double beta = pi - alpha;
+        double beta = (pi/2) - alpha;
         double radius = (length / 2) / Math.cos(alpha);
         double arcLen = radius * beta * 2;
 
         return new float[]{ (float) radius, (float) arcLen};
+    }
+
+    public static float[] makeArcV3(Vector2f target){
+        double length = target.length();
+        double sign = Math.signum(target.getX());
+        double theta = Math.atan2(Math.abs(target.getY()), Math.abs(target.getX()));
+        double radius = (length / Math.cos(theta)) * -sign;
+        double arcLength = (2 * radius * ((pi/2) - theta)) * Math.signum(target.getY());
+
+        return new float[]{(float) radius, (float) arcLength};
+    }
+
+    public static float[] makeArc(Vector2f target, int version){
+        float[] output;
+
+        switch (version){
+            case 1:
+                output = makeArcV1(target);
+                break;
+            case 2:
+                output = makeArcV2(target);
+                break;
+            case 3:
+                output = makeArcV3(target);
+                break;
+            default:
+                output = new float[] {0, 0};
+        }
+
+        return output;
     }
 }

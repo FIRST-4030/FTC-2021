@@ -38,6 +38,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.TFMathExtension;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector2f;
+import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
@@ -64,6 +65,7 @@ public class tfMathArcTest extends MultiOpModeManager {
     public static float[] arrayX = new float[] {10, -7, 10,  15, 8, -9, -16, -10};
     public static float[] arrayY = new float[] {20, 2, -10, -10, 7, 13, -16, -15};
     public static int index = 0;
+    public static int version_control = 1;
 
     // Members
     private AUTO_STATE state = AUTO_STATE.DONE;
@@ -122,7 +124,7 @@ public class tfMathArcTest extends MultiOpModeManager {
 
         Vector2f targetVector = new Vector2f(arrayX[index], arrayY[index]);
         
-        float[] f = TFMathExtension.makeArc(targetVector);
+        float[] f = TFMathExtension.makeArc(targetVector, version_control);
         r = f[0];
         arcLength = f[1];
         // Step through the auto commands
@@ -153,6 +155,8 @@ public class tfMathArcTest extends MultiOpModeManager {
         telemetry.addData("rightVel: ", drive.rightVel());
         
         //log the input and output of the method
+        telemetry.addData("makeArc method version: ", version_control);
+        telemetry.addData("Index: ", index);
         telemetry.addData("Input Target Vector: ", targetVector);
         telemetry.addData("Output Arc Radius: ", r);
         telemetry.addData("Output Arc Length: ", arcLength);
