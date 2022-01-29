@@ -63,6 +63,7 @@ public class tfMathArcTest extends MultiOpModeManager {
     //Warning: giving it axis aligned vector (points along the axis line itself) it might return a null value in one(or both) element(s) or just return wrong values
     public static float[] arrayX = new float[] {10, -7, 10,  15, 8, -9, -16, -10};
     public static float[] arrayY = new float[] {20, 2, -10, -10, 7, 13, -16, -15};
+    public static int index = 0;
 
     // Members
     private AUTO_STATE state = AUTO_STATE.DONE;
@@ -119,7 +120,7 @@ public class tfMathArcTest extends MultiOpModeManager {
     @Override
     public void loop() {
 
-        Vector2f targetVector = new Vector2f(arrayX[0], arrayY[0]);
+        Vector2f targetVector = new Vector2f(arrayX[index], arrayY[index]);
         
         float[] f = TFMathExtension.makeArc(targetVector);
         r = f[0];
@@ -127,7 +128,7 @@ public class tfMathArcTest extends MultiOpModeManager {
         // Step through the auto commands
         switch (state) {
             case TEST_MOVE:
-                drive.arcTo(r, arcLength, speedMin, speedMax);
+                //drive.arcTo(r, arcLength, speedMin, speedMax);
                 //drive.combinedCurves(0, 10, speedMin, speedMax, 0, 10, speedMin, speedMax);
                 collectorArm.setPosition(COLLECTOR_UP);
                 if (drive.isDone() && !drive.isBusy()) {

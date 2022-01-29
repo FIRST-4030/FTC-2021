@@ -84,4 +84,14 @@ public class Quaternion {
     public void setW(float w) {
         this.w = w;
     }
+
+    public Matrix4f getAsFrameRotationMatrix(){
+        float a, b, c, d;
+        a = w; b = i; c = j; d = k;
+        return null;
+    }
+
+    public Matrix4f getAsPointRotationMatrix(){
+        return null;
+    }
 }

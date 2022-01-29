@@ -176,26 +176,4 @@ public class Matrix4fBuilder {
                         up.getX(),      up.getY(),      up.getZ(),      -Vector3f.dot(up, translation),
                         0,              0,              0,                                 1});
     }
-
-    /**
-     * Builds a Quaternion Rotation Matrix to rotate around a described axis
-     * <br> Generally, buildGenRot does its job, but it's using Eulerian angles
-     * @param axis
-     * @param angle_rad
-     * @return
-     */
-    public static Matrix4f buildQuaternionRot(Vector3f axis, double angle_rad){
-        float    s = 2 / (axis.length() * axis.length()), //manually multiply axis.length^-2 because Math.pow is 'inefficient'
-                qi = axis.getX(),
-                qj = axis.getY(),
-                qk = axis.getZ(),
-                qw = (float) Math.sin(angle_rad);
-
-        return new Matrix4f(
-                new float[]{1 - s * (qj * qj + qk * qk),     s * (qi * qj - qk * qw),     s * (qi * qk + qj * qw), 0,
-                                s * (qi * qj + qk * qw), 1 - s * (qi * qi + qk * qk),     s * (qj * qk - qi * qw), 0,
-                                s * (qi * qk - qj * qw),     s * (qj * qk + qi * qw), 1 - s * (qi * qi + qj * qj), 0,
-                                                      0,                           0,                           0, 1}
-                );
-    }
 }
