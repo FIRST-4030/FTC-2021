@@ -78,6 +78,7 @@ public class Depositor extends OpMode {
     public int num = 0;
     public boolean sensorTriggered = false;
     public boolean prepPosSet = false;
+    public boolean Up = false;
 
     // Members
     private boolean enabled = false;
@@ -214,12 +215,16 @@ public class Depositor extends OpMode {
                     }
                     if (belt.getTargetPosition() >= belt.getCurrentPosition()) {
                         belt.setPower(PREP_SPEED);
+                        Up = true;
                     } else {
                         belt.setPower(-PREP_SPEED);
+                        Up = false;
                     }
                     prepPosSet = true;
                 }
                 if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < (BELT_POSITION_DEADBAND + 10)) {
+                    state = AUTO_STATE.DONE;
+                } else if (Up && belt.getCurrentPosition() >= belt.getTargetPosition()) {
                     state = AUTO_STATE.DONE;
                 }
                 break;

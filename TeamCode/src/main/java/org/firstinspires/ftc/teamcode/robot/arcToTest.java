@@ -114,7 +114,7 @@ public class arcToTest extends MultiOpModeManager {
         switch (state) {
             case TEST_MOVE:
                 //drive.arcTo(r, arcLength, speedMin, speedMax);
-                drive.combinedCurves(0, 20, speedMin, speedMax, r, arcLength, speedMin, speedMax);
+                drive.combinedCurves(0, 20, r, arcLength, speedMin, speedMax);
                 collectorArm.setPosition(COLLECTOR_UP);
                 if (drive.isDone() && !drive.isBusy()) {
                     waitTimer.reset();
