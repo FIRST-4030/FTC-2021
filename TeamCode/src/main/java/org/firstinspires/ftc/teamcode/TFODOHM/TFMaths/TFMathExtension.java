@@ -4,6 +4,16 @@ import java.util.ArrayList;
 
 public class TFMathExtension {
 
+    //important constants
+    public static final double pi = Math.PI;
+    public static final double e = Math.E;
+    public static final double golden_ratio = (1 + Math.sqrt(5)) / 2;
+
+    //quick conversions
+    public static final double rad2deg = 180 / pi;
+    public static final double deg2rad = pi / 180;
+
+
     /**
      * Liner Interpolation: 'a' & 'b' are the start & end points (order matters), and 't' is the scalar value: 0 gives 'a', 1 gives 'b', anything between gives a point in between 'a' & 'b'
      * @param a
@@ -272,7 +282,7 @@ public class TFMathExtension {
     }
 
     /**
-     * Make an arc from (0,0) and the given point
+     * Make an arc from (0,0) and the given point / Generate the first 2 parameters of the arcTo method
      * <br>the output is [0] = radius; [1] = arc length
      * @param target
      * @return
@@ -294,10 +304,11 @@ public class TFMathExtension {
 
         Vector2f output = TFMathExtension.llInt2d(new Vector2f(int2f.length() * 1000, 0), new Vector2f(int2f.length() * -1000,0), closestToXAxis, int2f);
 
+        assert output != null;
         Vector2f diff = Vector2f.sub(int2f, output);
 
         double angle = Math.atan2(diff.getY(), diff.getX());
 
-        return new float[]{output.getX(), (float) ((angle > 180 ? -1 * (360 - angle) : angle) * Math.abs(output.getX()))};
+        return new float[]{-output.getX(), (float) ((angle > pi ? -1 * (2 * pi - angle) : angle) * Math.abs(output.getX()))};
     }
 }

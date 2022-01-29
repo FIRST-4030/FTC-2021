@@ -85,13 +85,36 @@ public class Quaternion {
         this.w = w;
     }
 
+    /**
+     * Rotates the frame of reference instead of the object
+     * @return
+     */
     public Matrix4f getAsFrameRotationMatrix(){
-        float a, b, c, d;
+        float a, b, c, d, as, bs, cs, ds;
         a = w; b = i; c = j; d = k;
-        return null;
+        as = a * a; bs = b * b; cs = c * c; ds = d * d;
+        return new Matrix4f(
+                new float[] {   (2 * as) - 1 + (2 * bs), 2 * (b * c) + 2 * (a * d), 2 * (b * d) - 2 * (a * c), 0,
+                              2 * (b * c) - 2 * (a * d),   (2 * as) - 1 + (2 * cs), 2 * (c * d) + 2 * (a * b), 0,
+                              2 * (b * d) + 2 * (a * c), 2 * (c * d) - 2 * (a * b),   (2 * as) - 1 + (2 * ds), 0,
+                                                      0,                         0,                         0, 1
+                });
     }
 
+    /**
+     * Rotates the object instead of the frame of reference
+     * @return
+     */
     public Matrix4f getAsPointRotationMatrix(){
-        return null;
+        float a, b, c, d, as, bs, cs, ds;
+        a = w; b = i; c = j; d = k;
+        as = a * a; bs = b * b; cs = c * c; ds = d * d;
+        return new Matrix4f(
+                new float[] {  (2 * as) - 1 + (2 * bs), 2 * (b * c) - 2 * (a * d), 2 * (b * d) + 2 * (a * c), 0,
+                             2 * (b * c) + 2 * (a * d),   (2 * as) - 1 + (2 * cs), 2 * (c * d) - 2 * (a * b), 0,
+                             2 * (b * d) - 2 * (a * c), 2 * (c * d) + 2 * (a * b),   (2 * as) - 1 + (2 * ds), 0,
+                                                     0,                         0,                         0, 1
+
+                });
     }
 }
