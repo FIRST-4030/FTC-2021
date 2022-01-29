@@ -56,7 +56,7 @@ public class ServoTester extends OpMode{
     private static double COLLECTOR_DOWN = 0.9;
 
     // Servo position test constants
-    private float servoPos = 0.4f;
+    private float servoPos = 0.2f;
     private static final float INCREMENT = 0.01f;
 
     // Members

@@ -42,8 +42,8 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
 //@Disabled
-@Autonomous(name = "Autonomous", group = "Test")
-public class NewNewAuto extends MultiOpModeManager {
+@Autonomous(name = "secondVersionAuto", group = "Test")
+public class secondVersionAuto extends MultiOpModeManager {
     // Hardware
     private NewNewDrive drive;
     private Distance distance;
@@ -55,24 +55,24 @@ public class NewNewAuto extends MultiOpModeManager {
     // Constants
     public static double speedMin = 0.1;
     public static double speedMax = 0.7;
-    public static double r1 = 36.9;
+    public static double r1 = 36.8;
     public static double arcLength1 = 26.5;
-    public static double r2wh = 100;
-    public static double arcLength2wh = 14;
-    public static double r2wh2 = 30;
-    public static double arcLength2wh2 = 29;
+    public static double r2wh = 18;
+    public static double arcLength2wh = 4;
+    public static double r2wh2 = 0;
+    public static double arcLength2wh2 = 40;
     public static double r2duck = 19;
     public static double arcLength2duck = 44;
     public static double r3wh = 0;
-    public static double arcLength3wh = 20;
-    public static double r3wh2 = 24;
-    public static double arcLength3wh2 = 32;
+    public static double arcLength3wh = 40;
+    public static double r3wh2 = 18;
+    public static double arcLength3wh2 = 4;
     public static double r3duck = 0;
     public static double arcLength3duck = 42;
-    public static double r4wh = 24;
-    public static double arcLength4wh = 32;
+    public static double r4wh = 18;
+    public static double arcLength4wh = 4;
     public static double r4wh2 = 0;
-    public static double arcLength4wh2 = 20;
+    public static double arcLength4wh2 = 40;
     public static double r4duck = 0;
     public static double arcLength4duck = 18;
     public static double arcLength5duck = Math.PI;
@@ -88,7 +88,6 @@ public class NewNewAuto extends MultiOpModeManager {
     private boolean duckSide = false;
     //private DelayTimerManager delayTimer = new DelayTimerManager();
     private ElapsedTime delayTimer = new ElapsedTime();
-    private boolean startedCollecting = false;
 
     @Override
     public void init() {
@@ -202,8 +201,6 @@ public class NewNewAuto extends MultiOpModeManager {
             depositor.loop();
             distance.loop();
             duck.loop();
-            collector.auto();
-            collector.loop();
 
             // Step through the auto commands
             switch (state) {
@@ -259,10 +256,10 @@ public class NewNewAuto extends MultiOpModeManager {
                     } else {
                         if (redAlliance) {
                             //drive.arcTo(-r3wh, -arcLength3wh, -speedMin, -speedMax);
-                            drive.combinedCurves(r2wh, -arcLength2wh, -r2wh2, -arcLength2wh2, -speedMin, -speedMax);
+                            drive.combinedCurves(-r2wh, -arcLength2wh, -r2wh2, -arcLength2wh2, -speedMin, -speedMax);
                         } else {
                             //drive.arcTo(r3wh, -arcLength3wh, -speedMin, -speedMax);
-                            drive.combinedCurves(-r2wh, -arcLength2wh, r2wh2, -arcLength2wh2, -speedMin, -speedMax);
+                            drive.combinedCurves(r2wh, -arcLength2wh, r2wh2, -arcLength2wh2, -speedMin, -speedMax);
                         }
                     }
                     if (num == 0) {
@@ -275,22 +272,13 @@ public class NewNewAuto extends MultiOpModeManager {
                     }
                     break;
                 case COLLECT:
-                    if (!startedCollecting) {
-                        collector.autoCollect();
-                        startedCollecting = true;
-                    }
+                    /* collector.autoCollect();
                     drive.slowReverse();
                     if (collector.isEjecting()) {
                         drive.stopDrive();
+                        drive.returnToPos(drive.returnOffSet());*/
                         state = state.next();
-                    }
-                    break;
-                case RETURN:
-                    drive.returnToPos(drive.returnOffSet());
-                    if (drive.isDone() && !drive.isBusy()) {
-                        drive.setDoneFalse();
-                        state = state.next();
-                    }
+                    //}
                     break;
                 case ADD1:
                     if (duckSide) {
@@ -378,14 +366,13 @@ public class NewNewAuto extends MultiOpModeManager {
         DEPOSIT,
         PARK,
         COLLECT,
-        RETURN,
         ADD1,
         DUCK_SPIN,
         ADD2,
         LAST,
         DONE;
 
-        public NewNewAuto.AUTO_STATE next() {
+        public secondVersionAuto.AUTO_STATE next() {
             return OrderedEnumHelper.next(this);
         }
     }

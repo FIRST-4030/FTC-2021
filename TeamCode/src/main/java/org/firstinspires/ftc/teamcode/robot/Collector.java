@@ -70,6 +70,7 @@ public class Collector extends OpMode {
     private ElapsedTime collectorTimer = new ElapsedTime();
     private collectCmd collectCmdState = collectCmd.IDLE;
     private boolean collected = false;
+    private boolean auto = false;
 
     @Override
     public void init() {
@@ -79,7 +80,6 @@ public class Collector extends OpMode {
             collector.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
-            collectorArm.setPosition(COLLECTOR_UP);
 
             sensorCollector = hardwareMap.get(TouchSensor.class, "DC");
             //distance = hardwareMap.get(DistanceSensor.class, "DC");
@@ -134,7 +134,7 @@ public class Collector extends OpMode {
                 collectCmdState = collectCmd.COLLECT;
                 break;
             case COLLECT:
-                if (!gamepad2.left_bumper) {
+                if (!gamepad2.left_bumper && !auto) {
                     collectCmdState = collectCmd.BEFORE_EJECT;
                 }
                 if (collected && collectorTimer.seconds() > (Math.PI / 10)) {
@@ -144,7 +144,11 @@ public class Collector extends OpMode {
                 break;
             case SENSOR_DELAY:
                 collected = false;
-                if (collectorTimer.seconds() > DELAY_TIME) {
+                if (auto) {
+                    if (collectorTimer.seconds() > 0.5) {
+                        collectCmdState = collectCmd.BEFORE_EJECT;
+                    }
+                } else if (collectorTimer.seconds() > DELAY_TIME) {
                     collectCmdState = collectCmd.BEFORE_EJECT;
                 }
                 break;
@@ -154,6 +158,7 @@ public class Collector extends OpMode {
                 break;
             case EJECT:
                 if (collectorTimer.seconds() > EJECT_TIME) {
+                    auto = false;
                     collectCmdState = collectCmd.IDLE;
                 }
                 break;
@@ -162,8 +167,10 @@ public class Collector extends OpMode {
         // Collector commands
         switch (collectCmdState) {
             case IDLE:
-                collectorArm.setPosition(COLLECTOR_UP);
-                collector.setPower(0);
+                if (!auto) {
+                    collectorArm.setPosition(COLLECTOR_UP);
+                    collector.setPower(0);
+                }
                 break;
             case BEFORE_COLLECT:
             case COLLECT:
@@ -196,17 +203,22 @@ public class Collector extends OpMode {
     public void stop() {
     }
 
-    public void collect() {
+    public void autoCollect() {
+        auto = true;
         collectCmdState = collectCmd.BEFORE_COLLECT;
         loop();
     }
 
     public boolean isEjecting() {
-        return (collectCmdState == collectCmd.BEFORE_EJECT || collectCmdState == collectCmd.EJECT);
+        return (collectCmdState == collectCmd.BEFORE_EJECT || collectCmdState == collectCmd.EJECT || collectCmdState == collectCmd.IDLE);
     }
 
     public void collectorUp() {
         collectorArm.setPosition(0.6);
+    }
+
+    public void auto() {
+        auto = true;
     }
 
     public void collectorDown() {
