@@ -52,7 +52,6 @@ public class Collector extends OpMode {
     // Hardware
     private Servo collectorArm = null;
     private DcMotor collector = null;
-    //private DistanceSensor distance = null;
     private TouchSensor sensorCollector = null;
 
     // Config
@@ -88,7 +87,6 @@ public class Collector extends OpMode {
             Globals.opmode = this;
             in = Globals.input(this);
             in.register("COLLECT", GAMEPAD.driver2, PAD_KEY.left_bumper);
-            in.register("COLLECT1", GAMEPAD.driver1, PAD_KEY.left_bumper);
 
             enabled = true;
         } catch (Exception e) {
@@ -107,8 +105,6 @@ public class Collector extends OpMode {
         if (!enabled) {
             return;
         }
-
-        collectorArm.setPosition(COLLECTOR_UP);
     }
 
     @Override
@@ -120,13 +116,8 @@ public class Collector extends OpMode {
 
         in.loop();
 
-        /*// Collector
-        double spin = -gamepad2.left_stick_y;
-        collector.setPower(Range.clip(spin, SPEED, -SPEED));*/
-
         // Arm
         telemetry.addData("collector pos", collectorArm.getPosition());
-        telemetry.addData("collector pos", Math.round(collectorArm.getPosition() * 100.0)/100.0);
         telemetry.addData("State", collectCmdState);
 
         // Collector state
@@ -196,8 +187,6 @@ public class Collector extends OpMode {
 
         // Debug when requested
         if (DEBUG) {
-            /*telemetry.addData("Collector Input", "R %.0f/%s",
-                    range, inRange ? "+" : "-");*/
             telemetry.addData("Collector Output", "C %.2f/%d, A %.2f",
                     collector.getPower(), collector.getCurrentPosition(), collectorArm.getPosition());
         }
@@ -209,11 +198,19 @@ public class Collector extends OpMode {
 
     public void collect() {
         collectCmdState = collectCmd.BEFORE_COLLECT;
+        loop();
     }
 
-    public void autoCollect() {
-        collectCmdState = collectCmd.BEFORE_COLLECT;
-        loop();
+    public boolean isEjecting() {
+        return (collectCmdState == collectCmd.BEFORE_EJECT || collectCmdState == collectCmd.EJECT);
+    }
+
+    public void collectorUp() {
+        collectorArm.setPosition(0.6);
+    }
+
+    public void collectorDown() {
+        collectorArm.setPosition(COLLECTOR_DOWN);
     }
 
     enum collectCmd {

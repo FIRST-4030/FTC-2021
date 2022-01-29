@@ -591,40 +591,6 @@ public class NewNewDrive extends OpMode {
         pfunc.setClampLimits(true);
     }
 
-    /* private void combinedRampAndHold(
-            PiecewiseFunction pfunc,
-            int pathTicks1, int pathTicks2, int currentTicks,
-            double speedMin, double speedMax) {
-        // How many ticks does it take to ramp up/down between speedMin and speedMax
-        // Higher values correlate with longer ramp times and smaller acceleration
-        // Usually experiment and measurement can determine an approximate value
-        double rampUpTicks = rampMaxTicks * Math.abs(speedMax - speedMin) / 0.9;
-        double rampDownTicks = rampMaxTicks * Math.abs(speedMax - speedMin) / 0.9;
-
-        rampUpTicks *= Math.signum(pathTicks1);
-        rampDownTicks *= Math.signum(pathTicks2);
-        int totalPathTicks = Math.abs(pathTicks1) + Math.abs(pathTicks2);
-
-        if (Math.abs(rampUpTicks + rampDownTicks) >= totalPathTicks) {
-            // Path is shorter than the ramp up/down intervals
-            // 3 ramp points at 0%, 50% and 100%
-            speedMax = ((speedMax - speedMin) * (totalPathTicks / 2f) / rampUpTicks) + speedMin;
-            pfunc.addElement(currentTicks, speedMin);
-            pfunc.addElement(currentTicks + pathTicks / 2f, speedMax);
-            pfunc.addElement(currentTicks + pathTicks, speedMin);
-        } else {
-            // Path is long enough to ramp to full speed
-            // 4 ramp points at 0%, rampUpTicks, 100% - rampDownTicks, and 100%
-            pfunc.addElement(currentTicks, speedMin);
-            pfunc.addElement(currentTicks + rampUpTicks, speedMax);
-            pfunc.addElement(currentTicks + pathTicks - rampDownTicks, speedMax);
-            pfunc.addElement(currentTicks + pathTicks, speedMin);
-        }
-
-        // Enable first/last element clamping in case the encoder values drift outside the model
-        pfunc.setClampLimits(true);
-    } */
-
     public double leftPos() {
         return (driveLeft.getCurrentPosition() / TICKS_PER_INCH);
     }
@@ -643,5 +609,28 @@ public class NewNewDrive extends OpMode {
 
     public void setDoneFalse() {
         done = false;
+    }
+
+    public void slowReverse() {
+        if (!started) {
+            ogPosL = driveLeft.getCurrentPosition();
+            ogPosR = driveRight.getCurrentPosition();
+            started = true;
+        }
+        driveLeft.setPower(-0.1);
+        driveRight.setPower(-0.1);
+    }
+
+    public double returnOffSet() {
+        return ((Math.abs(driveLeft.getCurrentPosition() - ogPosL) + Math.abs(driveRight.getCurrentPosition() - ogPosR)) / 2.0);
+    }
+
+    public void returnToPos(double distance) {
+        arcTo(0, distance, 0.1, 0.2);
+    }
+
+    public void stopDrive() {
+        driveLeft.setPower(0);
+        driveRight.setPower(0);
     }
 }

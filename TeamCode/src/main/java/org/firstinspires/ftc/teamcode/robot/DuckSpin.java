@@ -72,8 +72,11 @@ public class DuckSpin extends OpMode {
     public static double speedMin = teleopMin;  // min duck spinner speed (0 - 1.0)
     public static double speedMax = teleopMax;  // max duck spinner speed (0 - 1.0)
     public static double rampTime = teleopRamp;  // duck spinner ramp time (seconds, >0)
+    public static double rampStop = teleopRampStop;
     private final ElapsedTime timer = new ElapsedTime();
     private AUTO_STATE state = AUTO_STATE.IDLE;
+    private boolean auto = false;
+    private boolean redSide = false;
 
     @Override
     public void init() {
@@ -111,7 +114,10 @@ public class DuckSpin extends OpMode {
         speedMin = teleopMin;
         speedMax = teleopMax;
         rampTime = teleopRamp;
-        state = red ? AUTO_STATE.RED : AUTO_STATE.BLUE;
+        rampStop = teleopRampStop;
+        redSide = red;
+        auto = false;
+        state = red ? AUTO_STATE.SPIN_RED : AUTO_STATE.SPIN_BLUE;
     }
 
     public void auto(boolean red) {
@@ -119,8 +125,11 @@ public class DuckSpin extends OpMode {
         speedMin = autoMin;
         speedMax = autoMax;
         rampTime = autoRamp;
+        rampStop = autoRampStop;
+        auto = true;
         if (state == AUTO_STATE.IDLE) {
-            state = red ? AUTO_STATE.RED : AUTO_STATE.BLUE;
+            redSide = red;
+            state = red ? AUTO_STATE.SPIN_RED : AUTO_STATE.SPIN_BLUE;
         }
     }
 
@@ -140,58 +149,27 @@ public class DuckSpin extends OpMode {
 
         // Override the current auto state with driver commands
         // Technically we should only trigger on button-down, not repeatedly while held
-        /* if (in.down("DUCK_RED")) {
-            teleop(true);
-        } else if (in.down("DUCK_BLUE")) {
+        if (gamepad1.a) {
             teleop(false);
-        } */
+        }
+        if (gamepad1.b) {
+            teleop(true);
+        }
 
         // Run the auto cycle (including translated driver commands)
         switch (state) {
             case IDLE:
                 break;
-            case RED:
-                // Start backward
-                speed = -speedMin;
-                timer.reset();
-                state = AUTO_STATE.SPIN_RED; // Jump to a specific state
-                break;
-            case BLUE:
-                // Start forward
-                speed = speedMin;
-                timer.reset();
-                state = AUTO_STATE.SPIN_BLUE; // Jump to a specific state
-                break;
             case SPIN_BLUE:
                 // Run the spin cycle
-                if (speed != 0 && timer.seconds() < rampTime) {
-                    speed = (speedMin + (timer.seconds() / rampTime) *
-                            (speedMax - speedMin)) * Math.signum(speed);
-                } else {
-                    speed = 0;
-                    state = state.next(); // Jump to the next state in the enum list
-                }
-                duck.setPower(speed);
-                break;
-            case SPIN_RED:
-                // Run the spin cycle
-                if (speed != 0 && timer.seconds() < rampTime) {
-                    speed = (speedMin + (timer.seconds() / rampTime) *
-                            (speedMax - speedMin)) * Math.signum(speed);
-                } else {
-                    speed = 0;
-                    state = state.next(); // Jump to the next state in the enum list
-                }
-                duck2.setPower(speed);
-                break;
-            case NEW_SPIN_RED:
-                duckRampPoly(-teleopMin, -teleopMax, teleopRamp, pow);
+                duckRampPoly(speedMin, speedMax, rampTime, rampStop, pow, auto, redSide);
                 if (done && duck.getPower() == 0) {
                     state = AUTO_STATE.DONE;
                 }
                 break;
-            case NEW_SPIN_BLUE:
-                duckRampPoly(teleopMin, teleopMax, teleopRamp, pow);
+            case SPIN_RED:
+                // Run the spin cycle
+                duckRampPoly(-speedMin, -speedMax, rampTime, rampStop, pow, auto, redSide);
                 if (done && duck.getPower() == 0) {
                     state = AUTO_STATE.DONE;
                 }
@@ -226,157 +204,18 @@ public class DuckSpin extends OpMode {
          * You should also be able to adjust speedMax/speedMin directly in the dashboard
          * Tuning controls on the gamepad can be useful, but the dashboard requires less code
          */
-
-        if (gamepad1.a) {
-            state = AUTO_STATE.NEW_SPIN_BLUE;
-        }
-        if (gamepad1.b) {
-            state = AUTO_STATE.NEW_SPIN_RED;
-        }
-
     }
 
     @Override
     public void stop() {
     }
 
-    // duck spin s curve ramp taken from sin curve
     // put in speedMin and speedMax, -1 to 1
     // time is the total time of one routine
-    // boolean full: true means a half period of sin curve
-    //               false means a quarter period of sin curve
-    public void duckRampS(double speedMin, double speedMax, double time, boolean full) {
-        if (time == 0) {
-            return;
-        }
-
-        speedMin = Math.max(-1, speedMin);
-        speedMin = Math.min(1, speedMin);
-        speedMax = Math.max(-1, speedMax);
-        speedMax = Math.min(1, speedMax);
-        double y = 0;
-
-        if (full) {
-            double a = Math.PI / Math.abs(time);
-            double b = Math.abs(speedMax - speedMin) / 2;
-            double c = Math.abs(time) / 2;
-            double d = Math.abs(speedMax + speedMin) / 2;
-            double x = timer.seconds();
-            if (timer.seconds() <= time) {
-                //y = 3 * Math.pow(timer.seconds() / time, 2) - 2 * Math.pow(timer.seconds() / time, 3);
-                y = b * Math.sin(a * (x - c)) + d;
-            } else {
-                y = 0;
-            }
-        } else {
-            double a = Math.PI / (2 * Math.abs(time));
-            double b = Math.abs(speedMax - speedMin);
-            double x = timer.seconds();
-            if (timer.seconds() <= time) {
-                y = b * Math.sin(a * x) + speedMin;
-            } else {
-                y = 0;
-            }
-        }
-
-        if (!done && started) {
-            // speed is calculated using the curve defined above
-            if (speedMax > 0) {
-                duck.setPower(y);
-                duck2.setPower(y);
-            } else {
-                duck.setPower(-y);
-                duck2.setPower(-y);
-            }
-            done = (timer.seconds() > time);
-        }
-
-        if (!started) {
-            timer.reset();
-            started = true;
-            done = false;
-        } else if (done) {
-            duck.setPower(0);
-            duck2.setPower(0);
-            started = false;
-        }
-
-        telemetry.log().add(getClass().getSimpleName() + "::duckRampS(): Motors in use");
-        telemetry.addData("Vel1", duck.getPower());
-        telemetry.addData("Vel2", duck2.getPower());
-    }
-
-    // duck spin inverse s curve ramp taken from arcsin curve
-    // put in speedMin and speedMax, -1 to 1
-    // time is the total time of one routine
-    // boolean full: true means a half period of inverse sin curve
-    //               false means a quarter period of inverse sin curve
-    public void duckRampInvS(double speedMin, double speedMax, double time, boolean full) {
-        if (time == 0) {
-            return;
-        }
-
-        speedMin = Math.max(-1, speedMin);
-        speedMin = Math.min(1, speedMin);
-        speedMax = Math.max(-1, speedMax);
-        speedMax = Math.min(1, speedMax);
-        double y = 0;
-
-        if (!full) {
-            double a = 2 * Math.abs(speedMax - speedMin) / Math.PI;
-            double b = 1 / time;
-            double x = timer.seconds();
-            if (timer.seconds() <= time) {
-                y = a * Math.asin(b * x) + speedMin;
-            } else {
-                y = 0;
-            }
-        } else {
-            double a = 2 / time;
-            double b = Math.abs(speedMax - speedMin) / Math.PI;
-            double c = Math.abs(time) / 2;
-            double d = Math.abs(speedMax + speedMin) / 2;
-            double x = timer.seconds();
-            if (timer.seconds() <= time) {
-                y = b * Math.asin(a * (x - c)) + d;
-            } else {
-                y = 0;
-            }
-        }
-
-        if (!done && started) {
-            // speed is calculated using the curve defined above
-            if (speedMax > 0) {
-                duck.setPower(y);
-                duck2.setPower(y);
-            } else {
-                duck.setPower(-y);
-                duck2.setPower(-y);
-            }
-            done = (timer.seconds() > time);
-        }
-
-        if (!started) {
-            timer.reset();
-            started = true;
-            done = false;
-        } else if (done) {
-            duck.setPower(0);
-            duck2.setPower(0);
-            started = false;
-        }
-
-        telemetry.log().add(getClass().getSimpleName() + "::duckRampInvS(): Motors in use");
-        telemetry.addData("Vel1", duck.getPower());
-        telemetry.addData("Vel2", duck2.getPower());
-    }
-
-    // duck spin inverse s curve ramp taken from arcsin curve
-    // put in speedMin and speedMax, -1 to 1
-    // time is the total time of one routine
-    // boolean full: true means a half period of inverse sin curve
-    //               false means a quarter period of inverse sin curve
-    public void duckRampPoly(double speedMin, double speedMax, double time, double pow) {
+    // rampStop is the time before it accelerates to full speed
+    // pow is the power for the poly curve
+    //
+    public void duckRampPoly(double speedMin, double speedMax, double time, double rampStop, double pow, boolean auto, boolean red) {
         if (time == 0) {
             return;
         }
@@ -388,18 +227,26 @@ public class DuckSpin extends OpMode {
         double y;
 
         double x = timer.seconds();
-        if (timer.seconds() <= teleopRampStop) {
-            y = Math.pow(teleopRampStop, -pow) * (speedMax - speedMin) * Math.pow(x, pow) + speedMin;
+        if (timer.seconds() <= rampStop) {
+            y = Math.pow(rampStop, -pow) * (speedMax - speedMin) * Math.pow(x, pow) + speedMin;
         } else if (timer.seconds() <= time) {
-            y = (1 - speedMax) / (time - teleopRampStop) * (timer.seconds() - teleopRamp) + speedMax;
+            y = (1 - speedMax) / (time - rampStop) * (timer.seconds() - time) + speedMax;
         } else {
             y = 0;
         }
 
         if (!done && started) {
-            // speed is calculated using the curve defined above
-            duck.setPower(y);
-            duck2.setPower(y);
+            if (!auto) {
+                // speed is calculated using the curve defined above
+                duck.setPower(y);
+                duck2.setPower(y);
+            } else {
+                if (red) {
+                    duck.setPower(y);
+                } else {
+                    duck.setPower(y);
+                }
+            }
             done = (timer.seconds() > time);
         }
 
@@ -412,10 +259,6 @@ public class DuckSpin extends OpMode {
             duck2.setPower(0);
             started = false;
         }
-
-        telemetry.log().add(getClass().getSimpleName() + "::duckRampInvS(): Motors in use");
-        telemetry.addData("Vel1", duck.getPower());
-        telemetry.addData("Vel2", duck2.getPower());
     }
 
     // An encoder-synchronized piecewise function for unloading ducks quickly
@@ -423,9 +266,9 @@ public class DuckSpin extends OpMode {
         // A speed slow enough for a safe start
         double speedStart = teleopMin;
         // The maximum speed at which ducks can safely travel
-        double speedMax = 0.83; // TODO: Calculate from measurements
+        double speedMax = teleopMax; // TODO: Calculate from measurements
         // The best speed for removing ducks from the spinner
-        double speedEject = teleopMax;
+        double speedEject = 1;
 
         // Minimum number of ticks until it's safe to run at speedMax
         int startTicks = 500; // TODO: Approximate the best observed ramp rate
@@ -452,12 +295,8 @@ public class DuckSpin extends OpMode {
 
     enum AUTO_STATE implements OrderedEnum {
         IDLE,
-        RED,
-        BLUE,
         SPIN_BLUE,
         SPIN_RED,
-        NEW_SPIN_RED,
-        NEW_SPIN_BLUE,
         DONE;
 
         public AUTO_STATE next() {

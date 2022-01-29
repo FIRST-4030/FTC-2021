@@ -29,24 +29,15 @@
 
 package org.firstinspires.ftc.teamcode.robot;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
-import org.firstinspires.ftc.teamcode.roadrunner.util.DashboardUtil;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
@@ -56,38 +47,36 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 public class NewNewAuto extends MultiOpModeManager {
     // Hardware
     private NewNewDrive drive;
-    private Servo collectorArm = null;
-    //private DcMotor collector = null;
     private Distance distance;
     private Depositor depositor;
     private Capstone capstone;
     private DuckSpin duck;
+    private Collector collector;
 
     // Constants
     public static double speedMin = 0.1;
     public static double speedMax = 0.7;
-    public static double distance1 = 14;
-    public static double r2 = 39;
-    public static double arcLength2 = 27;
-    public static double r3wh = 100;
-    public static double arcLength3wh = 15;
-    public static double r3wh2 = 46;
-    public static double arcLength3wh2 = 31;
-    public static double r3duck = 12;
-    public static double arcLength3duck = 37.8;
-    public static double r4wh = 0;
-    public static double arcLength4wh = 30;
-    public static double r4wh2 = 24;
-    public static double arcLength4wh2 = 24;
+    public static double r1 = 37;
+    public static double arcLength1 = 28;
+    public static double r2wh = 100;
+    public static double arcLength2wh = 14;
+    public static double r2wh2 = 30;
+    public static double arcLength2wh2 = 29;
+    public static double r2duck = 19;
+    public static double arcLength2duck = 46;
+    public static double r3wh = 0;
+    public static double arcLength3wh = 20;
+    public static double r3wh2 = 24;
+    public static double arcLength3wh2 = 32;
+    public static double r3duck = 0;
+    public static double arcLength3duck = 30;
+    public static double r4wh = 24;
+    public static double arcLength4wh = 32;
+    public static double r4wh2 = 0;
+    public static double arcLength4wh2 = 20;
     public static double r4duck = 0;
-    public static double arcLength4duck = 36.75;
-    public static double r5wh = 24;
-    public static double arcLength5wh = 24;
-    public static double r5wh2 = 0;
-    public static double arcLength5wh2 = 30;
-    public static double r5duck = 9.25;
-    public static double arcLength5duck = 36.25;
-    public static double arcLength6duck = Math.PI;
+    public static double arcLength4duck = 19;
+    public static double arcLength5duck = Math.PI;
     public static double COLLECTOR_UP = 0.6;
     public static double COLLECTOR_DOWN = 0.90;
     public static int num = 0;
@@ -111,6 +100,7 @@ public class NewNewAuto extends MultiOpModeManager {
             super.register(new Capstone());
             super.register(new Distance());
             super.register(new DuckSpin());
+            super.register(new Collector());
 
             distance = new Distance();
             super.register(distance);
@@ -120,6 +110,8 @@ public class NewNewAuto extends MultiOpModeManager {
             super.register(capstone);
             duck = new DuckSpin();
             super.register(duck);
+            collector = new Collector();
+            super.register(collector);
 
             Globals.opmode = this;
             in = Globals.input(this);
@@ -144,14 +136,6 @@ public class NewNewAuto extends MultiOpModeManager {
             error = true;
         }
 
-        try {
-            collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
-            //collector = hardwareMap.get(DcMotor.class, "Collector");
-        } catch (Exception e) {
-            telemetry.log().add("Could not find collector");
-            error = true;
-        }
-
         // Initialization status
         String status = "Ready";
         if (error) {
@@ -170,8 +154,7 @@ public class NewNewAuto extends MultiOpModeManager {
         in.loop();
         if (in.down("+")) {
             delayTime += 1;
-            // Moving the servo position and number should decrease
-        } else if (in.down("-") && delayTime < 0) {
+        } else if (in.down("-") && delayTime > 0) {
             delayTime -= 1;
         }
 
@@ -199,6 +182,8 @@ public class NewNewAuto extends MultiOpModeManager {
                 }
             }
         }
+        telemetry.addData("Barcode Pos: ", distance.position());
+        telemetry.addData("Door: ", depositor.doorUsed());
         super.init_loop();
     }
 
@@ -217,33 +202,9 @@ public class NewNewAuto extends MultiOpModeManager {
             depositor.loop();
             distance.loop();
             duck.loop();
-            in.loop();
 
             // Step through the auto commands
             switch (state) {
-                case BARCODE:
-                    if (distance.state() == Distance.AUTO_STATE.DONE) {
-                        if (distance.position() == Distance.BARCODE.LEFT) {
-                            depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
-                        } else if (distance.position() == Distance.BARCODE.CENTER) {
-                            depositor.setDoor(Depositor.DOOR_USED.MID_DOOR);
-                        } else if (distance.position() == Distance.BARCODE.RIGHT) {
-                            depositor.setDoor(Depositor.DOOR_USED.HIGH_DOOR);
-                        } else {
-                            if (!duckSide) {
-                                if (redAlliance) {
-                                    depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
-                                } else {
-                                    depositor.setDoor(Depositor.DOOR_USED.HIGH_DOOR);
-                                }
-                            } else {
-                                depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
-                            }
-                        }
-                        state = state.next();
-                    }
-                    break;
-
                 /* case MOVE_OUT:
                     depositor.prep();
                     //drive.driveTo(speedMin, speedMax, distance1);
@@ -256,20 +217,20 @@ public class NewNewAuto extends MultiOpModeManager {
                     break;*/
                 case ARC:
                     depositor.prep();
-                    collectorArm.setPosition(COLLECTOR_UP);
                     if (duckSide) {
                         if (redAlliance) {
-                            drive.arcTo(-r2, arcLength2, speedMin, speedMax);
+                            drive.arcTo(-r1, arcLength1, speedMin, speedMax);
                         } else {
-                            drive.arcTo(r2, arcLength2, speedMin, speedMax);
+                            drive.arcTo(r1, arcLength1, speedMin, speedMax);
                         }
                     } else {
                         if (redAlliance) {
-                            drive.arcTo(r2, arcLength2, speedMin, speedMax);
+                            drive.arcTo(r1, arcLength1, speedMin, speedMax);
                         } else {
-                            drive.arcTo(-r2, arcLength2, speedMin, speedMax);
+                            drive.arcTo(-r1, arcLength1, speedMin, speedMax);
                         }
                     }
+                    collector.collectorUp();
                     if (drive.isDone() && !drive.isBusy()) {
                         drive.setDoneFalse();
                         state = state.next();
@@ -289,17 +250,17 @@ public class NewNewAuto extends MultiOpModeManager {
                 case PARK:
                     if (duckSide) {
                         if (redAlliance) {
-                            drive.arcTo(-r3duck, -arcLength3duck, -speedMin, -speedMax);
+                            drive.arcTo(r2duck, -arcLength2duck, -speedMin, -speedMax);
                         } else {
-                            drive.arcTo(r3duck, -arcLength3duck, -speedMin, -speedMax);
+                            drive.arcTo(-r2duck, -arcLength2duck, -speedMin, -speedMax);
                         }
                     } else {
                         if (redAlliance) {
                             //drive.arcTo(-r3wh, -arcLength3wh, -speedMin, -speedMax);
-                            drive.combinedCurves(-r3wh, -arcLength3wh, -r3wh2, -arcLength3wh2, -speedMin, -speedMax);
+                            drive.combinedCurves(r2wh, -arcLength2wh, -r2wh2, -arcLength2wh2, -speedMin, -speedMax);
                         } else {
                             //drive.arcTo(r3wh, -arcLength3wh, -speedMin, -speedMax);
-                            drive.combinedCurves(r3wh, -arcLength3wh, r3wh2, -arcLength3wh2, -speedMin, -speedMax);
+                            drive.combinedCurves(-r2wh, -arcLength2wh, r2wh2, -arcLength2wh2, -speedMin, -speedMax);
                         }
                     }
                     if (num == 0) {
@@ -311,20 +272,29 @@ public class NewNewAuto extends MultiOpModeManager {
                         state = state.next();
                     }
                     break;
+                case COLLECT:
+                    collector.collect();
+                    drive.slowReverse();
+                    if (collector.isEjecting()) {
+                        drive.stopDrive();
+                        drive.returnToPos(drive.returnOffSet());
+                        state = state.next();
+                    }
+                    break;
                 case ADD1:
                     if (duckSide) {
                         if (redAlliance) {
-                            drive.arcTo(r4duck, arcLength4duck, speedMin, speedMax);
+                            drive.arcTo(r3duck, arcLength3duck, speedMin, speedMax);
                         } else {
-                            drive.arcTo(r4duck, 35.75, speedMin, speedMax);
+                            drive.arcTo(r3duck, arcLength3duck, speedMin, speedMax);
                         }
                     } else {
                         if (redAlliance) {
                             //drive.arcTo(-r3wh, arcLength3wh, speedMin, speedMax);
-                            drive.combinedCurves(-r4wh, arcLength4wh, -r4wh2, arcLength4wh2, speedMin, speedMax);
+                            drive.combinedCurves(-r3wh, arcLength3wh, -r3wh2, arcLength3wh2, speedMin, speedMax);
                         } else {
                             //drive.arcTo(r3wh, arcLength3wh, speedMin, speedMax);
-                            drive.combinedCurves(r4wh, arcLength4wh, r4wh2, arcLength4wh2, speedMin, speedMax);
+                            drive.combinedCurves(r3wh, arcLength3wh, r3wh2, arcLength3wh2, speedMin, speedMax);
                         }
                     }
                     if (drive.isDone() && !drive.isBusy()) {
@@ -345,17 +315,17 @@ public class NewNewAuto extends MultiOpModeManager {
                 case ADD2:
                     if (duckSide) {
                         if (redAlliance) {
-                            drive.arcTo(-r5duck, -arcLength5duck, -speedMin, -speedMax);
+                            drive.arcTo(-r4duck, -arcLength4duck, -speedMin, -speedMax);
                         } else {
-                            drive.arcTo(r5duck + 0.05, -arcLength5duck, -speedMin, -speedMax);
+                            drive.arcTo(r4duck, -arcLength4duck, -speedMin, -speedMax);
                         }
                     } else {
                         if (redAlliance) {
                             //drive.arcTo(-r3wh, -arcLength3wh, -speedMin, -speedMax);
-                            drive.combinedCurves(-r5wh, -arcLength5wh, -r5wh2, -arcLength5wh2, -speedMin, -speedMax);
+                            drive.combinedCurves(-r4wh, -arcLength4wh, -r4wh2, -arcLength4wh2, -speedMin, -speedMax);
                         } else {
                             //drive.arcTo(r3wh, -arcLength3wh, -speedMin, -speedMax);
-                            drive.combinedCurves(r5wh, -arcLength5wh, r5wh2, -arcLength5wh2, -speedMin, -speedMax);
+                            drive.combinedCurves(r4wh, -arcLength4wh, r4wh2, -arcLength4wh2, -speedMin, -speedMax);
                         }
                     }
                     if (drive.isDone() && !drive.isBusy() && depositor.isDone()) {
@@ -364,17 +334,17 @@ public class NewNewAuto extends MultiOpModeManager {
                     }
                     break;
                 case LAST:
-                    if (duckSide) {
-                        drive.arcTo(0, -arcLength6duck, -speedMin, -speedMax);
+                    /* if (duckSide) {
+                        drive.arcTo(0, -arcLength5duck, -speedMin, -speedMax);
                     } else {
                         depositor.tiltBack();
                         state = state.next();
                     }
-                    if (drive.isDone() && !drive.isBusy()) {
+                    if (drive.isDone() && !drive.isBusy()) {*/
                         depositor.tiltBack();
                         drive.setDoneFalse();
                         state = AUTO_STATE.DONE;
-                    }
+                    //}
                     break;
                 // Stop processing
                 case DONE:
@@ -392,12 +362,11 @@ public class NewNewAuto extends MultiOpModeManager {
     }
 
     enum AUTO_STATE implements OrderedEnum {
-        BARCODE,
-        //MOVE_OUT,
         ARC,
         PREP_WAIT,
         DEPOSIT,
         PARK,
+        COLLECT,
         ADD1,
         DUCK_SPIN,
         ADD2,
