@@ -309,6 +309,24 @@ public class TFMathExtension {
 
         double angle = Math.atan2(diff.getY(), diff.getX());
 
-        return new float[]{-output.getX(), (float) ((angle > pi ? -1 * (2 * pi - angle) : angle) * Math.abs(output.getX()))};
+        return new float[]{-output.getX(), (float) ((angle > pi ? -1 * (2 * pi - angle) : angle) * 2 * Math.abs(output.getX()))};
+    }
+
+
+    /**
+     * Make an arc from (0,0) and the given point / Generate the first 2 parameters of the arcTo method
+     * <br>the output is [0] = radius; [1] = arc length
+     * <br>V2
+     * @param target
+     * @return
+     */
+    public static float[] makeArcV2(Vector2f target){
+        float length = target.length();
+        double alpha = Math.atan2(target.getX(), target.getY());
+        double beta = pi - alpha;
+        double radius = (length / 2) / Math.cos(alpha);
+        double arcLen = radius * beta * 2;
+
+        return new float[]{ (float) radius, (float) arcLen};
     }
 }
