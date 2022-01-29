@@ -71,7 +71,7 @@ public class TFODMain extends OpMode {
     private FrustumInterpolator l270;
     //camera attributes (with testing defaults)
     private Vector3f lensLocalPos = new Vector3f(4.1f, 6.2f, -7.2f);
-    private Matrix4f lensLocalRotation = Matrix4f.matMul(Matrix4f.matMul(Matrix4fBuilder.buildRotY(-185) ,Matrix4fBuilder.buildRotX(-50)), Matrix4fBuilder.buildRotZ(180));
+    private Matrix4f lensLocalRotation = Matrix4f.matMul(Matrix4f.matMul(Matrix4fBuilder.buildRotY(-8) ,Matrix4fBuilder.buildRotX(-45)), Matrix4fBuilder.buildRotZ(180));
 
     public TFODMain(){init();}
 
