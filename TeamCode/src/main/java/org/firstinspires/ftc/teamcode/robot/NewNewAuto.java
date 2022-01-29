@@ -67,10 +67,12 @@ public class NewNewAuto extends MultiOpModeManager {
     public static double speedMin = 0.1;
     public static double speedMax = 0.9;
     public static double distance1 = 14;
-    public static double r2 = 38;
-    public static double arcLength2 = 28;
-    public static double r3wh = 90;
-    public static double arcLength3wh = 50;
+    public static double r2 = 42;
+    public static double arcLength2 = 27;
+    public static double r3wh = 100;
+    public static double arcLength3wh = 15;
+    public static double r3wh2 = 46;
+    public static double arcLength3wh2 = 31;
     public static double r3duck = 12;
     public static double arcLength3duck = 37.8;
     public static double r4duck = 0;
@@ -168,8 +170,26 @@ public class NewNewAuto extends MultiOpModeManager {
         telemetry.addData("Alliance", redAlliance ? "Red" : "Blue");
         telemetry.addData("Direction", duckSide ? "Duck" : "Warehouse");
         telemetry.addData("DelayTime (seconds) ", delayTime);
-        if (distance.isDone()) {
+
+        if (distance.state() == Distance.AUTO_STATE.DONE) {
             distance.startScan();
+            if (distance.position() == Distance.BARCODE.LEFT) {
+                depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
+            } else if (distance.position() == Distance.BARCODE.CENTER) {
+                depositor.setDoor(Depositor.DOOR_USED.MID_DOOR);
+            } else if (distance.position() == Distance.BARCODE.RIGHT) {
+                depositor.setDoor(Depositor.DOOR_USED.HIGH_DOOR);
+            } else {
+                if (!duckSide) {
+                    if (redAlliance) {
+                        depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
+                    } else {
+                        depositor.setDoor(Depositor.DOOR_USED.HIGH_DOOR);
+                    }
+                } else {
+                    depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
+                }
+            }
         }
         super.init_loop();
     }
@@ -179,7 +199,7 @@ public class NewNewAuto extends MultiOpModeManager {
         super.start();
         num = 0;
         drive.setDoneFalse();
-        state = AUTO_STATE.BARCODE;
+        state = AUTO_STATE.ARC;
         delayTimer.reset();
     }
 
@@ -267,9 +287,11 @@ public class NewNewAuto extends MultiOpModeManager {
                         }
                     } else {
                         if (redAlliance) {
-                            drive.arcTo(-r3wh, -arcLength3wh, -speedMin, -speedMax);
+                            //drive.arcTo(-r3wh, -arcLength3wh, -speedMin, -speedMax);
+                            drive.combinedCurves(-r3wh, -arcLength3wh, -speedMin, -speedMax, -r3wh2, -arcLength3wh2, -speedMin, -speedMax);
                         } else {
-                            drive.arcTo(r3wh, -arcLength3wh, -speedMin, -speedMax);
+                            //drive.arcTo(r3wh, -arcLength3wh, -speedMin, -speedMax);
+                            drive.combinedCurves(r3wh, -arcLength3wh, -speedMin, -speedMax, r3wh2, -arcLength3wh2, -speedMin, -speedMax);
                         }
                     }
                     if (num == 0) {
@@ -290,9 +312,11 @@ public class NewNewAuto extends MultiOpModeManager {
                         }
                     } else {
                         if (redAlliance) {
-                            drive.arcTo(-r3wh, arcLength3wh, speedMin, speedMax);
+                            //drive.arcTo(-r3wh, arcLength3wh, speedMin, speedMax);
+                            drive.combinedCurves(-r3wh2, arcLength3wh2, speedMin, speedMax, -r3wh, arcLength3wh, speedMin, speedMax);
                         } else {
-                            drive.arcTo(r3wh, arcLength3wh, speedMin, speedMax);
+                            //drive.arcTo(r3wh, arcLength3wh, speedMin, speedMax);
+                            drive.combinedCurves(r3wh2, arcLength3wh2, speedMin, speedMax, r3wh, arcLength3wh, speedMin, speedMax);
                         }
                     }
                     if (drive.isDone() && !drive.isBusy()) {
@@ -319,9 +343,11 @@ public class NewNewAuto extends MultiOpModeManager {
                         }
                     } else {
                         if (redAlliance) {
-                            drive.arcTo(-r3wh, -arcLength3wh, -speedMin, -speedMax);
+                            //drive.arcTo(-r3wh, -arcLength3wh, -speedMin, -speedMax);
+                            drive.combinedCurves(-r3wh, -arcLength3wh, -speedMin, -speedMax, -r3wh2, -arcLength3wh2, -speedMin, -speedMax);
                         } else {
-                            drive.arcTo(r3wh, -arcLength3wh, -speedMin, -speedMax);
+                            //drive.arcTo(r3wh, -arcLength3wh, -speedMin, -speedMax);
+                            drive.combinedCurves(r3wh, -arcLength3wh, -speedMin, -speedMax, r3wh2, -arcLength3wh2, -speedMin, -speedMax);
                         }
                     }
                     if (drive.isDone() && !drive.isBusy() && depositor.isDone()) {

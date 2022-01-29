@@ -462,7 +462,7 @@ public class NewNewDrive extends OpMode {
             arcLengthInner2 = Math.toRadians(angle2) * (Math.abs(r2) - trackWidthHalf);
             arcLengthOuter2 = Math.toRadians(angle2) * (Math.abs(r2) + trackWidthHalf);
 
-            if (r1 > 0) {
+            if (r2 > 0) {
                 // if radius is greater than zero, we are moving to the left, so the right side is on the outside
                 arcLengthL2 = arcLengthInner2;
                 arcLengthR2 = arcLengthOuter2;
@@ -483,7 +483,7 @@ public class NewNewDrive extends OpMode {
         double maxRatio = 0;
         if ((isBusy() || !done) && speedCurveL.isValid() && speedCurveR.isValid() && started) {
             // speed is calculated using the curve defined above
-            if (driveLeft.getCurrentPosition() < ogPosL + leftTicks1 && driveRight.getCurrentPosition() >= ogPosR + rightTicks1) {
+            if (driveLeft.getCurrentPosition() < ogPosL + leftTicks1 && driveRight.getCurrentPosition() < ogPosR + rightTicks1) {
                 maxRatio = Math.max(Math.abs(leftTicks1), Math.abs(rightTicks1)) / Math.abs(midTicks1);
                 driveLeft.setPower((leftTicks1 / midTicks1) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
                 driveRight.setPower((rightTicks1 / midTicks1) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
@@ -497,7 +497,7 @@ public class NewNewDrive extends OpMode {
 
         if (!started) {
             // initialize speedCurve to have motor ticks be the X coordinate and motor speed be the Y coordinate
-            speedCurveL.setClampLimits(true);
+            /* speedCurveL.setClampLimits(true);
             speedCurveR.setClampLimits(true);
             speedCurveL.addElement(driveLeft.getCurrentPosition() - 0.05 * leftTicks1, speedMin1);
             speedCurveL.addElement(driveLeft.getCurrentPosition() + 0.5 * leftTicks1, speedMax1);
@@ -511,7 +511,10 @@ public class NewNewDrive extends OpMode {
             speedCurveR.addElement(driveLeft.getCurrentPosition() + 1.00 * rightTicks1, (speedMax1 + speedMax2) / 2.0);
             speedCurveR.addElement(driveLeft.getCurrentPosition() - 0.05 * rightTicks2 + rightTicks1, (speedMax1 + speedMax2) / 2.0);
             speedCurveR.addElement(driveLeft.getCurrentPosition() + 0.5 * rightTicks2 + rightTicks1, speedMax2);
-            speedCurveR.addElement(driveLeft.getCurrentPosition() + 1.00 * rightTicks2 + rightTicks1, speedMin2);
+            speedCurveR.addElement(driveLeft.getCurrentPosition() + 1.00 * rightTicks2 + rightTicks1, speedMin2); */
+
+            rampAndHold(speedCurveL, (int) (leftTicks1 + leftTicks2), driveLeft.getCurrentPosition(), (speedMin1 + speedMin2) / 2, (speedMax1 + speedMax2) / 2);
+            rampAndHold(speedCurveR, (int) (rightTicks1 + rightTicks2), driveRight.getCurrentPosition(), (speedMin1 + speedMin2) / 2, (speedMax1 + speedMax2) / 2);
 
             ogPosL = driveLeft.getCurrentPosition();
             ogPosR = driveRight.getCurrentPosition();
@@ -573,6 +576,40 @@ public class NewNewDrive extends OpMode {
         // Enable first/last element clamping in case the encoder values drift outside the model
         pfunc.setClampLimits(true);
     }
+
+    /* private void combinedRampAndHold(
+            PiecewiseFunction pfunc,
+            int pathTicks1, int pathTicks2, int currentTicks,
+            double speedMin, double speedMax) {
+        // How many ticks does it take to ramp up/down between speedMin and speedMax
+        // Higher values correlate with longer ramp times and smaller acceleration
+        // Usually experiment and measurement can determine an approximate value
+        double rampUpTicks = rampMaxTicks * Math.abs(speedMax - speedMin) / 0.9;
+        double rampDownTicks = rampMaxTicks * Math.abs(speedMax - speedMin) / 0.9;
+
+        rampUpTicks *= Math.signum(pathTicks1);
+        rampDownTicks *= Math.signum(pathTicks2);
+        int totalPathTicks = Math.abs(pathTicks1) + Math.abs(pathTicks2);
+
+        if (Math.abs(rampUpTicks + rampDownTicks) >= totalPathTicks) {
+            // Path is shorter than the ramp up/down intervals
+            // 3 ramp points at 0%, 50% and 100%
+            speedMax = ((speedMax - speedMin) * (totalPathTicks / 2f) / rampUpTicks) + speedMin;
+            pfunc.addElement(currentTicks, speedMin);
+            pfunc.addElement(currentTicks + pathTicks / 2f, speedMax);
+            pfunc.addElement(currentTicks + pathTicks, speedMin);
+        } else {
+            // Path is long enough to ramp to full speed
+            // 4 ramp points at 0%, rampUpTicks, 100% - rampDownTicks, and 100%
+            pfunc.addElement(currentTicks, speedMin);
+            pfunc.addElement(currentTicks + rampUpTicks, speedMax);
+            pfunc.addElement(currentTicks + pathTicks - rampDownTicks, speedMax);
+            pfunc.addElement(currentTicks + pathTicks, speedMin);
+        }
+
+        // Enable first/last element clamping in case the encoder values drift outside the model
+        pfunc.setClampLimits(true);
+    } */
 
     public double leftPos() {
         return (driveLeft.getCurrentPosition() / TICKS_PER_INCH);

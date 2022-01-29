@@ -50,8 +50,8 @@ public class arcToTest extends MultiOpModeManager {
     // Constants
     public static double r = 20;
     public static double speedMin = 0.1;
-    public static double speedMax = 0.5;
-    public static double arcLength = 2 * Math.PI * Math.abs(r) * 1.05;
+    public static double speedMax = 0.9;
+    public static double arcLength = 2 * Math.PI * Math.abs(r) / 4;
     public static double COLLECTOR_UP = 0.6;
     public static int num = 0;
 
@@ -113,8 +113,8 @@ public class arcToTest extends MultiOpModeManager {
         // Step through the auto commands
         switch (state) {
             case TEST_MOVE:
-                drive.arcTo(r, arcLength, speedMin, speedMax);
-                //drive.combinedCurves(0, 10, speedMin, speedMax, 0, 10, speedMin, speedMax);
+                //drive.arcTo(r, arcLength, speedMin, speedMax);
+                drive.combinedCurves(0, 20, speedMin, speedMax, r, arcLength, speedMin, speedMax);
                 collectorArm.setPosition(COLLECTOR_UP);
                 if (drive.isDone() && !drive.isBusy()) {
                     waitTimer.reset();
