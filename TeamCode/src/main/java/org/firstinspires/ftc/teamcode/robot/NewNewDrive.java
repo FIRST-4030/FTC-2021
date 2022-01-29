@@ -29,9 +29,11 @@ public class NewNewDrive extends OpMode {
     public static double thirdRampPoint = 0.675;
     public static double lastRampPoint = 1.0;
     public static double accelMax = 0.025;
-    public static double rampMaxTicks = 668;
+    public static double rampMaxTicks = 800;
     private double ogPosL = 0;
     private double ogPosR = 0;
+    private boolean over1stMoveL = false;
+    private boolean over1stMoveR = false;
 
     // Hardware
     private DcMotor driveLeft;
@@ -416,7 +418,7 @@ public class NewNewDrive extends OpMode {
                 leftTicks + "," + rightTicks + "," + midTicks + "," + maxRatio + "," + accelLeft + "," + accelRight);
     }
 
-    public void combinedCurves(double r1, double arcLength1, double speedMin1, double speedMax1, double r2, double arcLength2, double speedMin2, double speedMax2) {
+    public void combinedCurves(double r1, double arcLength1, double r2, double arcLength2, double speedMin, double speedMax) {
         if (arcLength1 == 0 && arcLength2 == 0) {
             return;
         }
@@ -483,7 +485,17 @@ public class NewNewDrive extends OpMode {
         double maxRatio = 0;
         if ((isBusy() || !done) && speedCurveL.isValid() && speedCurveR.isValid() && started) {
             // speed is calculated using the curve defined above
-            if (driveLeft.getCurrentPosition() < ogPosL + leftTicks1 && driveRight.getCurrentPosition() < ogPosR + rightTicks1) {
+            if (leftTicks1 > 0) {
+                over1stMoveL = (driveLeft.getCurrentPosition() <= ogPosL + leftTicks1);
+            } else {
+                over1stMoveL = (driveLeft.getCurrentPosition() >= ogPosL + leftTicks1);
+            }
+            if (rightTicks1 > 0) {
+                over1stMoveR = (driveRight.getCurrentPosition() <= ogPosR + rightTicks1);
+            } else {
+                over1stMoveR = (driveRight.getCurrentPosition() >= ogPosR + rightTicks1);
+            }
+            if (over1stMoveL && over1stMoveR) {
                 maxRatio = Math.max(Math.abs(leftTicks1), Math.abs(rightTicks1)) / Math.abs(midTicks1);
                 driveLeft.setPower((leftTicks1 / midTicks1) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
                 driveRight.setPower((rightTicks1 / midTicks1) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
@@ -513,8 +525,8 @@ public class NewNewDrive extends OpMode {
             speedCurveR.addElement(driveLeft.getCurrentPosition() + 0.5 * rightTicks2 + rightTicks1, speedMax2);
             speedCurveR.addElement(driveLeft.getCurrentPosition() + 1.00 * rightTicks2 + rightTicks1, speedMin2); */
 
-            rampAndHold(speedCurveL, (int) (leftTicks1 + leftTicks2), driveLeft.getCurrentPosition(), (speedMin1 + speedMin2) / 2, (speedMax1 + speedMax2) / 2);
-            rampAndHold(speedCurveR, (int) (rightTicks1 + rightTicks2), driveRight.getCurrentPosition(), (speedMin1 + speedMin2) / 2, (speedMax1 + speedMax2) / 2);
+            rampAndHold(speedCurveL, (int) (leftTicks1 + leftTicks2), driveLeft.getCurrentPosition(), speedMin, speedMax);
+            rampAndHold(speedCurveR, (int) (rightTicks1 + rightTicks2), driveRight.getCurrentPosition(), speedMin, speedMax);
 
             ogPosL = driveLeft.getCurrentPosition();
             ogPosR = driveRight.getCurrentPosition();
@@ -525,6 +537,8 @@ public class NewNewDrive extends OpMode {
             driveLeft.setPower(0);
             driveRight.setPower(0);
             started = false;
+            over1stMoveL = false;
+            over1stMoveR = false;
             speedCurveL.reset();
             speedCurveR.reset();
         }
@@ -561,13 +575,13 @@ public class NewNewDrive extends OpMode {
             // Path is shorter than the ramp up/down intervals
             // 3 ramp points at 0%, 50% and 100%
             speedMax = ((speedMax - speedMin) * (pathTicks / 2f) / rampUpTicks) + speedMin;
-            pfunc.addElement(currentTicks, speedMin);
+            pfunc.addElement(currentTicks - 0.025 * pathTicks, speedMin);
             pfunc.addElement(currentTicks + pathTicks / 2f, speedMax);
             pfunc.addElement(currentTicks + pathTicks, speedMin);
         } else {
             // Path is long enough to ramp to full speed
             // 4 ramp points at 0%, rampUpTicks, 100% - rampDownTicks, and 100%
-            pfunc.addElement(currentTicks, speedMin);
+            pfunc.addElement(currentTicks - 0.025 * pathTicks, speedMin);
             pfunc.addElement(currentTicks + rampUpTicks, speedMax);
             pfunc.addElement(currentTicks + pathTicks - rampDownTicks, speedMax);
             pfunc.addElement(currentTicks + pathTicks, speedMin);
