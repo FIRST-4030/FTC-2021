@@ -20,7 +20,7 @@ public class NewNewDrive extends OpMode {
     public static boolean DEBUG = false;
     private static final int INPUT_SCALING_EXPONENT = 3;
     private static final double MAX_VELOCITY = 40.0; // inches per second
-    public static double TICKS_PER_INCH = 44.5;
+    private final double TICKS_PER_INCH = 44.5;
     public static double ACCEL_CONSTANT = 0.4;
     public static double trackWidth = 15.25;
     public static double trackWidthHalf = trackWidth / 2.0;
@@ -621,8 +621,16 @@ public class NewNewDrive extends OpMode {
         driveRight.setPower(-0.1);
     }
 
+    public double returnPosL() {
+        return driveLeft.getCurrentPosition();
+    }
+
+    public double returnPosR() {
+        return driveRight.getCurrentPosition();
+    }
+
     public double returnOffSet() {
-        return ((Math.abs(driveLeft.getCurrentPosition() - ogPosL) + Math.abs(driveRight.getCurrentPosition() - ogPosR)) / 2.0);
+        return ((Math.abs(driveLeft.getCurrentPosition() - ogPosL) + Math.abs(driveRight.getCurrentPosition() - ogPosR)) / 2.0 / TICKS_PER_INCH);
     }
 
     public void returnToPos(double distance) {
@@ -632,5 +640,6 @@ public class NewNewDrive extends OpMode {
     public void stopDrive() {
         driveLeft.setPower(0);
         driveRight.setPower(0);
+        done = true;
     }
 }

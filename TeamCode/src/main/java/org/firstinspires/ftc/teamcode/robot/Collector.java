@@ -221,6 +221,10 @@ public class Collector extends OpMode {
         auto = true;
     }
 
+    public boolean isCollected() {
+        return (collected && collectorTimer.seconds() > (Math.PI / 10));
+    }
+
     public void collectorDown() {
         collectorArm.setPosition(COLLECTOR_DOWN);
     }
