@@ -13,22 +13,23 @@ public class CameraLens {
     private boolean busy = false;
 
     //Camera Attributes
-    private double hFOV = 1, vFOV = 1;
-    private final double zFar = 1000;
-    private final Plane3f xzPlane = Plane3f.XZ_PLANE;
+    private double hFOV = 1, vFOV = 1; //initialize with default values in just in case
+    private final double zFar = 1000; //set the far plane/ will stretch the Z coordinate
+    private final Plane3f xzPlane = Plane3f.XZ_PLANE; //define the plane for clipping the Camera Position to Calculated Vector 
 
     //NDC Img Attributes
     private Vector4f imgRight = new Vector4f(1, 0, 0, 1);
     private Vector4f imgBottom = new Vector4f(0, 1, 0, 1);
     private Vector4f imgCenter = new Vector4f(0, 0, 1, 1);
 
-    //Describing transforms
+    //Describing transforms, most importantly, the rotation and translation
     private Matrix4f rotation = new Matrix4f();
     private Vector3f translation = new Vector3f();
 
     //Final output Matrix4f
     private Matrix4f imgToLocal = new Matrix4f();
 
+    //Preset FOV value for the listed cameras (only the C270)
     public static final double[] C270_FOV = TFMathExtension.findFOV(3.58, 2.02, 4.11);
 
     public CameraLens(){}
