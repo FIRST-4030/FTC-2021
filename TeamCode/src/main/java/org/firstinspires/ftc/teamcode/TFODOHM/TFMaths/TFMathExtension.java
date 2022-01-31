@@ -179,7 +179,7 @@ public class TFMathExtension {
     }*/
 
     /**
-     * This method converts the sensor width, sensor height, and focal length of a camera into horizontal & vertical FOV
+     * This method converts the sensor width, sensor height, and focal length of a camera into horizontal & vertical FOV in radians
      * @param width
      * @param height
      * @param focal_len

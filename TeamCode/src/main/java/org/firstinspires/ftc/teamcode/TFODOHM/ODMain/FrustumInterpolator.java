@@ -16,7 +16,9 @@ public class FrustumInterpolator {
     private Matrix4f camRot;
 
     private double hFOV, vFOV; //horizontal and vertical fov, important for calculating the frustum later
-    private Vector4f fplane_right = new Vector4f(), fplane_bottom = new Vector4f(), fplane_center = new Vector4f();
+    private Vector4f fplane_right = new Vector4f(),
+                     fplane_bottom = new Vector4f(),
+                     fplane_center = new Vector4f();
 
     private Vector3f camPos = new Vector3f();
     private Plane3f cardinalAxisPlane = Plane3f.XZ_PLANE;
