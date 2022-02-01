@@ -32,7 +32,10 @@ public class CameraLens {
     //Preset FOV value for the listed cameras (only the C270)
     public static final double[] C270_FOV = TFMathExtension.findFOV(3.58, 2.02, 4.11);
 
-    public CameraLens(){}
+    public CameraLens(double[] fov){
+        this.hFOV = fov[0];
+        this.vFOV = fov[1];
+    }
 
     public CameraLens(double[] fov, Vector3f lensPos, Matrix4f lensRot){
         this.hFOV = fov[0];
