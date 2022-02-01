@@ -61,7 +61,7 @@ public class NewNewAuto extends MultiOpModeManager {
     // Constants
     private final double TICKS_PER_INCH = 44.5;
     public static double speedMin = 0.1;
-    public static double speedMax = 0.7;
+    public static double speedMax = 0.8;
     public static double r1 = 36.9;
     public static double arcLength1 = 26.5;
     public static double r2wh = 100;
@@ -72,12 +72,12 @@ public class NewNewAuto extends MultiOpModeManager {
     public static double arcLength2duck = 44;
     public static double r3wh = 0;
     public static double arcLength3wh = 20;
-    public static double r3wh2 = 24;
-    public static double arcLength3wh2 = 32;
+    public static double r3wh2 = 25;
+    public static double arcLength3wh2 = 30;
     public static double r3duck = 0;
     public static double arcLength3duck = 42;
-    public static double r4wh = 24;
-    public static double arcLength4wh = 32;
+    public static double r4wh = 25;
+    public static double arcLength4wh = 30;
     public static double r4wh2 = 0;
     public static double arcLength4wh2 = 20;
     public static double r4duck = 0;
@@ -94,10 +94,12 @@ public class NewNewAuto extends MultiOpModeManager {
 
     // Members
     private AUTO_STATE state = AUTO_STATE.DONE;
+    private AUTO_STATE oldState = AUTO_STATE.DONE;
+    private AUTO_STATE savedState = AUTO_STATE.DONE;
     private InputHandler in;
     private boolean redAlliance = false;
     private boolean duckSide = false;
-    //private DelayTimerManager delayTimer = new DelayTimerManager();
+    private ElapsedTime runTime = new ElapsedTime();
     private ElapsedTime delayTimer = new ElapsedTime();
     private boolean startedCollecting = false;
     private ElapsedTime collectorTimer = new ElapsedTime();
@@ -219,6 +221,7 @@ public class NewNewAuto extends MultiOpModeManager {
         drive.setDoneFalse();
         state = AUTO_STATE.ARC;
         delayTimer.reset();
+        runTime.reset();
     }
 
     @Override
@@ -227,9 +230,215 @@ public class NewNewAuto extends MultiOpModeManager {
             depositor.loop();
             distance.loop();
             duck.loop();
+            if (state != oldState) {
+                savedState = oldState;
+                oldState = state;
+            }
+            if (duckSide) {
+                switch (state) {
+                    case ARC:
+                        depositor.prep();
+                        if (redAlliance) {
+                            drive.arcTo(-r1, arcLength1, speedMin, speedMax);
+                        } else {
+                            drive.arcTo(r1, arcLength1, speedMin, speedMax);
+                        }
+                        collectCmdState = collectCmd.IDLE;
+                        if (drive.isDone() && !drive.isBusy()) {
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.PREP_WAIT;
+                        }
+                        break;
+                    case PREP_WAIT:
+                        if (depositor.isDone()) {
+                            depositor.deposit();
+                            state = AUTO_STATE.DEPOSIT;
+                        }
+                        break;
+                    case DEPOSIT:
+                        if (depositor.isDone()) {
+                            state = AUTO_STATE.PARK;
+                        }
+                        break;
+                    case PARK:
+                        if (redAlliance) {
+                            drive.arcTo(r2duck, -arcLength2duck, -speedMin, -speedMax);
+                        } else {
+                            drive.arcTo(-r2duck, -arcLength2duck, -speedMin, -speedMax);
+                        }
+                        if (drive.isDone() && !drive.isBusy()) {
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.ADD1;
+                        }
+                        break;
+                    case COLLECT:
+                    case RETURN:
+                        drive.setDoneFalse();
+                        state = AUTO_STATE.ADD1;
+                        break;
+                    case ADD1:
+                        if (redAlliance) {
+                            drive.arcTo(r3duck, arcLength3duck, speedMin, speedMax);
+                        } else {
+                            drive.arcTo(r3duck, arcLength3duck, speedMin, speedMax);
+                        }
+                        if (drive.isDone() && !drive.isBusy()) {
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.DUCK_SPIN;
+                        }
+                        break;
+                    case DUCK_SPIN:
+                        duck.auto(redAlliance);
+                        if (duck.isDone()) {
+                            state = AUTO_STATE.ADD2;
+                        }
+                        break;
+                    case ADD2:
+                        if (!drive.isDone()) {
+                            if (redAlliance) {
+                                drive.arcTo(-r4duck, -arcLength4duck, -speedMin, -speedMax);
+                            } else {
+                                drive.arcTo(r4duck, -arcLength4duck, -speedMin, -speedMax);
+                            }
+                        }
+                        if (drive.isDone() && !drive.isBusy()) {
+                            depositor.reset();
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.LAST;
+                        }
+                        break;
+                    case LAST:
+                        if (depositor.isDone()) {
+                            depositor.tiltBack();
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.DONE;
+                        }
+                        break;
+                    // Stop processing
+                    case DONE:
+                        break;
+                }
+            } else {
+                switch (state) {
+                    case ARC:
+                        depositor.prep();
+                        if (redAlliance) {
+                            drive.arcTo(r1, arcLength1, speedMin, speedMax);
+                        } else {
+                            drive.arcTo(-r1, arcLength1, speedMin, speedMax);
+                        }
+                        collectCmdState = collectCmd.IDLE;
+                        if (drive.isDone() && !drive.isBusy()) {
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.PREP_WAIT;
+                        }
+                        break;
+                    case PREP_WAIT:
+                        if (depositor.isDone()) {
+                            depositor.deposit();
+                            state = AUTO_STATE.DEPOSIT;
+                        }
+                        break;
+                    case DEPOSIT:
+                        if (depositor.isDone()) {
+                            state = AUTO_STATE.PARK;
+                        }
+                        break;
+                    case PARK:
+                        if (redAlliance) {
+                            //drive.arcTo(-r3wh, -arcLength3wh, -speedMin, -speedMax);
+                            drive.combinedCurves(r2wh, -arcLength2wh, -r2wh2, -arcLength2wh2, -speedMin, -speedMax);
+                        } else {
+                            //drive.arcTo(r3wh, -arcLength3wh, -speedMin, -speedMax);
+                            drive.combinedCurves(-r2wh, -arcLength2wh, r2wh2, -arcLength2wh2, -speedMin, -speedMax);
+                        }
+                        if (drive.isDone() && !drive.isBusy()) {
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.COLLECT;
+                        }
+                        break;
+                    case COLLECT:
+                        if (!startedCollecting) {
+                            //collectCmdState = collectCmd.BEFORE_COLLECT;
+                            ogPosL = drive.returnPosL();
+                            ogPosR = drive.returnPosR();
+                            //drive.slowReverse();
+                            startedCollecting = true;
+                        }
+                        if (!drive.isDone()) {
+                            drive.arcTo(0, -10, -speedMin, -speedMax);
+                        }
+                        if (drive.isDone() && !drive.isBusy()) {//collectCmdState == collectCmd.EJECT) {
+                            drive.setDoneFalse();
+                            startedCollecting = false;
+                            state = AUTO_STATE.RETURN;
+                        }
+                        break;
+                    case RETURN:
+                        if (!drive.isDone()) {
+                            drive.arcTo(0, 10, speedMin, speedMax);
+                        }
+                        if (drive.isDone() && !drive.isBusy() && collectCmdState == collectCmd.IDLE) {
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.ADD1;
+                        }
+                        break;
+                    case ADD1:
+                        depositor.prep();
+                        if (redAlliance) {
+                            //drive.arcTo(-r3wh, arcLength3wh, speedMin, speedMax);
+                            drive.combinedCurves(-r3wh, arcLength3wh, -r3wh2, arcLength3wh2, speedMin, speedMax);
+                        } else {
+                            //drive.arcTo(r3wh, arcLength3wh, speedMin, speedMax);
+                            drive.combinedCurves(r3wh, arcLength3wh, r3wh2, arcLength3wh2, speedMin, speedMax);
+                        }
+                        if (drive.isDone() && !drive.isBusy() && depositor.isDone()) {
+                            depositor.deposit();
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.DUCK_SPIN;
+                        }
+                        break;
+                    case DUCK_SPIN:
+                        if (depositor.isDone()) {
+                            state = AUTO_STATE.ADD2;
+                        }
+                        break;
+                    case ADD2:
+                        if (!drive.isDone()) {
+                            if (redAlliance) {
+                                //drive.arcTo(-r3wh, -arcLength3wh, -speedMin, -speedMax);
+                                drive.combinedCurves(-r4wh, -arcLength4wh, -r4wh2, -arcLength4wh2, -speedMin, -speedMax);
+                            } else {
+                                //drive.arcTo(r3wh, -arcLength3wh, -speedMin, -speedMax);
+                                drive.combinedCurves(r4wh, -arcLength4wh, r4wh2, -arcLength4wh2, -speedMin, -speedMax);
+                            }
+                        }
+                        if (drive.isDone() && !drive.isBusy()) {
+                            if (runTime.seconds() > 25) {
+                                depositor.reset();
+                                drive.setDoneFalse();
+                                state = AUTO_STATE.LAST;
+                            } else {
+                                drive.setDoneFalse();
+                                state = AUTO_STATE.COLLECT;
+                            }
+                        }
+                        break;
+                    case LAST:
+                        if (depositor.isDone()) {
+                            depositor.tiltBack();
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.DONE;
+                        }
+                        break;
+                    // Stop processing
+                    case DONE:
+                        break;
+                }
+            }
 
             // Step through the auto commands
-            switch (state) {
+            /* switch (state) {
                 case ARC:
                     depositor.prep();
                     if (duckSide) {
@@ -286,23 +495,29 @@ public class NewNewAuto extends MultiOpModeManager {
                 case COLLECT:
                     if (duckSide) {
                         state = AUTO_STATE.ADD1;
-                    }
-                    if (!startedCollecting) {
+                    } else if (!startedCollecting) {
                         collectCmdState = collectCmd.BEFORE_COLLECT;
                         ogPosL = drive.returnPosL();
                         ogPosR = drive.returnPosR();
-                        drive.slowReverse();
+                        //drive.slowReverse();
                         startedCollecting = true;
                     }
+                    if (!drive.isDone()) {
+                        drive.arcTo(0, -10, -speedMin, -speedMax);
+                    }
                     if (collectCmdState == collectCmd.EJECT) {
-                        drive.stopDrive();
                         drive.setDoneFalse();
                         state = AUTO_STATE.RETURN;
                     }
                     break;
                 case RETURN:
-                    collectCmdState = collectCmd.EJECT;
-                    drive.arcTo(0, (Math.abs(drive.returnPosL() - ogPosL) + Math.abs(drive.returnPosR() - ogPosR) / 2.0 / TICKS_PER_INCH), 0.1, 0.2);
+                    if (!drive.isDone()) {
+                        drive.arcTo(0, 10, speedMin, speedMax);
+                    }
+                    //drive.arcTo(0, (Math.abs(drive.returnPosL() - ogPosL) + Math.abs(drive.returnPosR() - ogPosR) / 2.0 / TICKS_PER_INCH), 0.1, 0.2);
+                    telemetry.addData("distanceOffL", Math.abs(drive.returnPosL() - ogPosL));
+                    telemetry.addData("distanceOffR", Math.abs(drive.returnPosR() - ogPosR));
+                    telemetry.addData("distanceinInches", (Math.abs(drive.returnPosL() - ogPosL) + Math.abs(drive.returnPosR() - ogPosR) / 2.0 / TICKS_PER_INCH));
                     if (drive.isDone() && !drive.isBusy() && collectCmdState == collectCmd.IDLE) {
                         drive.setDoneFalse();
                         state = AUTO_STATE.ADD1;
@@ -345,47 +560,40 @@ public class NewNewAuto extends MultiOpModeManager {
                     }
                     break;
                 case ADD2:
-                    if (duckSide) {
-                        if (redAlliance) {
-                            drive.arcTo(-r4duck, -arcLength4duck, -speedMin, -speedMax);
+                    if (!drive.isDone()) {
+                        if (duckSide) {
+                            if (redAlliance) {
+                                drive.arcTo(-r4duck, -arcLength4duck, -speedMin, -speedMax);
+                            } else {
+                                drive.arcTo(r4duck, -arcLength4duck, -speedMin, -speedMax);
+                            }
                         } else {
-                            drive.arcTo(r4duck, -arcLength4duck, -speedMin, -speedMax);
-                        }
-                    } else {
-                        if (redAlliance) {
-                            //drive.arcTo(-r3wh, -arcLength3wh, -speedMin, -speedMax);
-                            drive.combinedCurves(-r4wh, -arcLength4wh, -r4wh2, -arcLength4wh2, -speedMin, -speedMax);
-                        } else {
-                            //drive.arcTo(r3wh, -arcLength3wh, -speedMin, -speedMax);
-                            drive.combinedCurves(r4wh, -arcLength4wh, r4wh2, -arcLength4wh2, -speedMin, -speedMax);
+                            if (redAlliance) {
+                                //drive.arcTo(-r3wh, -arcLength3wh, -speedMin, -speedMax);
+                                drive.combinedCurves(-r4wh, -arcLength4wh, -r4wh2, -arcLength4wh2, -speedMin, -speedMax);
+                            } else {
+                                //drive.arcTo(r3wh, -arcLength3wh, -speedMin, -speedMax);
+                                drive.combinedCurves(r4wh, -arcLength4wh, r4wh2, -arcLength4wh2, -speedMin, -speedMax);
+                            }
                         }
                     }
-                    if (num == 0) {
+                    if (drive.isDone() && !drive.isBusy()) {
                         depositor.reset();
-                        num++;
-                    }
-                    if (drive.isDone() && !drive.isBusy() && depositor.isDone()) {
                         drive.setDoneFalse();
                         state = state.next();
                     }
                     break;
                 case LAST:
-                    /* if (duckSide) {
-                        drive.arcTo(0, -arcLength5duck, -speedMin, -speedMax);
-                    } else {
-                        depositor.tiltBack();
-                        state = state.next();
-                    }
-                    if (drive.isDone() && !drive.isBusy()) {*/
+                    if (depositor.isDone()) {
                         depositor.tiltBack();
                         drive.setDoneFalse();
                         state = AUTO_STATE.DONE;
-                    //}
+                    }
                     break;
                 // Stop processing
                 case DONE:
                     break;
-            }
+                    }*/
 
 
             // Arm
@@ -428,8 +636,8 @@ public class NewNewAuto extends MultiOpModeManager {
             // Collector commands
             switch (collectCmdState) {
                 case IDLE:
-                        collectorArm.setPosition(COLLECTOR_UP);
-                        collector.setPower(0);
+                    collectorArm.setPosition(COLLECTOR_UP);
+                    collector.setPower(0);
                     break;
                 case BEFORE_COLLECT:
                 case COLLECT:
@@ -470,7 +678,7 @@ public class NewNewAuto extends MultiOpModeManager {
         LAST,
         DONE;
 
-        public NewNewAuto.AUTO_STATE next() {
+        public AUTO_STATE next() {
             return OrderedEnumHelper.next(this);
         }
     }

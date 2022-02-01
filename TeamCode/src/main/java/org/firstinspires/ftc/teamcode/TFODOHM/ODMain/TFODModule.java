@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 @Config
-@Autonomous(name = "TFOD_MAIN", group = "Test")
+@Autonomous(name = "TFODModule", group = "Test")
 public class TFODModule extends OpMode {
     @Override
     public void init() {

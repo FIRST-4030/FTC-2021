@@ -47,14 +47,14 @@ public class ticksTest extends MultiOpModeManager {
     private Servo collectorArm = null;
 
     // Constants
-    public static double speedMin = 0.2;
-    public static double speedMax = 0.5;
+    public static double speedMin = 0.1;
+    public static double speedMax = 0.8;
     public static double r = 16;
     public static double arcLength = 16;
     public static double angle = arcLength / Math.PI * 180.0 / r;
     public static double COLLECTOR_UP = 0.53;
     public static int num = 0;
-    public static int Distance = 15;
+    public static int Distance = 30;
 
     // Members
     private AUTO_STATE state = AUTO_STATE.DONE;
@@ -115,7 +115,7 @@ public class ticksTest extends MultiOpModeManager {
         // Step through the auto commands
         switch (state) {
             case MOVE:
-                drive.driveTo(speedMin, speedMax, Distance);
+                drive.driveTo(Distance, speedMin, speedMax);
                 collectorArm.setPosition(COLLECTOR_UP);
                 if (drive.isDone() && !drive.isBusy()) {
                     drive.setDoneFalse();
