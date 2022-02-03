@@ -91,7 +91,7 @@ public class TFODModule extends OpMode {
         tfParameters.isModelTensorFlow2 = true;
         tfParameters.useObjectTracker = true;
         tfParameters.inputSize = 320;
-        tfod = ClassFactory.getInstance().createTFObjectDetector(tfParameters, vuforia);
+        tfod = ClassFactory.getInstance().createTFObjectDetector(tfParameters, this.vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
     }
 
@@ -123,6 +123,16 @@ public class TFODModule extends OpMode {
     }
 
     @Override
+    public void init_loop() {
+
+    }
+
+    @Override
+    public void start() {
+
+    }
+
+    @Override
     public void loop() {
 
         if (debug){
@@ -135,6 +145,15 @@ public class TFODModule extends OpMode {
         }
 
         telemetry.addData("TFODModule Debugging: \n", "\t" + telemetryStringCache);
+    }
+
+
+
+
+
+    @Override
+    public void stop() {
+        tfod.shutdown();
     }
 
     /**
