@@ -183,7 +183,6 @@ public class tfMathArcTest extends MultiOpModeManager {
     enum AUTO_STATE implements OrderedEnum {
         TEST_MOVE,
         DONE;
-
         public AUTO_STATE next() {
             return OrderedEnumHelper.next(this);
         }
