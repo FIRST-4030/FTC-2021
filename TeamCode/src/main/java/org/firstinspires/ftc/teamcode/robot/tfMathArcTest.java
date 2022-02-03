@@ -73,9 +73,6 @@ public class tfMathArcTest extends MultiOpModeManager {
     private AUTO_STATE state = AUTO_STATE.DONE;
     private final ElapsedTime waitTimer = new ElapsedTime();
 
-    //TF
-    private TFODMain tfodMain;
-
     @Override
     public void init() {
         boolean error = false;
@@ -103,8 +100,6 @@ public class tfMathArcTest extends MultiOpModeManager {
             error = true;
         }
 
-        tfodMain = new TFODMain();
-        tfodMain.init();
 
         // Initialization status
         String status = "Ready";
@@ -112,7 +107,6 @@ public class tfMathArcTest extends MultiOpModeManager {
             status = "Hardware Error";
         }
         telemetry.addData("Status", status);
-        telemetry.log().add("" + tfodMain.isBusy());
         drive.enableLogging();
     }
 
@@ -132,36 +126,30 @@ public class tfMathArcTest extends MultiOpModeManager {
 
     @Override
     public void loop() {
-        if (tfodMain.isBusy() != true) {
-            tfodMain.loop();
-        }
 
-        Vector2f targetVector = new Vector2f();
+        Vector2f targetVector;
 
-        if (tfodMain.isBusy() != true) {
-            Vector3f temp = tfodMain.getBBToLocal();
+        targetVector = new Vector2f(arrayX[5], arrayY[5]);
 
-            targetVector = new Vector2f(temp.getX(), temp.getZ());
+        float[] f = TFMathExtension.makeArc(targetVector, version_control);
 
-            float[] f = TFMathExtension.makeArc(targetVector, version_control);
+        r = f[0];
+        arcLength = f[1];
+        // Step through the auto commands
+        switch (state) {
+            case TEST_MOVE:
+                drive.arcTo(r, arcLength, speedMin, speedMax);
+                //drive.combinedCurves(0, 10, speedMin, speedMax, 0, 10, speedMin, speedMax);
+                collectorArm.setPosition(COLLECTOR_UP);
+                if (drive.isDone() && !drive.isBusy()) {
+                    waitTimer.reset();
+                    state = AUTO_STATE.DONE;
+                }
+                break;
+            // Stop processing
+            case DONE:
+                break;
 
-            r = f[0];
-            arcLength = f[1];
-            // Step through the auto commands
-            switch (state) {
-                case TEST_MOVE:
-                    drive.arcTo(r, arcLength, speedMin, speedMax);
-                    //drive.combinedCurves(0, 10, speedMin, speedMax, 0, 10, speedMin, speedMax);
-                    collectorArm.setPosition(COLLECTOR_UP);
-                    if (drive.isDone() && !drive.isBusy()) {
-                        waitTimer.reset();
-                        state = AUTO_STATE.DONE;
-                    }
-                    break;
-                // Stop processing
-                case DONE:
-                    break;
-            }
         }
 
         //log what state it currently is in

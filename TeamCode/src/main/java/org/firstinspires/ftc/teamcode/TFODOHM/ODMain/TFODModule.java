@@ -25,14 +25,12 @@ public class TFODModule extends OpMode {
     //Vuforia stuff for camera handling
     private static final String VUFORIA_KEY = "AV9rwXT/////AAABma+8TAirNkVYosxu9qv0Uz051FVEjKU+nkH+MaIvGuHMijrdgoZYBZwCW2aG8P3+eZecZZPq9UKsZiTHAg73h09NT48122Ui10c8DsPe0Tx5Af6VaBklR898w8xCTdOUa7AlBEOa4KfWX6zDngegeZT5hBLfJKE1tiDmYhJezVDlITIh7SHBv0xBvoQuXhemlzL/OmjrnLuWoKVVW0kLanImI7yra+L8eOCLLp1BBD/Iaq2irZCdvgziZPnMLeTUEO9XUbuW8txq9i51anvlwY8yvMXLvIenNC1xg4KFhMmFzZ8xnpx4nWZZtyRBxaDU99aXm7cQgkVP0VD/eBIDYN4AcB0/Pa7V376m6tRJ5UZh";
     private VuforiaLocalizer vuforia;
-    private VuforiaLocalizer.Parameters vuforiaParameters;
     private static final String CAM_NAME = "MainCam";
     private int imgWidth, imgHeight;
 
     //init TF stuff for AI object detection
     private static final String TFOD_MODEL_ASSET = "FreightFrenzy_BCDM.tflite";
     private TFObjectDetector tfod;
-    private TFObjectDetector.Parameters tfParameters;
     private List<Recognition> tfodRecognitions = new ArrayList<>();
     private static final String[] LABELS = {
             "Ball",
@@ -70,6 +68,11 @@ public class TFODModule extends OpMode {
             telemetry.log().add("TensorFlow Cannot Initialize!");
         }
 
+        if (tfod != null) {
+            tfod.activate();
+            tfod.setZoom(1.0, 16.0/9.0);
+        }
+
         Matrix4f lensRot = Matrix4f.matMul(Matrix4f.matMul(Matrix4fBuilder.buildRotY(-8) ,Matrix4fBuilder.buildRotX(-45)), Matrix4fBuilder.buildRotZ(180));
 
         camera.setTranslation(new Vector3f(4.1f, 16.2f, -7.2f));
@@ -83,7 +86,7 @@ public class TFODModule extends OpMode {
     public void initTensorFlow(){
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        this.tfParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+        TFObjectDetector.Parameters tfParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
         tfParameters.minResultConfidence = 0.69f;
         tfParameters.isModelTensorFlow2 = true;
         tfParameters.useObjectTracker = true;
@@ -100,7 +103,7 @@ public class TFODModule extends OpMode {
         /*
          * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
          */
-        vuforiaParameters = new VuforiaLocalizer.Parameters();
+        VuforiaLocalizer.Parameters vuforiaParameters = new VuforiaLocalizer.Parameters();
 
         vuforiaParameters.vuforiaLicenseKey = VUFORIA_KEY;
         vuforiaParameters.cameraName = hardwareMap.get(WebcamName.class, TFODModule.CAM_NAME);
