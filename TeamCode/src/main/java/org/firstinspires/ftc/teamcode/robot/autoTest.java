@@ -35,7 +35,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
 import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
@@ -46,8 +45,8 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
 //@Disabled
-@Autonomous(name = "Autonomous", group = "Test")
-public class NewNewAuto extends MultiOpModeManager {
+@Autonomous(name = "autoTest", group = "Test")
+public class autoTest extends MultiOpModeManager {
     // Hardware
     private NewNewDrive drive;
     private Distance distance;
@@ -247,6 +246,7 @@ public class NewNewAuto extends MultiOpModeManager {
                         } else {
                             drive.arcTo(r1, arcLength1, speedMin, speedMax);
                         }
+                        collectorArm.setPosition(COLLECTOR_UP);
                         collectCmdState = collectCmd.IDLE;
                         if (drive.isDone() && !drive.isBusy()) {
                             drive.setDoneFalse();
@@ -331,6 +331,7 @@ public class NewNewAuto extends MultiOpModeManager {
                         } else {
                             drive.arcTo(-r1, arcLength1, speedMin, speedMax);
                         }
+                        collectorArm.setPosition(COLLECTOR_UP);
                         collectCmdState = collectCmd.IDLE;
                         if (drive.isDone() && !drive.isBusy()) {
                             drive.setDoneFalse();
@@ -350,14 +351,32 @@ public class NewNewAuto extends MultiOpModeManager {
                         break;
                     case PARK:
                         if (redAlliance) {
-                            //drive.arcTo(-r3wh, -arcLength3wh, -speedMin, -speedMax);
-                            //drive.combinedCurves(r2wh, -arcLength2wh, -r2wh2, -arcLength2wh2, -speedMin, -speedMax);
-                            drive.combined3Curves(r2wh, -arcLength2wh, -r2wh2, -arcLength2wh2, r2wh3, -arcLength2wh3, -speedMin, -speedMax);
-                        } else {
-                            //drive.arcTo(r3wh, -arcLength3wh, -speedMin, -speedMax);
-                            //drive.combinedCurves(-r2wh, -arcLength2wh, r2wh2, -arcLength2wh2, -speedMin, -speedMax);
-                            drive.combined3Curves(-r2wh, -arcLength2wh, r2wh2, -arcLength2wh2, -r2wh3, -arcLength2wh3, -speedMin, -speedMax);
+                            drive.arcTo(r2wh, -arcLength2wh, -speedMin, -speedMax);
+                            } else {
+                            drive.arcTo(-r2wh, -arcLength2wh, -speedMin, -speedMax);
+                            }
+                        if (drive.isDone() && !drive.isBusy()) {
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.PARK2;
                         }
+                        break;
+                    case PARK2:
+                        if (redAlliance) {
+                            drive.arcTo(-r2wh2, -arcLength2wh2, -speedMin, -speedMax);
+                            } else {
+                            drive.arcTo(r2wh2, -arcLength2wh2, -speedMin, -speedMax);
+                            }
+                        if (drive.isDone() && !drive.isBusy()) {
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.PARK3;
+                        }
+                        break;
+                    case PARK3:
+                        if (redAlliance) {
+                            drive.arcTo(r2wh3, -arcLength2wh3, -speedMin, -speedMax);
+                            } else {
+                            drive.arcTo(-r2wh3, -arcLength2wh3, -speedMin, -speedMax);
+                           }
                         if (drive.isDone() && !drive.isBusy()) {
                             drive.setDoneFalse();
                             state = AUTO_STATE.COLLECT;
@@ -395,13 +414,33 @@ public class NewNewAuto extends MultiOpModeManager {
                     case ADD1:
                         depositor.prep();
                         if (redAlliance) {
-                            //drive.arcTo(-r3wh, arcLength3wh, speedMin, speedMax);
-                            //drive.combinedCurves(-r3wh, arcLength3wh, -r3wh2, arcLength3wh2, speedMin, speedMax);
-                            drive.combined3Curves(-r3wh, collectDistance + arcLength3wh, -r3wh2, arcLength3wh2, r3wh3, arcLength3wh3, speedMin, speedMax);
+                            drive.arcTo(-r3wh, collectDistance + arcLength3wh, speedMin, speedMax);
+                            } else {
+                            drive.arcTo(r3wh, collectDistance + arcLength3wh, speedMin, speedMax);
+                           }
+                        if (drive.isDone() && !drive.isBusy() && depositor.isDone()) {
+                            depositor.deposit();
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.ADD12;
+                        }
+                        break;
+                    case ADD12:
+                        if (redAlliance) {
+                            drive.arcTo(-r3wh2, arcLength3wh2, speedMin, speedMax);
                         } else {
-                            //drive.arcTo(r3wh, arcLength3wh, speedMin, speedMax);
-                            //drive.combinedCurves(r3wh, arcLength3wh, r3wh2, arcLength3wh2, speedMin, speedMax);
-                            drive.combined3Curves(r3wh, collectDistance + arcLength3wh, r3wh2, arcLength3wh2, r3wh3, arcLength3wh3, speedMin, speedMax);
+                            drive.arcTo(r3wh2, arcLength3wh2, speedMin, speedMax);
+                            }
+                        if (drive.isDone() && !drive.isBusy() && depositor.isDone()) {
+                            depositor.deposit();
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.ADD13;
+                        }
+                        break;
+                    case ADD13:
+                        if (redAlliance) {
+                            drive.arcTo(r3wh3, arcLength3wh3, speedMin, speedMax);
+                            } else {
+                            drive.arcTo(r3wh3, arcLength3wh3, speedMin, speedMax);
                         }
                         if (drive.isDone() && !drive.isBusy() && depositor.isDone()) {
                             depositor.deposit();
@@ -417,18 +456,40 @@ public class NewNewAuto extends MultiOpModeManager {
                     case ADD2:
                         if (!drive.isDone()) {
                             if (redAlliance) {
-                                //drive.arcTo(-r3wh, -arcLength3wh, -speedMin, -speedMax);
-                                //drive.combinedCurves(-r4wh, -arcLength4wh, -r4wh2, -arcLength4wh2, -speedMin, -speedMax);
-                                drive.combined3Curves(-r4wh, -arcLength4wh, -r4wh2, -arcLength4wh2, -r4wh3, -arcLength4wh3, -speedMin, -speedMax);
-                            } else {
-                                //drive.arcTo(r3wh, -arcLength3wh, -speedMin, -speedMax);
-                                //drive.combinedCurves(r4wh, -arcLength4wh, r4wh2, -arcLength4wh2, -speedMin, -speedMax);
-                                drive.combined3Curves(r4wh, -arcLength4wh, r4wh2, -arcLength4wh2, r4wh3, -arcLength4wh3, -speedMin, -speedMax);
+                                drive.arcTo(-r4wh, -arcLength4wh, -speedMin, -speedMax);
+                                } else {
+                                drive.arcTo(r4wh, -arcLength4wh, -speedMin, -speedMax);
                             }
                         }
                         if (drive.isDone() && !drive.isBusy()) {
                                 drive.setDoneFalse();
                                 state = AUTO_STATE.COLLECT;
+                        }
+                        break;
+                    case ADD22:
+                        if (!drive.isDone()) {
+                            if (redAlliance) {
+                                drive.arcTo( -r4wh2, -arcLength4wh2, -speedMin, -speedMax);
+                                } else {
+                                drive.arcTo(r4wh2, -arcLength4wh2, -speedMin, -speedMax);
+                                }
+                        }
+                        if (drive.isDone() && !drive.isBusy()) {
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.COLLECT;
+                        }
+                        break;
+                    case ADD23:
+                        if (!drive.isDone()) {
+                            if (redAlliance) {
+                                drive.arcTo(-r4wh3, -arcLength4wh3, -speedMin, -speedMax);
+                                } else {
+                                drive.arcTo(r4wh3, -arcLength4wh3, -speedMin, -speedMax);
+                                }
+                        }
+                        if (drive.isDone() && !drive.isBusy()) {
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.COLLECT;
                         }
                         break;
                     case LAST:
@@ -677,11 +738,17 @@ public class NewNewAuto extends MultiOpModeManager {
         PREP_WAIT,
         DEPOSIT,
         PARK,
+        PARK2,
+        PARK3,
         COLLECT,
         RETURN,
         ADD1,
+        ADD12,
+        ADD13,
         DUCK_SPIN,
         ADD2,
+        ADD22,
+        ADD23,
         LAST,
         DONE;
 

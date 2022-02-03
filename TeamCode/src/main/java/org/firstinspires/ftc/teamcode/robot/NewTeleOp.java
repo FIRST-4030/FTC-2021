@@ -235,7 +235,11 @@ public class NewTeleOp extends MultiOpModeManager {
         depositor.loop();
 
         // Collector state
-        collected = sensorCollector.isPressed();
+        if (!collected) {
+            collected = sensorCollector.isPressed();
+        } else if (collectCmdState != collectCmd.COLLECT || collectorTimer.seconds() <= (Math.PI / 10)) {
+            collected = sensorCollector.isPressed();
+        }
         telemetry.addData("Collected? ", collected);
         switch (collectCmdState) {
             case IDLE:
@@ -303,14 +307,14 @@ public class NewTeleOp extends MultiOpModeManager {
                 collectorTimer.seconds() + "," + collectCmdState);
 
         // Capstone
-        if (gamepad2.dpad_down) {
+        /*if (gamepad2.dpad_down) {
             capstoneTarget = CAP_DOWN;
         } else if (gamepad2.dpad_up) {
             capstoneTarget = CAP_MID;
         }
- /*       if (capstoneTarget >= 0 && capstoneTarget <= 1) {
+        if (capstoneTarget >= 0 && capstoneTarget <= 1) {
             capstoneTarget += (gamepad2.right_stick_y * 0.02);
-        } */
+        }
 
         double capError = capstoneTarget - capstoneArm.getPosition();
         if (capError != 0 && capTimer.seconds() > delayTime) {
@@ -318,7 +322,7 @@ public class NewTeleOp extends MultiOpModeManager {
             delta *= Math.signum(capError);
             capstoneArm.setPosition(capstoneArm.getPosition() + delta);
             capTimer.reset();
-        }
+        }*/
 
         // Distance Sensor
         if (distanceLeft.getDistance(DistanceUnit.INCH) <= 19) {

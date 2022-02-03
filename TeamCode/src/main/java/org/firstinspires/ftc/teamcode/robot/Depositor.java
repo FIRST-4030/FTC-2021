@@ -222,7 +222,7 @@ public class Depositor extends OpMode {
                     }
                     prepPosSet = true;
                 }
-                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < (BELT_POSITION_DEADBAND + 10)) {
+                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < (BELT_POSITION_DEADBAND + 30)) {
                     state = AUTO_STATE.DONE;
                 } else if (Up && belt.getCurrentPosition() >= belt.getTargetPosition()) {
                     state = AUTO_STATE.DONE;
@@ -343,7 +343,7 @@ public class Depositor extends OpMode {
                     telemetry.addData("action: ", "going to high door prep");
                     state = AUTO_STATE.DOOR_PREP;
                 }
-            } else if (gamepad2.right_bumper) {
+            } else if (gamepad2.dpad_up) {
                 if (required_Door == DOOR_USED.HIGH_DOOR) {
                     state = AUTO_STATE.TILT_DOOR_OPEN;
                 }

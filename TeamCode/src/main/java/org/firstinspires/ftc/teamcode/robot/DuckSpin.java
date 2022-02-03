@@ -66,7 +66,6 @@ public class DuckSpin extends OpMode {
 
     // Members
     public static boolean DEBUG = false;
-    private InputHandler in = null;
     private boolean enabled = false;
     private double speed = 0.0;
     public static double speedMin = teleopMin;  // min duck spinner speed (0 - 1.0)
@@ -80,25 +79,19 @@ public class DuckSpin extends OpMode {
 
     @Override
     public void init() {
-        // Pull in Globals
-        Globals.opmode = this;
-        in = Globals.input(this);
-
         // Duck spinner
         try {
             duck = hardwareMap.get(DcMotor.class, "duck");
+            duck.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             duck.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             duck2 = hardwareMap.get(DcMotor.class, "duck2");
+            duck2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             duck2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             enabled = true;
         } catch (Exception e) {
             telemetry.log().add(getClass().getSimpleName() + ": " +
                     "Could not initialize");
         }
-
-        // Inputs
-        in.register("DUCK_RED", GAMEPAD.driver1, PAD_KEY.b);
-        in.register("DUCK_BLUE", GAMEPAD.driver1, PAD_KEY.a);
     }
 
     @Override
@@ -110,7 +103,6 @@ public class DuckSpin extends OpMode {
     }
 
     public void teleop(boolean red) {
-        loop();
         speedMin = teleopMin;
         speedMax = teleopMax;
         rampTime = teleopRamp;
@@ -121,7 +113,6 @@ public class DuckSpin extends OpMode {
     }
 
     public void auto(boolean red) {
-        loop();
         speedMin = autoMin;
         speedMax = autoMax;
         rampTime = autoRamp;
@@ -139,14 +130,6 @@ public class DuckSpin extends OpMode {
 
     @Override
     public void loop() {
-        // Skip processing if we're disabled
-        if (!enabled) {
-            return;
-        }
-
-        // Inputs
-        in.loop();
-
         // Override the current auto state with driver commands
         // Technically we should only trigger on button-down, not repeatedly while held
         if (gamepad1.a) {
@@ -163,14 +146,14 @@ public class DuckSpin extends OpMode {
             case SPIN_BLUE:
                 // Run the spin cycle
                 duckRampPoly(speedMin, speedMax, rampTime, rampStop, pow, auto, redSide);
-                if (done && duck.getPower() == 0) {
+                if (done && duck.getPower() == 0 && duck2.getPower() == 0) {
                     state = AUTO_STATE.DONE;
                 }
                 break;
             case SPIN_RED:
                 // Run the spin cycle
                 duckRampPoly(-speedMin, -speedMax, rampTime, rampStop, pow, auto, redSide);
-                if (done && duck.getPower() == 0) {
+                if (done && duck.getPower() == 0 && duck2.getPower() == 0) {
                     state = AUTO_STATE.DONE;
                 }
                 break;
@@ -230,7 +213,7 @@ public class DuckSpin extends OpMode {
         if (timer.seconds() <= rampStop) {
             y = Math.pow(rampStop, -pow) * (speedMax - speedMin) * Math.pow(x, pow) + speedMin;
         } else if (timer.seconds() <= time) {
-            y = (1 - speedMax) / (time - rampStop) * (timer.seconds() - time) + speedMax;
+            y = ((Math.signum(speedMax) * 1) - speedMax) / (time - rampStop) * (timer.seconds() - rampStop) + speedMax;
         } else {
             y = 0;
         }
@@ -244,7 +227,7 @@ public class DuckSpin extends OpMode {
                 if (red) {
                     duck.setPower(y);
                 } else {
-                    duck.setPower(y);
+                    duck2.setPower(y);
                 }
             }
             done = (timer.seconds() > time);

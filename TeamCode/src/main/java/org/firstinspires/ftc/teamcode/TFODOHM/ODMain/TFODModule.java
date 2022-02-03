@@ -68,11 +68,6 @@ public class TFODModule extends OpMode {
             telemetry.log().add("TensorFlow Cannot Initialize!");
         }
 
-        if (tfod != null) {
-            tfod.activate();
-            tfod.setZoom(1.0, 16.0/9.0);
-        }
-
         Matrix4f lensRot = Matrix4f.matMul(Matrix4f.matMul(Matrix4fBuilder.buildRotY(-8) ,Matrix4fBuilder.buildRotX(-45)), Matrix4fBuilder.buildRotZ(180));
 
         camera.setTranslation(new Vector3f(4.1f, 16.2f, -7.2f));
@@ -135,6 +130,7 @@ public class TFODModule extends OpMode {
     @Override
     public void loop() {
 
+        scan();
         if (debug){
             telemetryStringCache = "Debug: ON";
             telemetryStringCache += "\nTotal Objects Recognized: " + (cLSCubeBall + cLSDuck + cLSMarker);
