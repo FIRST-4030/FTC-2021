@@ -100,14 +100,14 @@ public class TFODModule extends OpMode {
         /*
          * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
          */
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        vuforiaParameters = new VuforiaLocalizer.Parameters();
 
-        parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        parameters.cameraName = hardwareMap.get(WebcamName.class, TFODModule.CAM_NAME);
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-        parameters.useExtendedTracking = false;
-        parameters.cameraMonitorFeedback = null;
-
+        vuforiaParameters.vuforiaLicenseKey = VUFORIA_KEY;
+        vuforiaParameters.cameraName = hardwareMap.get(WebcamName.class, TFODModule.CAM_NAME);
+        vuforiaParameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        vuforiaParameters.useExtendedTracking = false;
+        vuforiaParameters.cameraMonitorFeedback = null;
+        vuforia = ClassFactory.getInstance().createVuforia(vuforiaParameters);
     }
 
     /**
