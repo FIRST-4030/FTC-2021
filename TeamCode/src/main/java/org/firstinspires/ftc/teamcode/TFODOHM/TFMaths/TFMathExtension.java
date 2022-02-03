@@ -289,6 +289,7 @@ public class TFMathExtension {
      */
     public static float[] makeArcV1(Vector2f target){
         Vector2f int2f = target;
+        Vector2f targetMid = Vector2f.mul(target, 0.5f);
 
         //get the direction that the point from (0,0)
         Vector2f int2fDir = int2f.normalized();
@@ -302,7 +303,7 @@ public class TFMathExtension {
         closestToXAxis.mul(1000);
         closestToXAxis.add(int2f);
 
-        Vector2f output = TFMathExtension.llInt2d(new Vector2f(int2f.length() * 1000, 0), new Vector2f(int2f.length() * -1000,0), closestToXAxis, int2f);
+        Vector2f output = TFMathExtension.llInt2d(new Vector2f(int2f.length() * 1000, 0), new Vector2f(int2f.length() * -1000,0), closestToXAxis, targetMid);
 
         assert output != null;
         Vector2f diff = Vector2f.sub(int2f, output);

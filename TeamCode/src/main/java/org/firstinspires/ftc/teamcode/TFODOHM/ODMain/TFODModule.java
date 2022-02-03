@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector2f;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector3f;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Config
@@ -26,6 +27,7 @@ public class TFODModule extends OpMode {
     private VuforiaLocalizer vuforia;
     private VuforiaLocalizer.Parameters vuforiaParameters;
     private static final String CAM_NAME = "MainCam";
+    private int imgWidth, imgHeight;
 
     //init TF stuff for AI object detection
     private static final String TFOD_MODEL_ASSET = "FreightFrenzy_BCDM.tflite";
@@ -41,10 +43,17 @@ public class TFODModule extends OpMode {
 
     //Object detection stuff
     private boolean busy = false;
-    private ArrayList<Vector2f> bbCenter = new ArrayList<>();
-    private int currentListSize = 0;
+    private boolean debug = true;
+    private ArrayList<Vector2f> bbCenterCubeBall = new ArrayList<>();
+    private ArrayList<Vector2f> bbCenterDuck = new ArrayList<>();
+    private ArrayList<Vector2f> bbCenterMarker = new ArrayList<>();
+    private int cLSCubeBall = 0, cLSDuck = 0, cLSMarker = 0, tLS = 0;
+    private String telemetryStringCache = "";
     private CameraLens camera = new CameraLens(CameraLens.C270_FOV);
 
+    /**
+     * After calling this class, init() after setting variables
+     */
     public TFODModule(){}
 
     @Override
@@ -65,8 +74,6 @@ public class TFODModule extends OpMode {
 
         camera.setTranslation(new Vector3f(4.1f, 16.2f, -7.2f));
         camera.setRotation(lensRot);
-
-        telemetry.log().add(camera.toString());
     }
 
     /**
@@ -103,21 +110,225 @@ public class TFODModule extends OpMode {
 
     }
 
+    /**
+     * This method force updates the variables
+     */
+    public void updateVar(){
+        cLSCubeBall = bbCenterCubeBall.size();
+        cLSDuck = bbCenterDuck.size();
+        cLSMarker = bbCenterMarker.size();
+    }
+
     @Override
     public void loop() {
 
+        if (debug){
+            telemetryStringCache = "Debug: ON";
+            telemetryStringCache += "\nTotal Objects Recognized: " + (cLSCubeBall + cLSDuck + cLSMarker);
+            telemetryStringCache += "\nOR Breakdown: \n" + ("\tCubes & Balls" + cLSCubeBall + "\n") + ("\tDucks: " + cLSDuck + "\n") + ("\tMarkers: " + cLSMarker + "\n");
+            telemetryStringCache += "\nCamera imgToLocal: \n" + camera.getImgToLocal().toString();
+        } else {
+            telemetryStringCache = "Debug: OFF";
+        }
+
+        telemetry.addData("TFODModule Debugging: \n", "\t" + telemetryStringCache);
     }
 
+    /**
+     * Gets the camera feed, use TF to recognize, and update variables
+     */
     public void scan(){
         busy = true;
+        String currentLabel;
+        Vector2f center = new Vector2f(), tLeft = new Vector2f(), bRight = new Vector2f();
 
         if (tfod != null){
-            bbCenter.clear(); //clear
+            bbCenterCubeBall.clear(); //clear
+            bbCenterDuck.clear();
+            bbCenterMarker.clear();
 
             tfodRecognitions = tfod.getRecognitions();
-            currentListSize = tfodRecognitions.size();
+            tLS = tfodRecognitions.size();
+            for (Recognition recognition : tfodRecognitions){
+                currentLabel = recognition.getLabel().toUpperCase();
+
+                tLeft.setX(recognition.getLeft());
+                tLeft.setY(recognition.getTop());
+
+                bRight.setX(recognition.getRight());
+                bRight.setY(recognition.getBottom());
+
+                center.setX( ((tLeft.getX() + bRight.getX())/2) / (0.5f * imgWidth) - 1);
+                center.setY( ((tLeft.getY() + bRight.getY())/2) / (0.5f * imgHeight) - 1);
+
+                switch (currentLabel){
+                    case "Ball":
+                    case "Cube":
+                        bbCenterCubeBall.add(center);
+                        break;
+                    case "Duck":
+                        bbCenterDuck.add(center);
+                        break;
+                    case "Marker":
+                        bbCenterMarker.add(center);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         busy = false;
+    }
+
+    /**
+     * Sort for Cubes & Balls (the closest to the center)
+     * @return Vector2f bbCoordinate
+     */
+    public Vector2f sortCBBB(){
+        busy = true;
+        int storedIndex = 0;
+        float currentLen;
+        float cachedLen = 100;
+
+        if (cLSCubeBall > 0){
+
+            for (int i = 0; i < cLSCubeBall; i++){
+
+                currentLen = bbCenterCubeBall.get(i).length();
+
+                if (currentLen <= cachedLen){
+                    cachedLen = currentLen;
+                    storedIndex = i;
+                }
+            }
+            busy = false;
+            return bbCenterCubeBall.get(storedIndex);
+        }
+        busy = false;
+        return new Vector2f(5, 5);
+    }
+
+    /**
+     * Sort for Ducks (the closest to the center)
+     * @return Vector2f bbCoordinate
+     */
+    public Vector2f sortDBB(){
+        busy = true;
+        int storedIndex = 0;
+        float currentLen;
+        float cachedLen = 100;
+
+        if (cLSDuck > 0){
+
+            for (int i = 0; i < cLSDuck; i++){
+
+                currentLen = bbCenterDuck.get(i).length();
+
+                if (currentLen <= cachedLen){
+                    cachedLen = currentLen;
+                    storedIndex = i;
+                }
+            }
+            busy = false;
+            return bbCenterDuck.get(storedIndex);
+        }
+        busy = false;
+        return new Vector2f(5, 5);
+    }
+
+    /**
+     * Sort for Markers (the closest to the center)
+     * @return Vector2f bbCoordinate
+     */
+    public Vector2f sortMBB(){
+        busy = true;
+        int storedIndex = 0;
+        float currentLen;
+        float cachedLen = 100;
+
+        if (cLSMarker > 0){
+
+            for (int i = 0; i < cLSMarker; i++){
+
+                currentLen = bbCenterMarker.get(i).length();
+
+                if (currentLen <= cachedLen){
+                    cachedLen = currentLen;
+                    storedIndex = i;
+                }
+            }
+            busy = false;
+            return bbCenterMarker.get(storedIndex);
+        }
+        busy = false;
+        return new Vector2f(5, 5);
+    }
+
+
+    /**
+     * When {@param state} is 1, 2, or 3, it corresponds with the following:
+     * <br>sort [Cubes & Balls, Ducks, Markers]
+     * @param state
+     * @return
+     */
+    public Vector2f sortBB(int state){
+        busy = true;
+        int cLS;
+        ArrayList<Vector2f> bbCenterList;
+
+        switch (state){
+            default:
+            case 1:
+                cLS = cLSCubeBall;
+                bbCenterList = bbCenterCubeBall;
+                break;
+            case 2:
+                cLS = cLSDuck;
+                bbCenterList = bbCenterDuck;
+                break;
+            case 3:
+                cLS = cLSMarker;
+                bbCenterList = bbCenterMarker;
+                break;
+        }
+
+        int storedIndex = 0;
+        float cachedLen = 100;
+        float currentLen;
+
+        if (cLS > 0){
+
+            for (int i = 0; i < cLS; i++){
+
+                currentLen = bbCenterList.get(i).length();
+
+                if (currentLen <= cachedLen){
+                    cachedLen = currentLen;
+                    storedIndex = i;
+                }
+            }
+            busy = false;
+            return bbCenterList.get(storedIndex);
+        }
+        busy = false;
+        return new Vector2f(5, 5);
+    }
+
+    /**
+     * Wrapper Method to calculate the given bounding box coordinate into local robot space
+     * @param bbCoordinate
+     * @return
+     */
+    public Vector3f calcCoordinate(Vector2f bbCoordinate){
+        return camera.findImgToLocal(bbCoordinate);
+    }
+
+    /**
+     * Find the busy state of the class; almost like DcMotor.isBusy()
+     * @return
+     */
+    public boolean isBusy(){
+        return busy;
     }
 }

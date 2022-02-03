@@ -8,7 +8,6 @@ import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector3f;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector4f;
 
 public class CameraLens {
-
     //For the isBusy() method
     private boolean busy = false;
 
