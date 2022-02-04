@@ -287,7 +287,7 @@ public class TFMathExtension {
      * @param target
      * @return
      */
-    public static float[] makeArcV1(Vector2f target){
+    public static double[] makeArcV1(Vector2f target){
         Vector2f int2f = target;
         Vector2f targetMid = Vector2f.mul(target, 0.5f);
 
@@ -301,7 +301,7 @@ public class TFMathExtension {
         //compare the direction of the normals using the dot product
         Vector2f closestToXAxis = int2fDir.getX() <= 0 ? (int2fDir.getY() >= 0 ? int2fNorm90 : int2fNorm270) : (int2fDir.getY() <= 0 ? int2fNorm90 : int2fNorm270);
         closestToXAxis.mul(1000);
-        closestToXAxis.add(int2f);
+        closestToXAxis.add(targetMid);
 
         Vector2f output = TFMathExtension.llInt2d(new Vector2f(int2f.length() * 1000, 0), new Vector2f(int2f.length() * -1000,0), closestToXAxis, targetMid);
 
@@ -310,7 +310,7 @@ public class TFMathExtension {
 
         double angle = Math.atan2(diff.getY(), diff.getX());
 
-        return new float[]{-output.getX(), (float) ((angle > pi ? -1 * (2 * pi - angle) : angle) * 2 * Math.abs(output.getX()))};
+        return new double[]{-output.getX(), ((angle > pi ? -1 * (2 * pi - angle) : angle) * 2 * Math.abs(output.getX()))};
     }
 
 
@@ -339,25 +339,5 @@ public class TFMathExtension {
         double arcLength = (2 * radius * ((pi/2) - theta));
 
         return new float[]{(float) radius, (float) arcLength};
-    }
-
-    public static float[] makeArc(Vector2f target, int version){
-        float[] output;
-
-        switch (version){
-            case 1:
-                output = makeArcV1(target);
-                break;
-            case 2:
-                output = makeArcV2(target);
-                break;
-            case 3:
-                output = makeArcV3(target);
-                break;
-            default:
-                output = new float[] {0, 0};
-        }
-
-        return output;
     }
 }

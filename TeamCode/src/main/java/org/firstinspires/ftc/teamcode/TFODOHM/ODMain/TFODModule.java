@@ -136,16 +136,20 @@ public class TFODModule extends OpMode {
     public void loop() {
 
         scan();
+
         if (debug){
             telemetryStringCache = "Debug: ON";
             telemetryStringCache += "\nTotal Objects Recognized: " + (cLSCubeBall + cLSDuck + cLSMarker);
-            telemetryStringCache += "\nOR Breakdown: \n" + ("\tCubes & Balls" + cLSCubeBall + "\n") + ("\tDucks: " + cLSDuck + "\n") + ("\tMarkers: " + cLSMarker + "\n");
+            telemetryStringCache += "\nOR Breakdown: \n" + ("\tCubes & Balls: " + cLSCubeBall + "\n") + ("\tDucks: " + cLSDuck + "\n") + ("\tMarkers: " + cLSMarker + "\n");
+            telemetryStringCache += "\nCube & Ball List: \n" + bbCenterCubeBall.toString();
+            telemetryStringCache += "\nMarker List: \n" + bbCenterMarker.toString();
+            telemetryStringCache += "\nDuck List: \n" + bbCenterDuck.toString();
             telemetryStringCache += "\nCamera imgToLocal: \n" + camera.getImgToLocal().toString();
         } else {
             telemetryStringCache = "Debug: OFF";
         }
 
-        telemetry.addData("TFODModule Debugging: \n", "\t" + telemetryStringCache);
+        telemetry.addData("TFODModule Debugging: \n", telemetryStringCache);
     }
 
 

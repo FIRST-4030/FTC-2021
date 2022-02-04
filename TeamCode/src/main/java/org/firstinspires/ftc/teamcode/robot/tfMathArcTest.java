@@ -131,7 +131,7 @@ public class tfMathArcTest extends MultiOpModeManager {
 
         targetVector = new Vector2f(arrayX[5], arrayY[5]);
 
-        float[] f = TFMathExtension.makeArc(targetVector, version_control);
+        double[] f = TFMathExtension.makeArcV1(targetVector);
 
         r = f[0];
         arcLength = f[1];
@@ -143,9 +143,19 @@ public class tfMathArcTest extends MultiOpModeManager {
                 collectorArm.setPosition(COLLECTOR_UP);
                 if (drive.isDone() && !drive.isBusy()) {
                     waitTimer.reset();
+                    state = AUTO_STATE.TEST_REVERSE;
+                }
+                break;
+            case TEST_REVERSE:
+                drive.arcTo(-r, -arcLength, speedMin, speedMax);
+                //drive.combinedCurves(0, 10, speedMin, speedMax, 0, 10, speedMin, speedMax);
+                collectorArm.setPosition(COLLECTOR_UP);
+                if (drive.isDone() && !drive.isBusy()) {
+                    waitTimer.reset();
                     state = AUTO_STATE.DONE;
                 }
                 break;
+
             // Stop processing
             case DONE:
                 break;
@@ -182,6 +192,7 @@ public class tfMathArcTest extends MultiOpModeManager {
 
     enum AUTO_STATE implements OrderedEnum {
         TEST_MOVE,
+        TEST_REVERSE,
         DONE;
         public AUTO_STATE next() {
             return OrderedEnumHelper.next(this);
