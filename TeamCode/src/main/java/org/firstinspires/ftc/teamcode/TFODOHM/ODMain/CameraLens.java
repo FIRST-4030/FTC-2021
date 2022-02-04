@@ -158,4 +158,189 @@ public class CameraLens {
     public boolean isBusy() {
         return busy;
     }
+
+    public static class CameraLensAlt{
+
+        public enum LERP_SCHEMA{
+            TC_TL_C_L,
+            C_L_BC_BL,
+            TC_TR_C_R,
+            C_R_BC_BR
+        }
+
+        private Vector3f TL, TC, TR,
+                          L,  C,  R,
+                         BL, BC, BR;
+
+        private Vector3f topX1, topX2, botX1, botX2;
+
+        private LERP_SCHEMA schema;
+
+        public CameraLensAlt(){
+            initVector2fs();
+        }
+
+        public Vector3f calcImgToLocal(float imgX, float imgY){
+            Vector3f output = new Vector3f();
+            Vector3f topY = new Vector3f();
+            Vector3f botY = new Vector3f();
+
+            switch (this.schema){
+                case TC_TL_C_L:
+                case C_L_BC_BL:
+                    topY = TFMathExtension.lerp(topX1, topX2, -imgX);
+                    botY = TFMathExtension.lerp(botX1, botX2, -imgX);
+                    output = TFMathExtension.lerp(botY, topY, -imgY);
+                    break;
+                case TC_TR_C_R:
+                case C_R_BC_BR:
+                    topY = TFMathExtension.lerp(topX1, topX2, imgX);
+                    botY = TFMathExtension.lerp(botX1, botX2, imgX);
+                    output = TFMathExtension.lerp(botY, topY, imgY);
+                    break;
+            }
+
+            return output;
+        }
+
+        private void initVector2fs(){
+            //init top Vec2fs
+            TL = new Vector3f();
+            TC = new Vector3f();
+            TR = new Vector3f();
+
+            //init mid Vec2fs
+            L = new Vector3f();
+            C = new Vector3f();
+            R = new Vector3f();
+
+            //init bot Vec2fs
+            BL = new Vector3f();
+            BC = new Vector3f();
+            BR = new Vector3f();
+
+            //init lerp vectors
+            topX1 = new Vector3f();
+            topX2 = new Vector3f();
+            botX1 = new Vector3f();
+            botX2 = new Vector3f();
+        }
+
+        public void setSchema(LERP_SCHEMA newSchema){
+            this.schema = newSchema;
+            updateVectors();
+        }
+
+        public void updateVectors(){
+            switch (this.schema){
+                case C_R_BC_BR:
+                    topX1 = C;
+                    topX2 = R;
+                    botX1 = BC;
+                    botX2 = BR;
+                    break;
+
+                case TC_TR_C_R:
+                    topX1 = TC;
+                    topX2 = TR;
+                    botX1 = C;
+                    botX2 = R;
+                    break;
+
+                case C_L_BC_BL:
+                    topX1 = C;
+                    topX2 = L;
+                    botX1 = BC;
+                    botX2 = BL;
+                    break;
+                case TC_TL_C_L:
+                    topX1 = TC;
+                    topX2 = TL;
+                    botX1 = C;
+                    botX2 = L;
+                    break;
+            }
+        }
+
+        public Vector3f getTL() {
+            return TL;
+        }
+
+        public void setTL(Vector3f TL) {
+            this.TL = TL;
+            updateVectors();
+        }
+
+        public Vector3f getTC() {
+            return TC;
+        }
+
+        public void setTC(Vector3f TC) {
+            this.TC = TC;
+            updateVectors();
+        }
+
+        public Vector3f getTR() {
+            return TR;
+        }
+
+        public void setTR(Vector3f TR) {
+            this.TR = TR;
+            updateVectors();
+        }
+
+        public Vector3f getL() {
+            return L;
+        }
+
+        public void setL(Vector3f l) {
+            L = l;
+            updateVectors();
+        }
+
+        public Vector3f getC() {
+            return C;
+        }
+
+        public void setC(Vector3f c) {
+            C = c;
+            updateVectors();
+        }
+
+        public Vector3f getR() {
+            return R;
+        }
+
+        public void setR(Vector3f r) {
+            R = r;
+            updateVectors();
+        }
+
+        public Vector3f getBL() {
+            return BL;
+        }
+
+        public void setBL(Vector3f BL) {
+            this.BL = BL;
+            updateVectors();
+        }
+
+        public Vector3f getBC() {
+            return BC;
+        }
+
+        public void setBC(Vector3f BC) {
+            this.BC = BC;
+            updateVectors();
+        }
+
+        public Vector3f getBR() {
+            return BR;
+        }
+
+        public void setBR(Vector3f BR) {
+            this.BR = BR;
+            updateVectors();
+        }
+    }
 }
