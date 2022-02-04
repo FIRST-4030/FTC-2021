@@ -61,19 +61,19 @@ public class autoTest extends MultiOpModeManager {
     private final double TICKS_PER_INCH = 44.5;
     public static double speedMin = 0.1;
     public static double speedMax = 0.8;
-    public static double r1 = 36.9;
-    public static double arcLength1 = 26.5;
-    public static double r2wh = 9;
+    public static double r1 = 30;
+    public static double arcLength1 = 27.5;
+    public static double r2wh = 8;
     public static double arcLength2wh = 12;
-    public static double r2wh2 = 9;
-    public static double arcLength2wh2 = 20.2;
+    public static double r2wh2 = 8;
+    public static double arcLength2wh2 = 17.25;
     public static double r2wh3 = 0;
-    public static double arcLength2wh3 = 20;
+    public static double arcLength2wh3 = 22;
     public static double r2duck = 19;
     public static double arcLength2duck = 44;
     public static double r3wh = 0;
-    public static double arcLength3wh = 20;
-    public static double r3wh2 = 13;
+    public static double arcLength3wh = 22;
+    public static double r3wh2 = 12;
     public static double arcLength3wh2 = 16;
     public static double r3wh3 = 0;
     public static double arcLength3wh3 = 12;
@@ -323,6 +323,7 @@ public class autoTest extends MultiOpModeManager {
                         break;
                 }
             } else {
+                // Warehouse Side
                 switch (state) {
                     case ARC:
                         depositor.prep();
@@ -352,9 +353,9 @@ public class autoTest extends MultiOpModeManager {
                     case PARK:
                         if (redAlliance) {
                             drive.arcTo(r2wh, -arcLength2wh, -speedMin, -speedMax);
-                            } else {
+                        } else {
                             drive.arcTo(-r2wh, -arcLength2wh, -speedMin, -speedMax);
-                            }
+                        }
                         if (drive.isDone() && !drive.isBusy()) {
                             drive.setDoneFalse();
                             state = AUTO_STATE.PARK2;
@@ -363,9 +364,9 @@ public class autoTest extends MultiOpModeManager {
                     case PARK2:
                         if (redAlliance) {
                             drive.arcTo(-r2wh2, -arcLength2wh2, -speedMin, -speedMax);
-                            } else {
+                        } else {
                             drive.arcTo(r2wh2, -arcLength2wh2, -speedMin, -speedMax);
-                            }
+                        }
                         if (drive.isDone() && !drive.isBusy()) {
                             drive.setDoneFalse();
                             state = AUTO_STATE.PARK3;
@@ -374,9 +375,9 @@ public class autoTest extends MultiOpModeManager {
                     case PARK3:
                         if (redAlliance) {
                             drive.arcTo(r2wh3, -arcLength2wh3, -speedMin, -speedMax);
-                            } else {
+                        } else {
                             drive.arcTo(-r2wh3, -arcLength2wh3, -speedMin, -speedMax);
-                           }
+                        }
                         if (drive.isDone() && !drive.isBusy()) {
                             drive.setDoneFalse();
                             state = AUTO_STATE.COLLECT;
@@ -384,7 +385,7 @@ public class autoTest extends MultiOpModeManager {
                         break;
                     case COLLECT:
                         if (!startedCollecting) {
-                            //collectCmdState = collectCmd.BEFORE_COLLECT;
+                            collectCmdState = collectCmd.BEFORE_COLLECT;
                             ogPosL = drive.returnPosL();
                             ogPosR = drive.returnPosR();
                             //drive.slowReverse();
@@ -393,7 +394,7 @@ public class autoTest extends MultiOpModeManager {
                         if (!drive.isDone()) {
                             drive.arcTo(0, -collectDistance, -speedMin, -speedMax);
                         }
-                        if (drive.isDone() && !drive.isBusy()) {//collectCmdState == collectCmd.EJECT) {
+                        if (drive.isDone() && !drive.isBusy() && collectCmdState == collectCmd.EJECT) {
                             if (runTime.seconds() > 25) {
                                 depositor.reset();
                                 drive.setDoneFalse();
@@ -415,11 +416,10 @@ public class autoTest extends MultiOpModeManager {
                         depositor.prep();
                         if (redAlliance) {
                             drive.arcTo(-r3wh, collectDistance + arcLength3wh, speedMin, speedMax);
-                            } else {
+                        } else {
                             drive.arcTo(r3wh, collectDistance + arcLength3wh, speedMin, speedMax);
-                           }
-                        if (drive.isDone() && !drive.isBusy() && depositor.isDone()) {
-                            depositor.deposit();
+                        }
+                        if (drive.isDone() && !drive.isBusy()) {
                             drive.setDoneFalse();
                             state = AUTO_STATE.ADD12;
                         }
@@ -429,9 +429,8 @@ public class autoTest extends MultiOpModeManager {
                             drive.arcTo(-r3wh2, arcLength3wh2, speedMin, speedMax);
                         } else {
                             drive.arcTo(r3wh2, arcLength3wh2, speedMin, speedMax);
-                            }
-                        if (drive.isDone() && !drive.isBusy() && depositor.isDone()) {
-                            depositor.deposit();
+                        }
+                        if (drive.isDone() && !drive.isBusy()) {
                             drive.setDoneFalse();
                             state = AUTO_STATE.ADD13;
                         }
@@ -439,7 +438,7 @@ public class autoTest extends MultiOpModeManager {
                     case ADD13:
                         if (redAlliance) {
                             drive.arcTo(r3wh3, arcLength3wh3, speedMin, speedMax);
-                            } else {
+                        } else {
                             drive.arcTo(r3wh3, arcLength3wh3, speedMin, speedMax);
                         }
                         if (drive.isDone() && !drive.isBusy() && depositor.isDone()) {
@@ -457,22 +456,22 @@ public class autoTest extends MultiOpModeManager {
                         if (!drive.isDone()) {
                             if (redAlliance) {
                                 drive.arcTo(-r4wh, -arcLength4wh, -speedMin, -speedMax);
-                                } else {
+                            } else {
                                 drive.arcTo(r4wh, -arcLength4wh, -speedMin, -speedMax);
                             }
                         }
                         if (drive.isDone() && !drive.isBusy()) {
-                                drive.setDoneFalse();
-                                state = AUTO_STATE.COLLECT;
+                            drive.setDoneFalse();
+                            state = AUTO_STATE.COLLECT;
                         }
                         break;
                     case ADD22:
                         if (!drive.isDone()) {
                             if (redAlliance) {
-                                drive.arcTo( -r4wh2, -arcLength4wh2, -speedMin, -speedMax);
-                                } else {
+                                drive.arcTo(-r4wh2, -arcLength4wh2, -speedMin, -speedMax);
+                            } else {
                                 drive.arcTo(r4wh2, -arcLength4wh2, -speedMin, -speedMax);
-                                }
+                            }
                         }
                         if (drive.isDone() && !drive.isBusy()) {
                             drive.setDoneFalse();
@@ -483,9 +482,9 @@ public class autoTest extends MultiOpModeManager {
                         if (!drive.isDone()) {
                             if (redAlliance) {
                                 drive.arcTo(-r4wh3, -arcLength4wh3, -speedMin, -speedMax);
-                                } else {
+                            } else {
                                 drive.arcTo(r4wh3, -arcLength4wh3, -speedMin, -speedMax);
-                                }
+                            }
                         }
                         if (drive.isDone() && !drive.isBusy()) {
                             drive.setDoneFalse();

@@ -22,7 +22,7 @@ public class NewNewDrive extends OpMode {
     public static boolean DEBUG = false;
     private static final double MAX_VELOCITY = 40.0; // inches per second
     private final double TICKS_PER_INCH = 44.5;
-    public static double trackWidth = 15.25;
+    public static double trackWidth = 17.5;
     public static double trackWidthHalf = trackWidth / 2.0;
     public static double firstRampPoint = -0.025;
     public static double secondRampPoint = 0.5;
@@ -54,6 +54,7 @@ public class NewNewDrive extends OpMode {
     BNO055IMU imu;
     Orientation lastAngles = new Orientation();
     public static double globalAngle, correction;
+    public static double gain = 0.03;
 
     // Standard methods
     @Override
@@ -353,11 +354,8 @@ public class NewNewDrive extends OpMode {
                 driveLeft.setPower((leftTicks / midTicks) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
                 driveRight.setPower((rightTicks / midTicks) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
             }
-            done = speedCurveL.isClamped() && speedCurveR.isClamped();
+            done = speedCurveL.isClamped() || speedCurveR.isClamped();
         }
-
-        double accelLeft = Math.abs(speedMax - speedMin) / (secondRampPoint * (leftTicks / TICKS_PER_INCH));
-        double accelRight = Math.abs(speedMax - speedMin) / (secondRampPoint * (rightTicks / TICKS_PER_INCH));
 
         speedMin = Math.max(-1, speedMin);
         speedMin = Math.min(1, speedMin);
@@ -367,8 +365,8 @@ public class NewNewDrive extends OpMode {
         if (!started) {
             // initialize speedCurve to have motor ticks be the X coordinate and motor speed be the Y coordinate
             // Ramp-and-hold
-            rampAndHold(speedCurveL, (int) leftTicks, driveLeft.getCurrentPosition(), speedMin, speedMax);
-            rampAndHold(speedCurveR, (int) rightTicks, driveRight.getCurrentPosition(), speedMin, speedMax);
+            rampAndHold2(speedCurveL, (int) leftTicks, driveLeft.getCurrentPosition(), speedMin, speedMax, ((leftTicks / midTicks) / maxRatio));
+            rampAndHold2(speedCurveR, (int) rightTicks, driveRight.getCurrentPosition(), speedMin, speedMax, ((rightTicks / midTicks) / maxRatio));
 
             ogPosL = driveLeft.getCurrentPosition();
             ogPosR = driveRight.getCurrentPosition();
@@ -384,18 +382,16 @@ public class NewNewDrive extends OpMode {
             speedCurveR.reset();
         }
 
-        telemetry.log().add(getClass().getSimpleName() + "::arcTo(): Motors in use");
+        //telemetry.log().add(getClass().getSimpleName() + "::arcTo(): Motors in use");
         telemetry.addData("left ticks", driveLeft.getCurrentPosition());
         telemetry.addData("right ticks", driveRight.getCurrentPosition());
         telemetry.addData("leftVel", driveLeft.getPower());
         telemetry.addData("rightVel", driveRight.getPower());
-        telemetry.addData("AccelLeft", accelLeft);
-        telemetry.addData("AccelRight", accelRight);
         logData("arcTo()", started + "," + done + "," +
                 speedCurveL.isValid() + "," + speedCurveL.getSize() + "," +
                 speedCurveR.isValid() + "," + speedCurveR.getSize() + "," +
                 arcLengthL + "," + arcLengthR + "," +
-                leftTicks + "," + rightTicks + "," + midTicks + "," + maxRatio + "," + accelLeft + "," + accelRight);
+                leftTicks + "," + rightTicks + "," + midTicks + "," + maxRatio);
     }
 
     public void combinedCurves(double r1, double arcLength1, double r2, double arcLength2, double speedMin, double speedMax) {
@@ -760,6 +756,45 @@ public class NewNewDrive extends OpMode {
         pfunc.setClampLimits(true);
     }
 
+    private void rampAndHold2(
+            PiecewiseFunction pfunc,
+            int pathTicks, int currentTicks,
+            double speedMin, double speedMax, double treadSpeedMax) {
+        // How many ticks does it take to ramp up/down between speedMin and speedMax
+        // Higher values correlate with longer ramp times and smaller acceleration
+        // Usually experiment and measurement can determine an approximate value
+        double rampUpTicks = rampMaxTicks * Math.abs(speedMax - speedMin) * Math.abs(treadSpeedMax);
+        double rampDownTicks = rampMaxTicks * Math.abs(speedMax - speedMin) * Math.abs(treadSpeedMax);
+
+        rampUpTicks *= Math.signum(pathTicks);
+        rampDownTicks *= Math.signum(pathTicks);
+
+        if (Math.abs(rampUpTicks + rampDownTicks) >= Math.abs(pathTicks)) {
+            // Path is shorter than the ramp up/down intervals
+            // 3 ramp points at 0%, 50% and 100%
+            pfunc.addElement(currentTicks - 0.01 * pathTicks, speedMin);
+            pfunc.addElement(currentTicks + (pathTicks / 2.0), speedMax);
+            pfunc.addElement(currentTicks + pathTicks, speedMin);
+        } else {
+            // Path is long enough to ramp to full speed
+            // 4 ramp points at 0%, rampUpTicks, 100% - rampDownTicks, and 100%
+            pfunc.addElement(currentTicks - 0.01 * pathTicks, speedMin);
+            pfunc.addElement(currentTicks + rampUpTicks, speedMax);
+            pfunc.addElement(currentTicks + pathTicks - rampDownTicks, speedMax);
+            pfunc.addElement(currentTicks + pathTicks, speedMin);
+        }
+
+        boolean left = false;
+        if (pfunc.equals(speedCurveL)) {
+            left = true;
+        } else if (pfunc.equals(speedCurveR)) {
+            left = false;
+        }
+        telemetry.log().add("rampAndHold2: " + (left ? "L" : "R") + "," + pathTicks + "," + rampUpTicks);
+        // Enable first/last element clamping in case the encoder values drift outside the model
+        pfunc.setClampLimits(true);
+    }
+
     public double leftPos() {
         return (driveLeft.getCurrentPosition() / TICKS_PER_INCH);
     }
@@ -857,17 +892,17 @@ public class NewNewDrive extends OpMode {
         // The gain value determines how sensitive the correction is to direction changes.
         // You will have to experiment with your robot to get small smooth direction changes
         // to stay on a straight line.
-        double correction, angle, gain = .03;
+        double difference, angle;
 
         angle = getAngle();
 
         if (angle == 0)
-            correction = 0;             // no adjustment.
+            difference = 0;             // no adjustment.
         else
-            correction = -angle;        // reverse sign of angle for correction.
+            difference = -angle;        // reverse sign of angle for correction.
 
-        correction = correction * gain;
+        difference = difference * gain;
 
-        return correction;
+        return difference;
     }
 }

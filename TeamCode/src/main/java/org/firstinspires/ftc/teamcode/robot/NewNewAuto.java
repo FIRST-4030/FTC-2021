@@ -62,8 +62,8 @@ public class NewNewAuto extends MultiOpModeManager {
     private final double TICKS_PER_INCH = 44.5;
     public static double speedMin = 0.1;
     public static double speedMax = 0.8;
-    public static double r1 = 36.9;
-    public static double arcLength1 = 26.5;
+    public static double r1 = 30;
+    public static double arcLength1 = 27.5;
     public static double r2wh = 9;
     public static double arcLength2wh = 12;
     public static double r2wh2 = 9;
@@ -323,6 +323,7 @@ public class NewNewAuto extends MultiOpModeManager {
                         break;
                 }
             } else {
+                // Warehouse Side
                 switch (state) {
                     case ARC:
                         depositor.prep();
