@@ -77,6 +77,9 @@ public class TFODModule extends OpMode {
 
         camera.setTranslation(new Vector3f(4.1f, 16.2f, -7.2f));
         camera.setRotation(lensRot);
+
+        telemetry.addData("Vuforia Class Null? ", vuforia == null ? "Yes" : "No");
+        telemetry.addData("TF Class Null? ", tfod == null ? "Yes" : "No");
     }
 
     /**
