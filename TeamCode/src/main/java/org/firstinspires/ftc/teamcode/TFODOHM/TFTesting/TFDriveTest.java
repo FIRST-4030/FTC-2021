@@ -46,7 +46,14 @@ public class TFDriveTest extends OpMode {
         telemetry.addData("TFOD Null? ", tfodModule == null ? "Yes" : "No");
         telemetry.addData("TFObjectDetection Null? ", tfodModule.getTfod() == null ? "Yes" : "No");
         telemetry.addData("Vuforia Null? ", tfodModule.getVuforia() == null ? "Yes" : "No");
-
+        if (tfodModule != null){
+            if (tfodModule.getVuforia() == null){
+                tfodModule.initVuforia();
+            }
+            if (tfodModule.getTfod() == null && tfodModule.getVuforia() != null){
+                tfodModule.initTensorFlow();
+            }
+        }
     }
 
     @Override

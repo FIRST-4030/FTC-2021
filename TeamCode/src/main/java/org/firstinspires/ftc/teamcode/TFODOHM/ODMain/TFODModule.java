@@ -138,9 +138,9 @@ public class TFODModule extends OpMode {
 
     @Override
     public void loop() {
-        //scan();
+        scan();
+        updateVar();
         logData();
-
     }
 
     public void logData(){
@@ -187,46 +187,45 @@ public class TFODModule extends OpMode {
      */
     public void scan(){
         busy = true;
+        String currentLabel;
+        Vector2f center = new Vector2f(), tLeft = new Vector2f(), bRight = new Vector2f();
+
         if (tfod != null) {
-            String currentLabel;
-            Vector2f center = new Vector2f(), tLeft = new Vector2f(), bRight = new Vector2f();
+            bbCenterCubeBall.clear(); //clear
+            bbCenterDuck.clear();
+            bbCenterMarker.clear();
 
-            if (tfod != null) {
-                bbCenterCubeBall.clear(); //clear
-                bbCenterDuck.clear();
-                bbCenterMarker.clear();
+            tfodRecognitions = tfod.getRecognitions();
+            tLS = tfodRecognitions.size();
+            for (Recognition recognition : tfodRecognitions) {
+                currentLabel = recognition.getLabel().toUpperCase();
 
-                tfodRecognitions = tfod.getRecognitions();
-                tLS = tfodRecognitions.size();
-                for (Recognition recognition : tfodRecognitions) {
-                    currentLabel = recognition.getLabel().toUpperCase();
+                tLeft.setX(recognition.getLeft());
+                tLeft.setY(recognition.getTop());
 
-                    tLeft.setX(recognition.getLeft());
-                    tLeft.setY(recognition.getTop());
+                bRight.setX(recognition.getRight());
+                bRight.setY(recognition.getBottom());
 
-                    bRight.setX(recognition.getRight());
-                    bRight.setY(recognition.getBottom());
+                center.setX(((tLeft.getX() + bRight.getX()) / 2) / (0.5f * imgWidth) - 1);
+                center.setY(((tLeft.getY() + bRight.getY()) / 2) / (0.5f * imgHeight) - 1);
 
-                    center.setX(((tLeft.getX() + bRight.getX()) / 2) / (0.5f * imgWidth) - 1);
-                    center.setY(((tLeft.getY() + bRight.getY()) / 2) / (0.5f * imgHeight) - 1);
-
-                    switch (currentLabel) {
-                        case "Ball":
-                        case "Cube":
-                            bbCenterCubeBall.add(center);
-                            break;
-                        case "Duck":
-                            bbCenterDuck.add(center);
-                            break;
-                        case "Marker":
-                            bbCenterMarker.add(center);
-                            break;
-                        default:
-                            break;
-                    }
+                switch (currentLabel) {
+                    case "BALL":
+                    case "CUBE":
+                        bbCenterCubeBall.add(center);
+                        break;
+                    case "DUCK":
+                        bbCenterDuck.add(center);
+                        break;
+                    case "MARKER":
+                        bbCenterMarker.add(center);
+                        break;
+                    default:
+                        break;
                 }
             }
         }
+
         busy = false;
     }
 
