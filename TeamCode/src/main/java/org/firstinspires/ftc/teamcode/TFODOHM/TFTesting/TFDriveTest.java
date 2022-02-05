@@ -38,7 +38,7 @@ public class TFDriveTest extends MultiOpModeManager {
         } catch (Exception e ){
             telemetry.log().add(drive.getClass().getSimpleName() + " is not initializing.");
         }
-
+        telemetry.log().add("Initialized!");
         super.init();
     }
 
@@ -49,8 +49,11 @@ public class TFDriveTest extends MultiOpModeManager {
 
     @Override
     public void start() {
-
+        super.start();
+        drive.setDoneFalse();
+        state = AUTO_STATE.VERIFICATION;
     }
+
     private boolean scanned = false, sorted = false, calculated = false, startedMove = false, reversingMove = false;
     private Vector2f tempV2, target;
     private Vector3f targetPreCasted;
@@ -118,6 +121,7 @@ public class TFDriveTest extends MultiOpModeManager {
             case DONE:
                 break;
         }
+        telemetry.addData("Current State: ", state);
     }
 
     @Override

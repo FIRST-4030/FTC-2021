@@ -134,9 +134,11 @@ public class TFODModule extends OpMode {
 
     @Override
     public void loop() {
+        //scan();
+        logData();
+    }
 
-        scan();
-
+    public void logData(){
         if (debug){
             telemetryStringCache = "Debug: ON";
             telemetryStringCache += "\nTotal Objects Recognized: " + (cLSCubeBall + cLSDuck + cLSMarker);
@@ -148,10 +150,8 @@ public class TFODModule extends OpMode {
         } else {
             telemetryStringCache = "Debug: OFF";
         }
-
         telemetry.addData("TFODModule Debugging: \n", telemetryStringCache);
     }
-
 
 
 
