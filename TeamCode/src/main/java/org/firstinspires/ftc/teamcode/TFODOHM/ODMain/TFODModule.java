@@ -371,4 +371,8 @@ public class TFODModule extends OpMode {
     public boolean isBusy(){
         return busy;
     }
+
+    public TFObjectDetector getTfod(){
+        return tfod;
+    }
 }

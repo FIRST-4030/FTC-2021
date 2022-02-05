@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.TFODOHM.TFTesting;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.TFODOHM.ODMain.TFODModule;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.TFMathExtension;
@@ -13,9 +14,11 @@ import org.firstinspires.ftc.teamcode.robot.tfMathArcTest;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
+import kotlin.jvm.internal.Reflection;
+
 @Config
 @Autonomous(name = "TFDrive", group = "Test")
-public class TFDriveTest extends MultiOpModeManager {
+public class TFDriveTest extends OpMode {
 
 
     private TFODModule tfodModule;
@@ -27,19 +30,22 @@ public class TFDriveTest extends MultiOpModeManager {
     public void init() {
         try {
             tfodModule = new TFODModule();
-            super.register(tfodModule);
+            tfodModule.init();
         } catch (Exception e ){
             telemetry.log().add(tfodModule.getClass().getSimpleName() + " is not initializing.");
         }
 
         try {
             drive = new NewNewDrive();
-            super.register(drive);
+            drive.init();
         } catch (Exception e ){
             telemetry.log().add(drive.getClass().getSimpleName() + " is not initializing.");
         }
-        telemetry.log().add("Initialized!");
-        super.init();
+
+        tfodModule.init();
+
+        telemetry.addData("TFOD Null? ", tfodModule == null ? "Yes" : "No");
+        telemetry.addData("Initialized!", "!");
     }
 
     @Override
@@ -71,6 +77,7 @@ public class TFDriveTest extends MultiOpModeManager {
                     state = AUTO_STATE.SCAN;
                 }
                 break;
+
             case SCAN: //scan for objects
                 if (!tfodModule.isBusy() && (scanned == false)) {
                     tfodModule.scan();
@@ -82,11 +89,13 @@ public class TFDriveTest extends MultiOpModeManager {
                 }
                 if (!tfodModule.isBusy() && (calculated == false)){
                     targetPreCasted = tfodModule.calcCoordinate(tempV2);
+                    calculated = true;
                 }
                 if (!tfodModule.isBusy() && (scanned && sorted && calculated)){
                     state = AUTO_STATE.RESET_VAR;
                 }
                 break;
+
             case RESET_VAR: //reset all variables used to check stuff in the previous case
                 scanned = false;
                 sorted = false;
@@ -98,6 +107,7 @@ public class TFDriveTest extends MultiOpModeManager {
                 inIMG = false;
                 state = AUTO_STATE.START_MOVE;
                 break;
+
             case START_MOVE:
                 if (startedMove == false){
                     startedMove = true;
@@ -108,26 +118,35 @@ public class TFDriveTest extends MultiOpModeManager {
                     state = AUTO_STATE.REVERSE_MOVE;
                 }
                 break;
+
             case REVERSE_MOVE:
                 if (reversingMove = false){
                     reversingMove = true;
                     drive.arcTo(-storedRadius, -storedArcLength, speedMin, speedMax);
                 }
-                if (reversingMove == true && (!drive.isBusy() && drive.isDone())){
+                if (reversingMove && (!drive.isBusy() && drive.isDone())){
                     reversingMove = false;
                     state = AUTO_STATE.VERIFICATION;
                 }
                 break;
+
             case DONE:
                 break;
         }
         telemetry.addData("Current State: ", state);
+        telemetry.addData("Calculated Vector: ", target);
+        telemetry.addData("Scanned: ", scanned);
+        telemetry.addData("Sorted: ", sorted);
+        telemetry.addData("Calculated: ", calculated);
+        telemetry.addData("StartedMove: ", startedMove);
+        telemetry.addData("ReversingMove: ", reversingMove);
     }
 
     @Override
     public void stop() {
+        tfodModule.stop();
+        drive.stop();
         state = AUTO_STATE.DONE;
-        super.stop();
     }
 
     enum AUTO_STATE implements OrderedEnum {
