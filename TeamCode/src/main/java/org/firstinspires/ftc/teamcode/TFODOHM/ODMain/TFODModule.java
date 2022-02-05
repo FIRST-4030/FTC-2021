@@ -162,6 +162,19 @@ public class TFODModule extends OpMode {
     }
 
     /**
+     * This method verifies that an object is in the img so we prevent null pointers
+     * @return true = object(s) are in view; false = object(s) not in view
+     */
+    public boolean verifyImg(){
+        List<Recognition> temp = tfod.getRecognitions();
+        if (temp.size() > 0){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Gets the camera feed, use TF to recognize, and update variables
      */
     public void scan(){

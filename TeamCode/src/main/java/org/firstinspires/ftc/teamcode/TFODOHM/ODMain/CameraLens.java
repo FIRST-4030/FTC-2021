@@ -196,7 +196,7 @@ public class CameraLens {
                 case C_R_BC_BR:
                     topY = TFMathExtension.lerp(topX1, topX2, imgX);
                     botY = TFMathExtension.lerp(botX1, botX2, imgX);
-                    output = TFMathExtension.lerp(botY, topY, imgY);
+                    output = TFMathExtension.lerp(topY, botY, imgY);
                     break;
             }
 

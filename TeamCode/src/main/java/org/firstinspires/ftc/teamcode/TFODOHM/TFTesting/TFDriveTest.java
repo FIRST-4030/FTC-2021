@@ -20,6 +20,18 @@ public class TFDriveTest extends MultiOpModeManager {
 
     @Override
     public void init() {
+        try {
+            super.register(tfodModule);
+        } catch (Exception e ){
+            telemetry.log().add(tfodModule.getClass().getSimpleName() + " is not initializing.");
+        }
+
+        try {
+            super.register(drive);
+        } catch (Exception e ){
+            telemetry.log().add(drive.getClass().getSimpleName() + " is not initializing.");
+        }
+
         super.init();
     }
 
@@ -32,13 +44,23 @@ public class TFDriveTest extends MultiOpModeManager {
     public void start() {
 
     }
-    private boolean scanned = false, sorted = false, calculated = false;
+    private boolean scanned = false, sorted = false, calculated = false, startedMove = false, reversingMove = false;
     private Vector2f tempV2, target;
     private Vector3f targetPreCasted;
     private double storedRadius, storedArcLength;
+    private boolean inIMG = false;
+
+    public static double speedMin = 0.1;
+    public static double speedMax = 0.5;
     @Override
     public void loop() {
         switch (state){
+            case VERIFICATION:
+                inIMG = tfodModule.verifyImg();
+                if (inIMG == true){
+                    state = AUTO_STATE.SCAN;
+                }
+                break;
             case SCAN: //scan for objects
                 if (!tfodModule.isBusy() && (scanned == false)) {
                     tfodModule.scan();
@@ -63,12 +85,28 @@ public class TFDriveTest extends MultiOpModeManager {
                 double[] f = TFMathExtension.makeArcV1(target);
                 storedRadius = f[0];
                 storedArcLength = f[1];
+                inIMG = false;
                 state = AUTO_STATE.START_MOVE;
                 break;
             case START_MOVE:
-
+                if (startedMove == false){
+                    startedMove = true;
+                    drive.arcTo(storedRadius, storedArcLength, speedMin, speedMax);
+                }
+                if (startedMove == true && (!drive.isBusy() && drive.isDone())){
+                    startedMove = false;
+                    state = AUTO_STATE.REVERSE_MOVE;
+                }
                 break;
             case REVERSE_MOVE:
+                if (reversingMove = false){
+                    reversingMove = true;
+                    drive.arcTo(-storedRadius, -storedArcLength, speedMin, speedMax);
+                }
+                if (reversingMove == true && (!drive.isBusy() && drive.isDone())){
+                    reversingMove = false;
+                    state = AUTO_STATE.VERIFICATION;
+                }
                 break;
             case DONE:
                 break;
@@ -82,6 +120,7 @@ public class TFDriveTest extends MultiOpModeManager {
     }
 
     enum AUTO_STATE implements OrderedEnum {
+        VERIFICATION,
         SCAN,
         RESET_VAR,
         START_MOVE,
