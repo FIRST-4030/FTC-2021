@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.android.util.Size;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -121,6 +122,9 @@ public class TFODModule extends OpMode {
      * This method force updates the variables
      */
     public void updateVar(){
+        Size c = vuforia.getCameraCalibration().getSize();
+        imgWidth = c.getWidth();
+        imgHeight = c.getHeight();
         cLSCubeBall = bbCenterCubeBall.size();
         cLSDuck = bbCenterDuck.size();
         cLSMarker = bbCenterMarker.size();
