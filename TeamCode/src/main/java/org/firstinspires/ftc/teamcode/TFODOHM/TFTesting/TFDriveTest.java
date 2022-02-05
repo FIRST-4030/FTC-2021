@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.TFODOHM.TFTesting;
 
+import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
 import org.firstinspires.ftc.teamcode.TFODOHM.ODMain.TFODModule;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.TFMathExtension;
 import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector2f;
@@ -10,6 +13,8 @@ import org.firstinspires.ftc.teamcode.robot.tfMathArcTest;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
+@Config
+@Autonomous(name = "TFDrive", group = "Test")
 public class TFDriveTest extends MultiOpModeManager {
 
 
