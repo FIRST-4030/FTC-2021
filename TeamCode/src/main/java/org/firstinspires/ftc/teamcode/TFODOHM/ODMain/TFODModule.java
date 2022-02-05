@@ -45,6 +45,7 @@ public class TFODModule extends OpMode {
     private ArrayList<Vector2f> bbCenterCubeBall = new ArrayList<>();
     private ArrayList<Vector2f> bbCenterDuck = new ArrayList<>();
     private ArrayList<Vector2f> bbCenterMarker = new ArrayList<>();
+    private Vector2f error_vector = new Vector2f(5,5);
     private int cLSCubeBall = 0, cLSDuck = 0, cLSMarker = 0, tLS = 0;
     private String telemetryStringCache = "";
     private CameraLens camera = new CameraLens(CameraLens.C270_FOV);
@@ -139,6 +140,7 @@ public class TFODModule extends OpMode {
     public void loop() {
         //scan();
         logData();
+
     }
 
     public void logData(){
@@ -169,12 +171,15 @@ public class TFODModule extends OpMode {
      * @return true = object(s) are in view; false = object(s) not in view
      */
     public boolean verifyImg(){
-        List<Recognition> temp = tfod.getRecognitions();
-        if (temp.size() > 0){
-            return true;
-        } else {
-            return false;
+        if (tfod != null) {
+            List<Recognition> temp = tfod.getRecognitions();
+            if (temp.size() > 0) {
+                return true;
+            } else {
+                return false;
+            }
         }
+        return false;
     }
 
     /**
@@ -182,45 +187,46 @@ public class TFODModule extends OpMode {
      */
     public void scan(){
         busy = true;
-        String currentLabel;
-        Vector2f center = new Vector2f(), tLeft = new Vector2f(), bRight = new Vector2f();
+        if (tfod != null) {
+            String currentLabel;
+            Vector2f center = new Vector2f(), tLeft = new Vector2f(), bRight = new Vector2f();
 
-        if (tfod != null){
-            bbCenterCubeBall.clear(); //clear
-            bbCenterDuck.clear();
-            bbCenterMarker.clear();
+            if (tfod != null) {
+                bbCenterCubeBall.clear(); //clear
+                bbCenterDuck.clear();
+                bbCenterMarker.clear();
 
-            tfodRecognitions = tfod.getRecognitions();
-            tLS = tfodRecognitions.size();
-            for (Recognition recognition : tfodRecognitions){
-                currentLabel = recognition.getLabel().toUpperCase();
+                tfodRecognitions = tfod.getRecognitions();
+                tLS = tfodRecognitions.size();
+                for (Recognition recognition : tfodRecognitions) {
+                    currentLabel = recognition.getLabel().toUpperCase();
 
-                tLeft.setX(recognition.getLeft());
-                tLeft.setY(recognition.getTop());
+                    tLeft.setX(recognition.getLeft());
+                    tLeft.setY(recognition.getTop());
 
-                bRight.setX(recognition.getRight());
-                bRight.setY(recognition.getBottom());
+                    bRight.setX(recognition.getRight());
+                    bRight.setY(recognition.getBottom());
 
-                center.setX( ((tLeft.getX() + bRight.getX())/2) / (0.5f * imgWidth) - 1);
-                center.setY( ((tLeft.getY() + bRight.getY())/2) / (0.5f * imgHeight) - 1);
+                    center.setX(((tLeft.getX() + bRight.getX()) / 2) / (0.5f * imgWidth) - 1);
+                    center.setY(((tLeft.getY() + bRight.getY()) / 2) / (0.5f * imgHeight) - 1);
 
-                switch (currentLabel){
-                    case "Ball":
-                    case "Cube":
-                        bbCenterCubeBall.add(center);
-                        break;
-                    case "Duck":
-                        bbCenterDuck.add(center);
-                        break;
-                    case "Marker":
-                        bbCenterMarker.add(center);
-                        break;
-                    default:
-                        break;
+                    switch (currentLabel) {
+                        case "Ball":
+                        case "Cube":
+                            bbCenterCubeBall.add(center);
+                            break;
+                        case "Duck":
+                            bbCenterDuck.add(center);
+                            break;
+                        case "Marker":
+                            bbCenterMarker.add(center);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
-
         busy = false;
     }
 
@@ -229,27 +235,30 @@ public class TFODModule extends OpMode {
      * @return Vector2f bbCoordinate
      */
     public Vector2f sortCBBB(){
-        busy = true;
-        int storedIndex = 0;
-        float currentLen;
-        float cachedLen = 100;
+        if (tfod != null) {
+            busy = true;
+            int storedIndex = 0;
+            float currentLen;
+            float cachedLen = 100;
 
-        if (cLSCubeBall > 0){
+            if (cLSCubeBall > 0) {
 
-            for (int i = 0; i < cLSCubeBall; i++){
+                for (int i = 0; i < cLSCubeBall; i++) {
 
-                currentLen = bbCenterCubeBall.get(i).length();
+                    currentLen = bbCenterCubeBall.get(i).length();
 
-                if (currentLen <= cachedLen){
-                    cachedLen = currentLen;
-                    storedIndex = i;
+                    if (currentLen <= cachedLen) {
+                        cachedLen = currentLen;
+                        storedIndex = i;
+                    }
                 }
+                busy = false;
+                return bbCenterCubeBall.get(storedIndex);
             }
             busy = false;
-            return bbCenterCubeBall.get(storedIndex);
+            return error_vector;
         }
-        busy = false;
-        return new Vector2f(5, 5);
+        return error_vector;
     }
 
     /**
@@ -257,27 +266,30 @@ public class TFODModule extends OpMode {
      * @return Vector2f bbCoordinate
      */
     public Vector2f sortDBB(){
-        busy = true;
-        int storedIndex = 0;
-        float currentLen;
-        float cachedLen = 100;
+        if (tfod != null) {
+            busy = true;
+            int storedIndex = 0;
+            float currentLen;
+            float cachedLen = 100;
 
-        if (cLSDuck > 0){
+            if (cLSDuck > 0) {
 
-            for (int i = 0; i < cLSDuck; i++){
+                for (int i = 0; i < cLSDuck; i++) {
 
-                currentLen = bbCenterDuck.get(i).length();
+                    currentLen = bbCenterDuck.get(i).length();
 
-                if (currentLen <= cachedLen){
-                    cachedLen = currentLen;
-                    storedIndex = i;
+                    if (currentLen <= cachedLen) {
+                        cachedLen = currentLen;
+                        storedIndex = i;
+                    }
                 }
+                busy = false;
+                return bbCenterDuck.get(storedIndex);
             }
             busy = false;
-            return bbCenterDuck.get(storedIndex);
+            return error_vector;
         }
-        busy = false;
-        return new Vector2f(5, 5);
+        return error_vector;
     }
 
     /**
@@ -285,27 +297,30 @@ public class TFODModule extends OpMode {
      * @return Vector2f bbCoordinate
      */
     public Vector2f sortMBB(){
-        busy = true;
-        int storedIndex = 0;
-        float currentLen;
-        float cachedLen = 100;
+        if (tfod != null) {
+            busy = true;
+            int storedIndex = 0;
+            float currentLen;
+            float cachedLen = 100;
 
-        if (cLSMarker > 0){
+            if (cLSMarker > 0) {
 
-            for (int i = 0; i < cLSMarker; i++){
+                for (int i = 0; i < cLSMarker; i++) {
 
-                currentLen = bbCenterMarker.get(i).length();
+                    currentLen = bbCenterMarker.get(i).length();
 
-                if (currentLen <= cachedLen){
-                    cachedLen = currentLen;
-                    storedIndex = i;
+                    if (currentLen <= cachedLen) {
+                        cachedLen = currentLen;
+                        storedIndex = i;
+                    }
                 }
+                busy = false;
+                return bbCenterMarker.get(storedIndex);
             }
             busy = false;
-            return bbCenterMarker.get(storedIndex);
+            return error_vector;
         }
-        busy = false;
-        return new Vector2f(5, 5);
+        return error_vector;
     }
 
 
@@ -316,46 +331,49 @@ public class TFODModule extends OpMode {
      * @return
      */
     public Vector2f sortBB(int state){
-        busy = true;
-        int cLS;
-        ArrayList<Vector2f> bbCenterList;
+        if (tfod != null) {
+            busy = true;
+            int cLS;
+            ArrayList<Vector2f> bbCenterList;
 
-        switch (state){
-            default:
-            case 1:
-                cLS = cLSCubeBall;
-                bbCenterList = bbCenterCubeBall;
-                break;
-            case 2:
-                cLS = cLSDuck;
-                bbCenterList = bbCenterDuck;
-                break;
-            case 3:
-                cLS = cLSMarker;
-                bbCenterList = bbCenterMarker;
-                break;
-        }
+            switch (state) {
+                default:
+                case 1:
+                    cLS = cLSCubeBall;
+                    bbCenterList = bbCenterCubeBall;
+                    break;
+                case 2:
+                    cLS = cLSDuck;
+                    bbCenterList = bbCenterDuck;
+                    break;
+                case 3:
+                    cLS = cLSMarker;
+                    bbCenterList = bbCenterMarker;
+                    break;
+            }
 
-        int storedIndex = 0;
-        float cachedLen = 100;
-        float currentLen;
+            int storedIndex = 0;
+            float cachedLen = 100;
+            float currentLen;
 
-        if (cLS > 0){
+            if (cLS > 0) {
 
-            for (int i = 0; i < cLS; i++){
+                for (int i = 0; i < cLS; i++) {
 
-                currentLen = bbCenterList.get(i).length();
+                    currentLen = bbCenterList.get(i).length();
 
-                if (currentLen <= cachedLen){
-                    cachedLen = currentLen;
-                    storedIndex = i;
+                    if (currentLen <= cachedLen) {
+                        cachedLen = currentLen;
+                        storedIndex = i;
+                    }
                 }
+                busy = false;
+                return bbCenterList.get(storedIndex);
             }
             busy = false;
-            return bbCenterList.get(storedIndex);
+            return error_vector;
         }
-        busy = false;
-        return new Vector2f(5, 5);
+        return error_vector;
     }
 
     /**
@@ -364,7 +382,10 @@ public class TFODModule extends OpMode {
      * @return
      */
     public Vector3f calcCoordinate(Vector2f bbCoordinate){
-        return camera.findImgToLocal(bbCoordinate);
+        if (bbCoordinate != error_vector) {
+            return camera.findImgToLocal(bbCoordinate);
+        }
+        return new Vector3f(0,0,0);
     }
 
     /**

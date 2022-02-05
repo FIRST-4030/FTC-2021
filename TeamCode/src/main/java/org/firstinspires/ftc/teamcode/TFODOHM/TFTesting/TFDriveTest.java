@@ -20,7 +20,6 @@ import kotlin.jvm.internal.Reflection;
 @Autonomous(name = "TFDrive", group = "Test")
 public class TFDriveTest extends OpMode {
 
-
     private TFODModule tfodModule;
     private NewNewDrive drive;
 
@@ -47,6 +46,7 @@ public class TFDriveTest extends OpMode {
         telemetry.addData("TFOD Null? ", tfodModule == null ? "Yes" : "No");
         telemetry.addData("TFObjectDetection Null? ", tfodModule.getTfod() == null ? "Yes" : "No");
         telemetry.addData("Vuforia Null? ", tfodModule.getVuforia() == null ? "Yes" : "No");
+
     }
 
     @Override
