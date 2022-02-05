@@ -45,7 +45,8 @@ public class TFDriveTest extends OpMode {
         tfodModule.init();
 
         telemetry.addData("TFOD Null? ", tfodModule == null ? "Yes" : "No");
-        telemetry.addData("Initialized!", "!");
+        telemetry.addData("TFObjectDetection Null? ", tfodModule.getTfod() == null ? "Yes" : "No");
+        telemetry.addData("Vuforia Null? ", tfodModule.getVuforia() == null ? "Yes" : "No");
     }
 
     @Override
@@ -100,6 +101,8 @@ public class TFDriveTest extends OpMode {
                 scanned = false;
                 sorted = false;
                 calculated = false;
+                startedMove = false;
+                reversingMove = false;
                 target = new Vector2f(targetPreCasted.getX(), targetPreCasted.getZ());
                 double[] f = TFMathExtension.makeArcV1(target);
                 storedRadius = f[0];

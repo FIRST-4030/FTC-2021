@@ -78,8 +78,8 @@ public class TFODModule extends OpMode {
         camera.setTranslation(new Vector3f(4.1f, 16.2f, -7.2f));
         camera.setRotation(lensRot);
 
-        telemetry.addData("Vuforia Class Null? ", vuforia == null ? "Yes" : "No");
-        telemetry.addData("TF Class Null? ", tfod == null ? "Yes" : "No");
+        telemetry.log().add("Vuforia Class Null? "+ vuforia == null ? "Yes" : "No");
+        telemetry.log().add("TF Class Null? "+ tfod == null ? "Yes" : "No");
     }
 
     /**
@@ -377,5 +377,13 @@ public class TFODModule extends OpMode {
 
     public TFObjectDetector getTfod(){
         return tfod;
+    }
+
+    public VuforiaLocalizer getVuforia(){
+        return vuforia;
+    }
+
+    public String getData(){
+        return telemetryStringCache;
     }
 }
