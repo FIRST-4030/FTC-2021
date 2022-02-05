@@ -58,12 +58,6 @@ public class TFODModule extends OpMode {
 
     @Override
     public void init() {
-        try {
-            initParameters();
-        } catch (Exception e){
-            telemetry.log().add("Parameters Cannot Initialize!");
-        }
-
         try{
             initVuforia();
         } catch (Exception e) {
@@ -95,7 +89,15 @@ public class TFODModule extends OpMode {
      * <p>This method inits: minResultConfidence; ModelTensorFlow2; inputSize;
      */
     public void initTensorFlow(){
-        tfod = ClassFactory.getInstance().createTFObjectDetector(tfParameters, vuforia);
+        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        TFObjectDetector.Parameters tfParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+        tfParameters.minResultConfidence = 0.69f;
+        tfParameters.isModelTensorFlow2 = true;
+        tfParameters.useObjectTracker = true;
+        tfParameters.inputSize = 320;
+        tfParameters.maxFrameRate = 30;
+        tfod = ClassFactory.getInstance().createTFObjectDetector(tfParameters, this.vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
     }
 
@@ -104,29 +106,14 @@ public class TFODModule extends OpMode {
      * <p>This method gives the localizer the VUFORIA_KEY;
      */
     public void initVuforia(){
-        vuforia = ClassFactory.getInstance().createVuforia(vuforiaParameters);
-    }
-
-    private VuforiaLocalizer.Parameters vuforiaParameters;
-    private  TFObjectDetector.Parameters tfParameters;
-    private void initParameters(){
-        vuforiaParameters = new VuforiaLocalizer.Parameters();
+         VuforiaLocalizer.Parameters vuforiaParameters = new VuforiaLocalizer.Parameters();
 
         vuforiaParameters.vuforiaLicenseKey = VUFORIA_KEY;
         vuforiaParameters.cameraName = hardwareMap.get(WebcamName.class, TFODModule.CAM_NAME);
         vuforiaParameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         vuforiaParameters.useExtendedTracking = false;
         vuforiaParameters.cameraMonitorFeedback = null;
-
-        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        tfParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfParameters.minResultConfidence = 0.69f;
-        tfParameters.isModelTensorFlow2 = true;
-        tfParameters.useObjectTracker = true;
-        tfParameters.inputSize = 320;
-        tfod = ClassFactory.getInstance().createTFObjectDetector(tfParameters, vuforia);
-        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
+        vuforia = ClassFactory.getInstance().createVuforia(vuforiaParameters);
     }
 
     /**
