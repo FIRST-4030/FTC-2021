@@ -26,12 +26,14 @@ public class TFDriveTest extends MultiOpModeManager {
     @Override
     public void init() {
         try {
+            tfodModule = new TFODModule();
             super.register(tfodModule);
         } catch (Exception e ){
             telemetry.log().add(tfodModule.getClass().getSimpleName() + " is not initializing.");
         }
 
         try {
+            drive = new NewNewDrive();
             super.register(drive);
         } catch (Exception e ){
             telemetry.log().add(drive.getClass().getSimpleName() + " is not initializing.");
