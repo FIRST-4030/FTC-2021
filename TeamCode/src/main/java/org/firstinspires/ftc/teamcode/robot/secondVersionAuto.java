@@ -31,6 +31,7 @@ package org.firstinspires.ftc.teamcode.robot;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.gamepad.GAMEPAD;
@@ -41,7 +42,7 @@ import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
 
 @Config
-//@Disabled
+@Disabled
 @Autonomous(name = "secondVersionAuto", group = "Test")
 public class secondVersionAuto extends MultiOpModeManager {
     // Hardware

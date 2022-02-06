@@ -56,7 +56,7 @@ public class ServoTester extends OpMode{
     private static double COLLECTOR_DOWN = 0.9;
 
     // Servo position test constants
-    private float servoPos = 0.2f;
+    private float servoPos = 0.5f;
     private static final float INCREMENT = 0.01f;
 
     // Members
@@ -114,7 +114,7 @@ public class ServoTester extends OpMode{
             servoPos = Math.max(0.0f, servoPos);
         }
         // Set position of desired servo
-        tilt.setPosition(servoPos);
+        collectorArm.setPosition(servoPos);
     }
 
     @Override
