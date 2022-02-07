@@ -73,7 +73,7 @@ public class Depositor extends OpMode {
     public static int INIT_PREP_POS = 390;
     public static int LOW_PREP_POS = 560;
     public static int MID_PREP_POS = 690;
-    public static int HIGH_PREP_POS = 840;
+    public static int HIGH_PREP_POS = 860;
     public static int BELT_POSITION_DEADBAND = 30;
     public int num = 0;
     public boolean sensorTriggered = false;
@@ -284,7 +284,7 @@ public class Depositor extends OpMode {
                     }
                     prepPosSet = true;
                 }
-                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < BELT_POSITION_DEADBAND) {
+                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < (BELT_POSITION_DEADBAND - 15)) {
                     state = AUTO_STATE.DONE;
                 }
                 break;

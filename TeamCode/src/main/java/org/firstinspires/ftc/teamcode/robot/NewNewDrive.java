@@ -326,6 +326,7 @@ public class NewNewDrive extends OpMode {
             arcLengthL = arcLength;
             arcLengthR = arcLength;
         } else {
+            correction = 0;
             angle = Math.toDegrees(arcLength / Math.abs(r));
             arcLengthInner = Math.toRadians(angle) * (Math.abs(r) - trackWidthHalf);
             arcLengthOuter = Math.toRadians(angle) * (Math.abs(r) + trackWidthHalf);
@@ -475,7 +476,7 @@ public class NewNewDrive extends OpMode {
             rampAndHold(speedCurveR, (int) rightTicks, driveRight.getCurrentPosition(), speedMin, speedMax, ((rightTicks / midTicks) / maxRatio));
             resetAngle();
             double startAngle = getAngle();
-            imuRamp(imuAngleRamp, (int) (left ? leftTicks : rightTicks), (left ? driveLeft.getCurrentPosition() : driveRight.getCurrentPosition()), startAngle, (angle - startAngle), speedMin, speedMax, (left ? ((leftTicks / midTicks) / maxRatio) : ((rightTicks / midTicks) / maxRatio)));
+            imuRamp(imuAngleRamp, (int) midTicks, ((driveLeft.getCurrentPosition() + driveRight.getCurrentPosition())/2), startAngle, (angle - startAngle), speedMin, speedMax, ((((leftTicks / midTicks) / maxRatio) + ((rightTicks / midTicks) / maxRatio))/2));
 
             started = true;
             done = false;
