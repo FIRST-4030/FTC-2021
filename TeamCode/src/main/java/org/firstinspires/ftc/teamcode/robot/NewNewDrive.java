@@ -50,10 +50,13 @@ public class NewNewDrive extends OpMode {
     private PiecewiseFunction imuAngleRamp;
     private PiecewiseFunction speedCurveL;
     private PiecewiseFunction speedCurveR;
+    private PiecewiseFunction imuAngleRamp1;
+    private PiecewiseFunction imuAngleRamp2;
     BNO055IMU imu;
     Orientation lastAngles = new Orientation();
     public static double globalAngle, correction;
     public static double gain = 0.03;
+    public static double gain2 = 0.03;
 
     // Standard methods
     @Override
@@ -93,6 +96,8 @@ public class NewNewDrive extends OpMode {
             enabled = true;
 
             imuAngleRamp = new PiecewiseFunction();
+            imuAngleRamp1 = new PiecewiseFunction();
+            imuAngleRamp2 = new PiecewiseFunction();
             speedCurveL = new PiecewiseFunction();
             speedCurveR = new PiecewiseFunction();
         } catch (Exception e) {
@@ -102,6 +107,10 @@ public class NewNewDrive extends OpMode {
         logDataInit();
     }
 
+    @Override
+    public void init_loop() {
+        telemetry.addData("ImuisCalibrated?", imu.isGyroCalibrated());
+    }
     @Override
     public void start() {
         done = false;
@@ -317,6 +326,7 @@ public class NewNewDrive extends OpMode {
             arcLengthL = arcLength;
             arcLengthR = arcLength;
         } else {
+            correction = 0;
             angle = Math.toDegrees(arcLength / Math.abs(r));
             arcLengthInner = Math.toRadians(angle) * (Math.abs(r) - trackWidthHalf);
             arcLengthOuter = Math.toRadians(angle) * (Math.abs(r) + trackWidthHalf);
@@ -401,7 +411,7 @@ public class NewNewDrive extends OpMode {
         }
     }
 
-    public void arcToNew(double r, double arcLength, double speedMin, double speedMax, double startAngle) {
+    public void arcToNew(double r, double arcLength, double speedMin, double speedMax) {
         if (arcLength == 0) {
             return;
         }
@@ -442,15 +452,15 @@ public class NewNewDrive extends OpMode {
         }
 
         double maxRatio = Math.max(Math.abs(leftTicks), Math.abs(rightTicks)) / Math.abs(midTicks);
-        if ((isBusy() || !done) && speedCurveL.isValid() && speedCurveR.isValid() && started) {
+        if ((isBusy() || !done) && speedCurveL.isValid() && speedCurveR.isValid() && imuAngleRamp.isValid() && started) {
             // speed is calculated using the curve defined above
             correction = checkDirectionNew(imuAngleRamp.getY((left ? driveLeft.getCurrentPosition() : driveRight.getCurrentPosition())));
             driveLeft.setPower((leftTicks / midTicks) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0) - (correction));
             driveRight.setPower((rightTicks / midTicks) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0) + (correction));
             if (Math.abs(r) - trackWidthHalf < 1) {
-                done = speedCurveL.isClamped() || speedCurveR.isClamped();
+                done = (speedCurveL.isClamped() || speedCurveR.isClamped()) && imuAngleRamp.isClamped();
             } else {
-                done = speedCurveL.isClamped() && speedCurveR.isClamped();
+                done = speedCurveL.isClamped() && speedCurveR.isClamped() && imuAngleRamp.isClamped();
             }
         }
 
@@ -464,7 +474,9 @@ public class NewNewDrive extends OpMode {
             // Ramp-and-hold
             rampAndHold(speedCurveL, (int) leftTicks, driveLeft.getCurrentPosition(), speedMin, speedMax, ((leftTicks / midTicks) / maxRatio));
             rampAndHold(speedCurveR, (int) rightTicks, driveRight.getCurrentPosition(), speedMin, speedMax, ((rightTicks / midTicks) / maxRatio));
-            imuRamp(imuAngleRamp, (int) (left ? leftTicks : rightTicks), (left ? driveLeft.getCurrentPosition() : driveRight.getCurrentPosition()), startAngle, (angle - startAngle));
+            resetAngle();
+            double startAngle = getAngle();
+            imuRamp(imuAngleRamp, (int) midTicks, ((driveLeft.getCurrentPosition() + driveRight.getCurrentPosition())/2), startAngle, (angle - startAngle), speedMin, speedMax, ((((leftTicks / midTicks) / maxRatio) + ((rightTicks / midTicks) / maxRatio))/2));
 
             started = true;
             done = false;
@@ -474,16 +486,18 @@ public class NewNewDrive extends OpMode {
             started = false;
             speedCurveL.reset();
             speedCurveR.reset();
+            imuAngleRamp.reset();
         }
 
         telemetry.addData("left ticks", driveLeft.getCurrentPosition());
         telemetry.addData("right ticks", driveRight.getCurrentPosition());
         telemetry.addData("leftVel", driveLeft.getPower());
         telemetry.addData("rightVel", driveRight.getPower());
+        telemetry.log().add("Angle: " + getAngle());
         if (logging) {
             logData("arcTo()", started + "," + done + "," +
                     speedCurveL.isValid() + "," + speedCurveL.getSize() + "," +
-                    speedCurveR.isValid() + "," + speedCurveR.getSize() + "," +
+                    speedCurveR.isValid() + "," + speedCurveR.getSize() + "," + imuAngleRamp.getY((left ? driveLeft.getCurrentPosition() : driveRight.getCurrentPosition())) + "," +
                     arcLengthL + "," + arcLengthR + "," +
                     leftTicks + "," + rightTicks + "," + midTicks + "," + maxRatio);
         }
@@ -497,14 +511,14 @@ public class NewNewDrive extends OpMode {
         double arcLengthL1, arcLengthR1;
         double arcLengthL2, arcLengthR2;
         ;
-        double arcLengthInner1, arcLengthOuter1;
-        double arcLengthInner2, arcLengthOuter2;
+        double arcLengthInner1, arcLengthOuter1 = 0;
+        double arcLengthInner2, arcLengthOuter2 = 0;
         double leftTicks1, rightTicks1;
         double leftTicks2, rightTicks2;
         double angle1, angle2;
-        correction = checkDirection();
 
         if (r1 == 0) {
+            angle1 = 0;
             arcLengthL1 = arcLength1;
             arcLengthR1 = arcLength1;
         } else {
@@ -524,6 +538,7 @@ public class NewNewDrive extends OpMode {
         }
 
         if (r2 == 0) {
+            angle2 = 0;
             arcLengthL2 = arcLength2;
             arcLengthR2 = arcLength2;
         } else {
@@ -541,6 +556,8 @@ public class NewNewDrive extends OpMode {
                 arcLengthR2 = arcLengthInner2;
             }
         }
+        boolean left1 = (arcLengthL1 == arcLengthOuter1);
+        boolean left2 = (arcLengthL2 == arcLengthOuter2);
 
         leftTicks1 = arcLengthL1 * TICKS_PER_INCH;
         rightTicks1 = arcLengthR1 * TICKS_PER_INCH;
@@ -553,51 +570,37 @@ public class NewNewDrive extends OpMode {
         if ((isBusy() || !done) && speedCurveL.isValid() && speedCurveR.isValid() && started) {
             // speed is calculated using the curve defined above
             if (leftTicks1 > 0) {
-                notOver1stMoveL = (driveLeft.getCurrentPosition() < (ogPosL + leftTicks1));
+                notOver1stMoveL = (driveLeft.getCurrentPosition() <= (ogPosL + leftTicks1));
             } else {
-                notOver1stMoveL = (driveLeft.getCurrentPosition() > (ogPosL + leftTicks1));
+                notOver1stMoveL = (driveLeft.getCurrentPosition() >= (ogPosL + leftTicks1));
             }
             if (rightTicks1 > 0) {
-                notOver1stMoveR = (driveRight.getCurrentPosition() < (ogPosR + rightTicks1));
+                notOver1stMoveR = (driveRight.getCurrentPosition() <= (ogPosR + rightTicks1));
             } else {
-                notOver1stMoveR = (driveRight.getCurrentPosition() > (ogPosR + rightTicks1));
+                notOver1stMoveR = (driveRight.getCurrentPosition() >= (ogPosR + rightTicks1));
             }
             if (notOver1stMoveL && notOver1stMoveR) {
                 maxRatio = Math.max(Math.abs(leftTicks1), Math.abs(rightTicks1)) / Math.abs(midTicks1);
-                if (r1 == 0) {
-                    if (!angleSet) {
-                        resetAngle();
-                        angleSet = true;
-                    }
-                    driveLeft.setPower((leftTicks1 / midTicks1) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0) - correction);
-                    driveRight.setPower((rightTicks1 / midTicks1) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0) + correction);
-                } else {
-                    angleSet = false;
-                    driveLeft.setPower((leftTicks1 / midTicks1) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
-                    driveRight.setPower((rightTicks1 / midTicks1) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
-                }
+                correction = checkDirectionNew(imuAngleRamp1.getY((left1 ? driveLeft.getCurrentPosition() : driveRight.getCurrentPosition())));
+                driveLeft.setPower((leftTicks1 / midTicks1) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0) - correction);
+                driveRight.setPower((rightTicks1 / midTicks1) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0) + correction);
             } else {
                 maxRatio = Math.max(Math.abs(leftTicks2), Math.abs(rightTicks2)) / Math.abs(midTicks2);
-                if (r2 == 0) {
-                    if (!angleSet) {
-                        resetAngle();
-                        angleSet = true;
-                    }
-                    driveLeft.setPower((leftTicks2 / midTicks2) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0) - correction);
-                    driveRight.setPower((rightTicks2 / midTicks2) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0) + correction);
-                } else {
-                    angleSet = false;
-                    driveLeft.setPower((leftTicks2 / midTicks2) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
-                    driveRight.setPower((rightTicks2 / midTicks2) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
-                }
+                correction = checkDirectionNew(imuAngleRamp2.getY((left2 ? driveLeft.getCurrentPosition() : driveRight.getCurrentPosition())));
+                driveLeft.setPower((leftTicks2 / midTicks2) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0) - correction);
+                driveRight.setPower((rightTicks2 / midTicks2) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0) + correction);
             }
             done = speedCurveL.isClamped() && speedCurveR.isClamped();
         }
 
         if (!started) {
             // initialize speedCurve to have motor ticks be the X coordinate and motor speed be the Y coordinate
-            rampAndHold(speedCurveL, (int) (leftTicks1 + leftTicks2), driveLeft.getCurrentPosition(), speedMin, speedMax, Math.max(Math.abs(leftTicks1 / midTicks1), Math.abs(leftTicks2 / midTicks2)));
-            rampAndHold(speedCurveR, (int) (rightTicks1 + rightTicks2), driveRight.getCurrentPosition(), speedMin, speedMax, Math.max(Math.abs(rightTicks1 / midTicks1), Math.abs(rightTicks2 / midTicks2)));
+            combinedRampAndHold(speedCurveL, (int) (leftTicks1 + leftTicks2), (int) leftTicks1, (int) leftTicks2, driveLeft.getCurrentPosition(), speedMin, speedMax, Math.abs(leftTicks1 / midTicks1), Math.abs(leftTicks2 / midTicks2));
+            combinedRampAndHold(speedCurveR, (int) (rightTicks1 + rightTicks2), (int) rightTicks1, (int) rightTicks2, driveRight.getCurrentPosition(), speedMin, speedMax, Math.abs(rightTicks1 / midTicks1), Math.abs(rightTicks2 / midTicks2));
+            double startAngle1 = getAngle();
+            double startAngle2 = angle1 - startAngle1;
+            imuRamp(imuAngleRamp1, (int) (left1 ? leftTicks1 : rightTicks1), (left1 ? driveLeft.getCurrentPosition() : driveRight.getCurrentPosition()), startAngle1, (angle1 - startAngle1), speedMin, speedMax, (left1 ? ((leftTicks1 / midTicks1) / maxRatio) : ((rightTicks1 / midTicks1) / maxRatio)));
+            imuRamp(imuAngleRamp2, (int) (left2 ? leftTicks2 : rightTicks2), (left2 ? driveLeft.getCurrentPosition() : driveRight.getCurrentPosition()), startAngle2, (angle2 - startAngle2), speedMin, speedMax, (left2 ? ((leftTicks2 / midTicks2) / maxRatio) : ((rightTicks2 / midTicks2) / maxRatio)));
 
             ogPosL = driveLeft.getCurrentPosition();
             ogPosR = driveRight.getCurrentPosition();
@@ -644,11 +647,6 @@ public class NewNewDrive extends OpMode {
         double leftTicks2, rightTicks2;
         double leftTicks3, rightTicks3;
         double angle1, angle2, angle3;
-
-        correction = checkDirection();
-        if (!angleSet) {
-            resetAngle();
-        }
 
         if (r1 == 0) {
             arcLengthL1 = arcLength1;
@@ -742,44 +740,24 @@ public class NewNewDrive extends OpMode {
             }
             if (notOver1stMoveL && notOver1stMoveR) {
                 maxRatio = Math.max(Math.abs(leftTicks1), Math.abs(rightTicks1)) / Math.abs(midTicks1);
-                if (r1 == 0) {
-                    angleSet = true;
-                    driveLeft.setPower((leftTicks1 / midTicks1) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0) - correction);
-                    driveRight.setPower((rightTicks1 / midTicks1) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0) + correction);
-                } else {
-                    angleSet = false;
-                    driveLeft.setPower((leftTicks1 / midTicks1) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
-                    driveRight.setPower((rightTicks1 / midTicks1) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
-                }
+                driveLeft.setPower((leftTicks1 / midTicks1) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
+                driveRight.setPower((rightTicks1 / midTicks1) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
             } else if (notOver2ndMoveL && notOver2ndMoveR) {
                 maxRatio = Math.max(Math.abs(leftTicks2), Math.abs(rightTicks2)) / Math.abs(midTicks2);
-                if (r2 == 0) {
-                    angleSet = true;
-                    driveLeft.setPower((leftTicks2 / midTicks2) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0) - correction);
-                    driveRight.setPower((rightTicks2 / midTicks2) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0) + correction);
-                } else {
-                    angleSet = false;
-                    driveLeft.setPower((leftTicks2 / midTicks2) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
-                    driveRight.setPower((rightTicks2 / midTicks2) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
-                }
+                driveLeft.setPower((leftTicks2 / midTicks2) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
+                driveRight.setPower((rightTicks2 / midTicks2) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
+
             } else {
                 maxRatio = Math.max(Math.abs(leftTicks3), Math.abs(rightTicks3)) / Math.abs(midTicks3);
-                if (r3 == 0) {
-                    angleSet = true;
-                    driveLeft.setPower((leftTicks3 / midTicks3) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0) - correction);
-                    driveRight.setPower((rightTicks3 / midTicks3) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0) + correction);
-                } else {
-                    angleSet = false;
-                    driveLeft.setPower((leftTicks3 / midTicks3) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
-                    driveRight.setPower((rightTicks3 / midTicks3) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
-                }
+                driveLeft.setPower((leftTicks3 / midTicks3) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0));
+                driveRight.setPower((rightTicks3 / midTicks3) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0));
             }
             done = speedCurveL.isClamped() && speedCurveR.isClamped();
         }
 
         if (!started) {
-            rampAndHold(speedCurveL, (int) (leftTicks1 + leftTicks2 + leftTicks3), driveLeft.getCurrentPosition(), speedMin, speedMax, Math.max(Math.max(Math.abs(leftTicks1 / midTicks1), Math.abs(leftTicks2 / midTicks2)), Math.abs(leftTicks3 / midTicks3)));
-            rampAndHold(speedCurveR, (int) (rightTicks1 + rightTicks2 + rightTicks3), driveRight.getCurrentPosition(), speedMin, speedMax, Math.max(Math.max(Math.abs(rightTicks1 / midTicks1), Math.abs(rightTicks2 / midTicks2)), Math.abs(rightTicks3 / midTicks3)));
+            combinedRampAndHold(speedCurveL, (int) (leftTicks1 + leftTicks2 + leftTicks3), (int) leftTicks1, (int) leftTicks3, driveLeft.getCurrentPosition(), speedMin, speedMax, Math.abs(leftTicks1 / midTicks1), Math.abs(leftTicks3 / midTicks3));
+            combinedRampAndHold(speedCurveR, (int) (rightTicks1 + rightTicks2 + rightTicks3), (int) rightTicks1, (int) rightTicks3, driveRight.getCurrentPosition(), speedMin, speedMax, Math.abs(rightTicks1 / midTicks1), Math.abs(rightTicks3 / midTicks3));
 
             ogPosL = driveLeft.getCurrentPosition();
             ogPosR = driveRight.getCurrentPosition();
@@ -857,12 +835,55 @@ public class NewNewDrive extends OpMode {
         pfunc.setClampLimits(true);
     }
 
+    private void combinedRampAndHold(
+            PiecewiseFunction pfunc,
+            int pathTicks, int currentTicks, int firstTicks, int lastTicks,
+            double speedMin, double speedMax, double firstSpeedMax, double lastSpeedMax) {
+        // How many ticks does it take to ramp up/down between speedMin and speedMax
+        // Higher values correlate with longer ramp times and smaller acceleration
+        // Usually experiment and measurement can determine an approximate value
+        double rampUpTicks = rampMaxTicks * Math.abs(speedMax - speedMin) * Math.abs(firstSpeedMax);
+        double rampDownTicks = rampMaxTicks * Math.abs(speedMax - speedMin) * Math.abs(lastSpeedMax);
+
+        rampUpTicks *= Math.signum(firstTicks);
+        rampDownTicks *= Math.signum(lastTicks);
+
+        // Path is long enough to ramp to full speed
+        // 4 ramp points at 0%, rampUpTicks, 100% - rampDownTicks, and 100%
+        if (Math.abs(rampUpTicks + rampDownTicks) >= Math.abs(pathTicks)) {
+            // Path is shorter than the ramp up/down intervals
+            // 3 ramp points at 0%, 50% and 100%
+            pfunc.addElement(currentTicks - 0.025 * pathTicks, speedMin);
+            pfunc.addElement(currentTicks + (pathTicks / 2.0), speedMax);
+            pfunc.addElement(currentTicks + pathTicks, speedMin);
+        } else {
+            pfunc.addElement(currentTicks - 0.025 * pathTicks, speedMin);
+            pfunc.addElement(currentTicks + rampUpTicks, speedMax);
+            pfunc.addElement(currentTicks + pathTicks - rampDownTicks, speedMax);
+            pfunc.addElement(currentTicks + pathTicks, speedMin);
+        }
+
+        // Enable first/last element clamping in case the encoder values drift outside the model
+        pfunc.setClampLimits(true);
+    }
+
     private void imuRamp(
             PiecewiseFunction pfunc,
             int pathTicks, int currentTicks,
-            double startAngle, double endAngle) {
+            double startAngle, double endAngle,
+            double speedMin, double speedMax, double treadSpeedMax) {
+        // How many ticks does it take to ramp up/down between speedMin and speedMax
+        // Higher values correlate with longer ramp times and smaller acceleration
+        // Usually experiment and measurement can determine an approximate value
+        double rampUpTicks = rampMaxTicks * Math.abs(speedMax - speedMin) * Math.abs(treadSpeedMax);
+        double rampDownTicks = rampMaxTicks * Math.abs(speedMax - speedMin) * Math.abs(treadSpeedMax);
 
-        pfunc.addElement(currentTicks, startAngle);
+        rampUpTicks *= Math.signum(pathTicks);
+        rampDownTicks *= Math.signum(pathTicks);
+
+        pfunc.addElement(currentTicks - 0.025 * pathTicks, startAngle);
+        pfunc.addElement(currentTicks + rampUpTicks, rampUpTicks / pathTicks * endAngle);
+        pfunc.addElement(currentTicks + pathTicks - rampDownTicks, (pathTicks - rampDownTicks) / pathTicks * endAngle);
         pfunc.addElement(currentTicks + pathTicks, endAngle);
 
         // Enable first/last element clamping in case the encoder values drift outside the model
@@ -988,9 +1009,9 @@ public class NewNewDrive extends OpMode {
 
         angle = getAngle();
 
-        difference = -(angle - theta);        // reverse sign of angle for correction.
+        difference = -(angle - theta); // reverse sign of angle for correction.
 
-        difference = difference * gain;
+        difference = difference * gain2;
 
         return difference;
     }

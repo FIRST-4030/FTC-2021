@@ -48,7 +48,7 @@ public class arcToTest extends MultiOpModeManager {
     private Servo collectorArm = null;
 
     // Constants
-    public static double r = 1;
+    public static double r = 20;
     public static double speedMin = 0.1;
     public static double speedMax = 0.8;
     public static double arcLength = 2 * Math.PI * Math.abs(r);
@@ -97,6 +97,7 @@ public class arcToTest extends MultiOpModeManager {
 
     @Override
     public void init_loop() {
+        super.init_loop();
     }
 
     @Override
@@ -115,7 +116,8 @@ public class arcToTest extends MultiOpModeManager {
             case TEST_MOVE:
                 //drive.arcTo(r, arcLength, speedMin, speedMax);
                 //drive.combined3Curves(0, 20, r, arcLength, 0, 20, speedMin, speedMax);
-                drive.arcToNew(r, arcLength, speedMin, speedMax, drive.getAngle());
+                //drive.combinedCurves(0, 20, 20, (arcLength * 20 / 4), speedMin, speedMax);
+                drive.arcToNew(r, arcLength, speedMin, speedMax);
                 collectorArm.setPosition(COLLECTOR_UP);
                 if (drive.isDone() && !drive.isBusy()) {
                     drive.setDoneFalse();

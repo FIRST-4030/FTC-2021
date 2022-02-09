@@ -61,7 +61,7 @@ public class Depositor extends OpMode {
     public static boolean DEBUG = false;
     public static double PREP_SPEED = 1;
     public static double BELT_SPEED = 0.6;
-    public static double RESET_BELT_SPEED = 0.3;
+    public static double RESET_BELT_SPEED = 0.4;
     public static double TILT_BACK = 0.36;
     public static double TILT_FORWARD = 0.06;
     public static double LOW_OPEN = 0.6;
@@ -73,8 +73,8 @@ public class Depositor extends OpMode {
     public static int INIT_PREP_POS = 390;
     public static int LOW_PREP_POS = 560;
     public static int MID_PREP_POS = 690;
-    public static int HIGH_PREP_POS = 840;
-    public static int BELT_POSITION_DEADBAND = 20;
+    public static int HIGH_PREP_POS = 860;
+    public static int BELT_POSITION_DEADBAND = 30;
     public int num = 0;
     public boolean sensorTriggered = false;
     public boolean prepPosSet = false;
@@ -82,10 +82,9 @@ public class Depositor extends OpMode {
 
     // Members
     private boolean enabled = false;
-    private AUTO_STATE state = AUTO_STATE.DONE;
+    public AUTO_STATE state = AUTO_STATE.DONE;
     private AUTO_STATE oldState = AUTO_STATE.DONE;
     private DOOR_USED required_Door = DOOR_USED.NONE;
-    private InputHandler in;
 
     @Override
     public void init() {
@@ -103,25 +102,16 @@ public class Depositor extends OpMode {
             tilt = hardwareMap.get(Servo.class, "Deptilt");
             sensor = hardwareMap.get(TouchSensor.class, "DS");
 
-            Globals.opmode = this;
-            in = Globals.input(this);
             sensorTriggered = false;
             prepPosSet = false;
             num = 0;
-
-            in.register("LOW", GAMEPAD.driver2, PAD_KEY.x);
-            in.register("MID", GAMEPAD.driver2, PAD_KEY.y);
-            in.register("HIGH", GAMEPAD.driver2, PAD_KEY.b);
-            in.register("REVERSE", GAMEPAD.driver2, PAD_KEY.a);
-            in.register("TILT_FORWARD", GAMEPAD.driver2, PAD_KEY.dpad_left);
-            in.register("TILT_BACK", GAMEPAD.driver2, PAD_KEY.dpad_right);
 
             enabled = true;
         } catch (Exception e) {
             telemetry.log().add(getClass().getSimpleName() + ": " +
                     "Could not initialize" + e.getMessage());
         }
-        RobotLog.d(",Depositor(),Time (s),State,Sensor isPressed,Belt isBusy,Belt Power,Belt Current Position,Belt Target Position,Low Position,Mid Position,High Position,Tilt Position,Enabled,Required_Door");
+        //RobotLog.d(",Depositor(),Time (s),State,Sensor isPressed,Belt isBusy,Belt Power,Belt Current Position,Belt Target Position,Low Position,Mid Position,High Position,Tilt Position,Enabled,Required_Door");
     }
 
     @Override
@@ -160,9 +150,6 @@ public class Depositor extends OpMode {
         if (!enabled) {
             return;
         }
-
-        // actually process the inputs from the game pads
-        in.loop();
 
         // if the state changed, set sensorTriggered to false
         if (state != oldState) {
@@ -297,7 +284,7 @@ public class Depositor extends OpMode {
                     }
                     prepPosSet = true;
                 }
-                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < BELT_POSITION_DEADBAND) {
+                if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < (BELT_POSITION_DEADBAND - 15)) {
                     state = AUTO_STATE.DONE;
                 }
                 break;

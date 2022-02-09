@@ -51,7 +51,6 @@ public class NewNewAuto extends MultiOpModeManager {
     private NewNewDrive drive;
     private Distance distance;
     private Depositor depositor;
-    private Capstone capstone;
     private DuckSpin duck;
     private DcMotor collector;
     private Servo collectorArm;
@@ -61,16 +60,16 @@ public class NewNewAuto extends MultiOpModeManager {
     private final double TICKS_PER_INCH = 44.5;
     public static double speedMin = 0.1;
     public static double speedMax = 0.8;
-    public static double r1 = 30;
-    public static double arcLength1 = 27;
-    public static double r2wh = 8;
-    public static double arcLength2wh = 12;
-    public static double r2wh2 = 8;
+    public static double r1 = 30.5;
+    public static double arcLength1 = 25.5;
+    public static double r2wh = 6;
+    public static double arcLength2wh = 11.5;
+    public static double r2wh2 = 6;
     public static double arcLength2wh2 = 17.25;
     public static double r2wh3 = 0;
     public static double arcLength2wh3 = 24;
-    public static double r2duck = 19;
-    public static double arcLength2duck = 41.5;
+    public static double r2duck = 18.5;
+    public static double arcLength2duck = 41;
     public static double r3wh = 0;
     public static double arcLength3wh = 24;
     public static double r3wh2 = 14;
@@ -78,26 +77,24 @@ public class NewNewAuto extends MultiOpModeManager {
     public static double r3wh3 = 0;
     public static double arcLength3wh3 = 7.5;
     public static double r3duck = 0;
-    public static double arcLength3duck = 29;
-    public static double r3duck2 = 1;
-    public static double arcLength3duck2 = Math.PI;
+    public static double arcLength3duck = 28;
+    public static double r3duck2 = 0;
+    public static double arcLength3duck2 = 14.5;
     public static double r4wh = 0;
-    public static double arcLength4wh = 6;
+    public static double arcLength4wh = 3;
     public static double r4wh2 = 14;
     public static double arcLength4wh2 = 18;
     public static double r4wh3 = 0;
-    public static double arcLength4wh3 = 29;
+    public static double arcLength4wh3 = 28;
     public static double r4duck = 0;
     public static double arcLength4duck = 30;
-    public static double collectDistance = 6;
-    public static double COLLECTOR_UP = 0.55;
+    public static double collectDistance = 16;
+    public static double COLLECTOR_UP = 0.53;
     public static double COLLECTOR_DOWN = 0.90;
     public static int num = 0;
     public static int delayTime = 0;
     public static double DELAY_TIME = 0.75;
     public static double EJECT_TIME = 2.5;
-    public static double ogPosL = 0;
-    public static double ogPosR = 0;
 
     // Members
     private AUTO_STATE state = AUTO_STATE.DONE;
@@ -112,6 +109,7 @@ public class NewNewAuto extends MultiOpModeManager {
     private collectCmd collectCmdState;
     private boolean collected = false;
     private boolean started = false;
+    private boolean collectStep = false;
 
     @Override
     public void init() {
@@ -120,7 +118,6 @@ public class NewNewAuto extends MultiOpModeManager {
 
         try {
             super.register(new Depositor());
-            super.register(new Capstone());
             super.register(new Distance());
             super.register(new DuckSpin());
 
@@ -128,8 +125,6 @@ public class NewNewAuto extends MultiOpModeManager {
             super.register(distance);
             depositor = new Depositor();
             super.register(depositor);
-            capstone = new Capstone();
-            super.register(capstone);
             duck = new DuckSpin();
             super.register(duck);
 
@@ -162,6 +157,7 @@ public class NewNewAuto extends MultiOpModeManager {
             collector.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
+            collectorArm.setPosition(0.41);
 
             sensorCollector = hardwareMap.get(TouchSensor.class, "DC");
         } catch (Exception e) {
@@ -210,8 +206,6 @@ public class NewNewAuto extends MultiOpModeManager {
                     } else {
                         depositor.setDoor(Depositor.DOOR_USED.HIGH_DOOR);
                     }
-                } else {
-                    depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
                 }
             }
         }
@@ -224,7 +218,8 @@ public class NewNewAuto extends MultiOpModeManager {
     public void start() {
         super.start();
         num = 0;
-        collectDistance = 8;
+        collectDistance = 9;
+        collectStep = false;
         drive.setDoneFalse();
         state = AUTO_STATE.ARC;
         delayTimer.reset();
@@ -282,7 +277,7 @@ public class NewNewAuto extends MultiOpModeManager {
                         if (redAlliance) {
                             drive.arcTo(r3duck, arcLength3duck, speedMin, speedMax);
                         } else {
-                            drive.arcTo(r3duck, arcLength3duck, speedMin, speedMax);
+                            drive.arcTo(r3duck, arcLength3duck - 2, speedMin, speedMax);
                         }
                         if (drive.isDone() && !drive.isBusy()) {
                             drive.setDoneFalse();
@@ -299,68 +294,28 @@ public class NewNewAuto extends MultiOpModeManager {
                         if (redAlliance) {
                             drive.arcTo(r3duck2, -arcLength3duck2, -speedMin, -speedMax);
                         } else {
-                            drive.arcTo(-r3duck2, -arcLength3duck2, -speedMin, -speedMax);
+                            drive.arcTo(-r3duck2, -arcLength3duck2 + .25, -speedMin, -speedMax);
                         }
                         if (drive.isDone() && !drive.isBusy()) {
-                            drive.setDoneFalse();
-                            state = AUTO_STATE.COLLECT;
-                        }
-                        break;
-                    case COLLECT:
-                        if (!startedCollecting) {
-                            collectCmdState = collectCmd.BEFORE_COLLECT;
-                            drive.setDoneFalse();
-                            startedCollecting = true;
-                        }
-                        collected = false;
-                        drive.arcTo(0, -1.5, -speedMin, -speedMax);
-                        if (drive.isDone() && !drive.isBusy()) {
-                            drive.setDoneFalse();
-                            state = AUTO_STATE.ADD23;
-                        }
-                        break;
-                    case ADD23:
-                        collected = false;
-                        if (collectorTimer.seconds() > 3) {
-                            collectCmdState = collectCmd.IDLE;
-                            drive.setDoneFalse();
-                            startedCollecting = false;
-                            state = AUTO_STATE.RETURN;
-                        }
-                        break;
-                    case RETURN:
-                        if (!drive.isDone()) {
-                            if (redAlliance) {
-                                drive.arcTo(-28, 38, speedMin, speedMax);
-                            } else {
-                                drive.arcTo(28, 38, speedMin, speedMax);
-                            }
-                        }
-                        if (drive.isDone() && !drive.isBusy()) {
-                            drive.setDoneFalse();
-                            depositor.deposit();
-                            state = AUTO_STATE.ADD2;
-                        }
-                        break;
-                    case ADD2:
-                        if (depositor.isDone()) {
                             drive.setDoneFalse();
                             state = AUTO_STATE.ADD22;
                         }
                         break;
                     case ADD22:
-                        if (!drive.isDone()) {
+                        /* if (!drive.isDone()) {
                             if (redAlliance) {
                                 drive.arcTo(-r4duck, -arcLength4duck, -speedMin, -speedMax);
                             } else {
                                 drive.arcTo(r4duck, -arcLength4duck, -speedMin, -speedMax);
                             }
                         }
-                        if (drive.isDone() && !drive.isBusy()) {
-                            depositor.reset();
-                            drive.setDoneFalse();
-                            state = AUTO_STATE.LAST;
-                        }
+                        COLLECTOR_UP = 0.41;
+                        collectorArm.setPosition(COLLECTOR_UP);
+                        if (drive.isDone() && !drive.isBusy()) {*/
+                        depositor.reset();
+                        drive.setDoneFalse();
+                        state = AUTO_STATE.LAST;
+                        //}
                         break;
                     case LAST:
                         if (depositor.isDone()) {
@@ -429,34 +384,25 @@ public class NewNewAuto extends MultiOpModeManager {
                         } else {
                             drive.arcTo(-r2wh3, -arcLength2wh3, -speedMin, -speedMax);
                         }
-                        telemetry.log().add("hello, " + "Robot is in Park3, " + "Done is " + drive.isDone());
                         if (drive.isDone() && !drive.isBusy()) {
+                            depositor.reset();
                             drive.setDoneFalse();
-                            state = AUTO_STATE.COLLECT;
+                            state = AUTO_STATE.COLLECT2;
                         }
                         break;
                     case COLLECT:
                         if (!startedCollecting) {
                             collectCmdState = collectCmd.BEFORE_COLLECT;
-                            ogPosL = drive.returnPosL();
-                            ogPosR = drive.returnPosR();
-                            //drive.slowReverse();
                             startedCollecting = true;
                         }
                         if (!drive.isDone()) {
                             drive.arcTo(0, -collectDistance, -speedMin, -speedMax);
                         }
                         if (drive.isDone() && !drive.isBusy() && collectCmdState == collectCmd.EJECT) {
-                            if (runTime.seconds() > 25) {
-                                depositor.reset();
-                                drive.setDoneFalse();
-                                state = AUTO_STATE.LAST;
-                            } else {
-                                drive.setDoneFalse();
-                                startedCollecting = false;
-                                state = AUTO_STATE.RETURN;
-                            }
-                        } else if (collectorTimer.seconds() > 5) {
+                            drive.setDoneFalse();
+                            startedCollecting = false;
+                            state = AUTO_STATE.RETURN;
+                        } else if (collectCmdState == collectCmd.COLLECT && collectorTimer.seconds() > 6) {
                             collectCmdState = collectCmd.IDLE;
                             depositor.reset();
                             state = AUTO_STATE.LAST;
@@ -468,10 +414,18 @@ public class NewNewAuto extends MultiOpModeManager {
                         break;
                     case ADD1:
                         depositor.prep();
-                        if (redAlliance) {
-                            drive.arcTo(-r3wh, collectDistance + arcLength3wh, speedMin, speedMax);
+                        if (!collectStep) {
+                            if (redAlliance) {
+                                drive.arcTo(-r3wh, collectDistance + arcLength3wh, speedMin, speedMax);
+                            } else {
+                                drive.arcTo(r3wh, collectDistance + arcLength3wh, speedMin, speedMax);
+                            }
                         } else {
-                            drive.arcTo(r3wh, collectDistance + arcLength3wh, speedMin, speedMax);
+                            if (redAlliance) {
+                                drive.arcTo(-r3wh, collectDistance + arcLength3wh + 3, speedMin, speedMax);
+                            } else {
+                                drive.arcTo(r3wh, collectDistance + arcLength3wh + 3, speedMin, speedMax);
+                            }
                         }
                         if (drive.isDone() && !drive.isBusy()) {
                             drive.setDoneFalse();
@@ -503,19 +457,19 @@ public class NewNewAuto extends MultiOpModeManager {
                         break;
                     case DUCK_SPIN:
                         if (depositor.isDone()) {
-                            depositor.reset();
                             state = AUTO_STATE.ADD2;
                         }
                         break;
                     case ADD2:
                         if (!drive.isDone()) {
                             if (redAlliance) {
-                                drive.arcTo(-r4wh, -arcLength4wh, -speedMin, -speedMax);
+                                drive.arcTo(-r4wh, -arcLength4wh, -speedMin, -0.6);
                             } else {
-                                drive.arcTo(r4wh, -arcLength4wh, -speedMin, -speedMax);
+                                drive.arcTo(r4wh, -arcLength4wh, -speedMin, -0.6);
                             }
                         }
                         if (drive.isDone() && !drive.isBusy()) {
+                            depositor.reset();
                             drive.setDoneFalse();
                             state = AUTO_STATE.ADD22;
                         }
@@ -544,11 +498,25 @@ public class NewNewAuto extends MultiOpModeManager {
                         if (drive.isDone() && !drive.isBusy()) {
                             drive.setDoneFalse();
                             //collectDistance += 2;
+                            state = AUTO_STATE.COLLECT2;
+                        }
+                        break;
+                    case COLLECT2:
+                        /* if (!startedCollecting) {
+                            collectCmdState = collectCmd.BEFORE_COLLECT;
+                            startedCollecting = true;
+                        } */
+                        if (!drive.isDone()) {
+                            drive.arcTo(0, -collectDistance, -speedMin, -speedMax);
+                        }
+                        if (drive.isDone() && !drive.isBusy()) { // && collectCmdState == collectCmd.EJECT) {
+                            drive.setDoneFalse();
+                            startedCollecting = false;
                             state = AUTO_STATE.LAST;
                         }
                         break;
                     case LAST:
-                        if (depositor.isDone()) {
+                        if (depositor.isDone() && collectCmdState == collectCmd.IDLE) {
                             depositor.tiltBack();
                             drive.setDoneFalse();
                             state = AUTO_STATE.DONE;
@@ -645,6 +613,7 @@ public class NewNewAuto extends MultiOpModeManager {
         ADD2,
         ADD22,
         ADD23,
+        COLLECT2,
         LAST,
         DONE;
 

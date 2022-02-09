@@ -64,7 +64,7 @@ public class NewTeleOp extends MultiOpModeManager {
     public static double COLLECTOR_DOWN = 0.90;
     private static double SPEED = 1;
     public static int DISTANCE = 30;
-    public static double DELAY_TIME = 1.15;
+    public static double DELAY_TIME = 1.75;
     public static double EJECT_TIME = 2;
     private static double timerRatio = 0.0;
     public static double duckPowerMin = 0.63;  // min duck spinner speed (0 - 1.0)
@@ -86,10 +86,6 @@ public class NewTeleOp extends MultiOpModeManager {
 
     private static boolean collectorActive = false;
     private static boolean collected = false;
-
-    // Servo position test constants
-    private float servoPos = 0.4f;
-    private static final float INCREMENT = 0.01f;
 
     // Members
     private ElapsedTime runtime = new ElapsedTime();
@@ -233,6 +229,9 @@ public class NewTeleOp extends MultiOpModeManager {
 
         // Depositor
         depositor.loop();
+        if (!depositor.isDone() && depositor.state == Depositor.AUTO_STATE.DOOR_PREP && collectCmdState == collectCmd.IDLE) {
+            collectCmdState = collectCmd.BEFORE_EJECT;
+        }
 
         // Collector state
         if (!collected) {
@@ -301,10 +300,10 @@ public class NewTeleOp extends MultiOpModeManager {
                 collector.setPower(-1);
                 break;
         }
-        RobotLog.d("," + "Collector" + "," + getRuntime() + "," +
+        /* RobotLog.d("," + "Collector" + "," + getRuntime() + "," +
                 gamepad2.left_bumper + "," + collected + "," +
                 collectorArm.getPosition() + "," + collector.getPower() + "," +
-                collectorTimer.seconds() + "," + collectCmdState);
+                collectorTimer.seconds() + "," + collectCmdState); */
 
         // Capstone
         /*if (gamepad2.dpad_down) {
@@ -323,45 +322,6 @@ public class NewTeleOp extends MultiOpModeManager {
             capstoneArm.setPosition(capstoneArm.getPosition() + delta);
             capTimer.reset();
         }*/
-
-        // Distance Sensor
-        if (distanceLeft.getDistance(DistanceUnit.INCH) <= 19) {
-            telemetry.addData("In Range (Left): ", "Yes");
-        } else {
-            telemetry.addData("In Range (Left): ", "No");
-        }
-        if (distanceRight.getDistance(DistanceUnit.INCH) <= 19) {
-            telemetry.addData("In Range (Right): ", "Yes");
-        } else {
-            telemetry.addData("In Range (Right): ", "No");
-        }
-        telemetry.addData("Left Distance", String.format("%.01f in", distanceLeft.getDistance(DistanceUnit.INCH)));
-        telemetry.addData("Right Distance", String.format("%.01f in", distanceRight.getDistance(DistanceUnit.INCH)));
-
-        // Feedback
-        telemetry.addData("Drive", "L %.2f/%d, R %.2f/%d",
-                leftDrive.getPower(), leftDrive.getCurrentPosition(),
-                rightDrive.getPower(), rightDrive.getCurrentPosition());
-        /* telemetry.addData("Duck/Collector", "D %.2f, C (%.2f)",
-                duckSpinner.getPower(), collector.getPower());
-        telemetry.addData("Depositor", "B %.2f, L %.2f, M %.2f",
-                depBelt.getPower(), depLow.getPosition(), depMid.getPosition());
-        telemetry.addData("Spin", spin);
-        telemetry.addData("Dep Belt Pos: ", depBelt.getCurrentPosition()); */
-
-        // Shows number of servoPos
-        telemetry.addData("Pos:", servoPos);
-        // Moving the servo position and number should increase
-        if (gamepad1.dpad_up) {
-            servoPos += INCREMENT;
-            servoPos = Math.min(1.0f, servoPos);
-            // Moving the servo position and number should decrease
-        } else if (gamepad1.dpad_down) {
-            servoPos -= INCREMENT;
-            servoPos = Math.max(0.0f, servoPos);
-        }
-        // Set position of desired servo
-        //collectorArm.setPosition(servoPos);
     }
 
     @Override
