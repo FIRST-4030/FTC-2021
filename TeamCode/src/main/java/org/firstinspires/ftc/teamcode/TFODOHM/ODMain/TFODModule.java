@@ -56,33 +56,7 @@ public class TFODModule extends OpMode {
      */
     public TFODModule(){}
 
-    @Override
-    public void init() {
-        try{
-            initVuforia();
-        } catch (Exception e) {
-            telemetry.log().add("Vuforia Cannot Initialize!");
-        }
 
-        try{
-            initTensorFlow();
-        } catch (Exception e) {
-            telemetry.log().add("TensorFlow Cannot Initialize!");
-        }
-
-        if (tfod != null){
-            tfod.activate();
-            tfod.setZoom(1.0, 16.0/9.0);
-        }
-
-        Matrix4f lensRot = Matrix4f.matMul(Matrix4f.matMul(Matrix4fBuilder.buildRotY(-188) ,Matrix4fBuilder.buildRotX(-50)), Matrix4fBuilder.buildRotZ(180));
-
-        camera.setTranslation(new Vector3f(4.1f, 16.2f, -7.2f));
-        camera.setRotation(lensRot);
-
-        telemetry.log().add("Vuforia Class Null? "+ vuforia == null ? "Yes" : "No");
-        telemetry.log().add("TF Class Null? "+ tfod == null ? "Yes" : "No");
-    }
 
     /**
      * Initializes TF for us to use
@@ -126,46 +100,6 @@ public class TFODModule extends OpMode {
         cLSCubeBall = bbCenterCubeBall.size();
         cLSDuck = bbCenterDuck.size();
         cLSMarker = bbCenterMarker.size();
-    }
-
-    @Override
-    public void init_loop() {
-
-    }
-
-    @Override
-    public void start() {
-
-    }
-
-    @Override
-    public void loop() {
-        updateVar();
-        scan();
-        logData();
-    }
-
-    public void logData(){
-        if (debug){
-            telemetryStringCache = "Debug: ON";
-            telemetryStringCache += "\nTotal Objects Recognized: " + (cLSCubeBall + cLSDuck + cLSMarker);
-            telemetryStringCache += "\nOR Breakdown: \n" + ("\tCubes & Balls: " + cLSCubeBall + "\n") + ("\tDucks: " + cLSDuck + "\n") + ("\tMarkers: " + cLSMarker + "\n");
-            telemetryStringCache += "\nCube & Ball List: \n" + bbCenterCubeBall.toString();
-            telemetryStringCache += "\nMarker List: \n" + bbCenterMarker.toString();
-            telemetryStringCache += "\nDuck List: \n" + bbCenterDuck.toString();
-            telemetryStringCache += "\nCamera imgToLocal: " + camera.getImgToLocal().toString();
-        } else {
-            telemetryStringCache = "Debug: OFF";
-        }
-        telemetry.addData("TFODModule Debugging: \n", telemetryStringCache);
-    }
-
-
-
-
-    @Override
-    public void stop() {
-        tfod.shutdown();
     }
 
     /**
@@ -408,4 +342,75 @@ public class TFODModule extends OpMode {
     public String getData(){
         return telemetryStringCache;
     }
+
+    public void logData(){
+        if (debug){
+            telemetryStringCache = "Debug: ON";
+            telemetryStringCache += "\nTotal Objects Recognized: " + (cLSCubeBall + cLSDuck + cLSMarker);
+            telemetryStringCache += "\nOR Breakdown: \n" + ("\tCubes & Balls: " + cLSCubeBall + "\n") + ("\tDucks: " + cLSDuck + "\n") + ("\tMarkers: " + cLSMarker + "\n");
+            telemetryStringCache += "\nCube & Ball List: \n" + bbCenterCubeBall.toString();
+            telemetryStringCache += "\nMarker List: \n" + bbCenterMarker.toString();
+            telemetryStringCache += "\nDuck List: \n" + bbCenterDuck.toString();
+            telemetryStringCache += "\nCamera imgToLocal: " + camera.getImgToLocal().toString();
+        } else {
+            telemetryStringCache = "Debug: OFF";
+        }
+        telemetry.addData("TFODModule Debugging: \n", telemetryStringCache);
+    }
+
+    public void initTFStuff(){
+        try{
+            initVuforia();
+        } catch (Exception e) {
+            telemetry.log().add("Vuforia Cannot Initialize!");
+        }
+
+        try{
+            initTensorFlow();
+        } catch (Exception e) {
+            telemetry.log().add("TensorFlow Cannot Initialize!");
+        }
+
+        if (tfod != null){
+            tfod.activate();
+            tfod.setZoom(1.0, 16.0/9.0);
+        }
+
+        Matrix4f lensRot = Matrix4f.matMul(Matrix4f.matMul(Matrix4fBuilder.buildRotY(-188) ,Matrix4fBuilder.buildRotX(-50)), Matrix4fBuilder.buildRotZ(180));
+
+        camera.setTranslation(new Vector3f(4.1f, 16.2f, -7.2f));
+        camera.setRotation(lensRot);
+
+        telemetry.log().add("Vuforia Class Null? "+ vuforia == null ? "Yes" : "No");
+        telemetry.log().add("TF Class Null? "+ tfod == null ? "Yes" : "No");
+    }
+
+    @Override
+    public void init() {
+
+    }
+
+    @Override
+    public void init_loop() {
+
+    }
+
+    @Override
+    public void start() {
+
+    }
+
+    @Override
+    public void loop() {
+        updateVar();
+        scan();
+        logData();
+    }
+
+    @Override
+    public void stop() {
+        tfod.shutdown();
+    }
+
+
 }
