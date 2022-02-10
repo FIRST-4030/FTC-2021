@@ -19,7 +19,7 @@ public class TFMathExtension {
      * @param a
      * @param b
      * @param t
-     * @return
+     * @return interpolated float
      */
     public static float lerp(float a, float b, float t){
         return a + (b - a) * t;
@@ -31,7 +31,7 @@ public class TFMathExtension {
      * @param a
      * @param b
      * @param t
-     * @return
+     * @return interpolated Vector2f
      */
     public static Vector2f lerp(Vector2f a, Vector2f b, float t){
         float nX = a.getX() + (b.getX() - a.getX()) * t;
@@ -46,7 +46,7 @@ public class TFMathExtension {
      * @param a
      * @param b
      * @param t
-     * @return
+     * @return interpolated Vector3f
      */
     public static Vector3f lerp(Vector3f a, Vector3f b, float t){
         float nX = a.getX() + (b.getX() - a.getX()) * t;
@@ -62,7 +62,7 @@ public class TFMathExtension {
      * @param a
      * @param b
      * @param t
-     * @return
+     * @return interpolated Vector4f
      */
     public static Vector4f lerp(Vector4f a, Vector4f b, float t){
         float nX = a.getX() + (b.getX() - a.getX()) * t;
@@ -77,10 +77,23 @@ public class TFMathExtension {
      * @param min
      * @param max
      * @param value
-     * @return
+     * @return clamped value
      */
     public static float clamp(float min, float max, float value){
         return Math.min(max, Math.max(min, value));
+    }
+    
+    /**
+     * Take the factorial of an input integer
+     * @param n
+     * @return factorial of n / n!
+     */
+    public static int factorialInt(int n){
+        int res = 1, i;
+        for (i = 2; i <= n; i++){
+            res *= i;
+        }
+        return res;
     }
 
     /**
@@ -197,7 +210,7 @@ public class TFMathExtension {
      * This method interpolates through a bezier curve through the given t value. The control points first and last element are the beginning and end points respectively.
      * @param controlPoints
      * @param t
-     * @return
+     * @return interpolated vector2f
      */
     public static Vector2f bezierCurveGen(ArrayList<Vector2f> controlPoints, float t){
         ArrayList<Vector2f> cachedPoints = controlPoints, newCachedPoints = new ArrayList<>();
