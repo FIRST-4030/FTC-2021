@@ -30,29 +30,33 @@ import kotlin.jvm.internal.Reflection;
 
 @Config
 @Autonomous(name = "TFDrive", group = "Test")
-public class TFDriveTest extends OpMode {
+public class TFDriveTest extends MultiOpModeManager {
     private NewNewDrive drive;
 
     private AUTO_STATE state = AUTO_STATE.DONE;
+    private AUTO_STATE oldState = AUTO_STATE.DONE;
 
     @Override
     public void init() {
-        initTFStuff();
 
         try {
+            super.register(new NewNewDrive());
             drive = new NewNewDrive();
+            super.register(drive);
             drive.init();
         } catch (Exception e ){
             telemetry.log().add(drive.getClass().getSimpleName() + " is not initializing.");
         }
+        initTFStuff();
 
         telemetry.addData("TFObjectDetection Null? ", getTfod() == null ? "Yes" : "No");
         telemetry.addData("Vuforia Null? ", getVuforia() == null ? "Yes" : "No");
+        telemetry.addData("IMU Null? ", drive.getImu() == null ? "Yes" : "No");
     }
 
     @Override
     public void init_loop() {
-
+        //drive.init_loop();
     }
 
     @Override
@@ -72,6 +76,10 @@ public class TFDriveTest extends OpMode {
     public static double speedMax = 0.5;
     @Override
     public void loop() {
+        if (oldState != state) {
+            drive.setDoneFalse();
+            oldState = state;
+        }
         switch (state){
             case VERIFICATION:
                 inIMG = verifyImg();
@@ -85,15 +93,15 @@ public class TFDriveTest extends OpMode {
                     scan();
                     scanned = true;
                 }
-                if (!isBusy() && (sorted == false)){
+                if (!isBusy() && scanned && (sorted == false)){
                     tempV2 = sortCBBB();
                     sorted = true;
                 }
-                if (!isBusy() && (calculated == false)){
+                if (!isBusy() && sorted && (calculated == false)){
                     targetPreCasted = calcCoordinate(tempV2);
                     calculated = true;
                 }
-                if (!isBusy() && (scanned && sorted && calculated)){
+                if (!isBusy() && (scanned && sorted && calculated) && gamepad1.a){
                     state = AUTO_STATE.RESET_VAR;
                 }
                 break;
@@ -109,7 +117,9 @@ public class TFDriveTest extends OpMode {
                 storedRadius = f[0];
                 storedArcLength = f[1];
                 inIMG = false;
-                state = AUTO_STATE.START_MOVE;
+                if (gamepad1.a) {
+                    state = AUTO_STATE.START_MOVE;
+                }
                 break;
 
             case START_MOVE:
@@ -144,6 +154,9 @@ public class TFDriveTest extends OpMode {
         telemetry.addData("Calculated: ", calculated);
         telemetry.addData("StartedMove: ", startedMove);
         telemetry.addData("ReversingMove: ", reversingMove);
+        telemetry.addData("TargetPreCasted: ", targetPreCasted);
+        telemetry.addData("Radius: ", storedRadius);
+        telemetry.addData("ArcLength: ", storedArcLength);
     }
 
     @Override

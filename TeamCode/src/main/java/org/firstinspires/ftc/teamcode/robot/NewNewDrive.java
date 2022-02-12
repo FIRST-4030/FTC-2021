@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.teamcode.utils.PiecewiseFunction;
 
 @Config
@@ -146,6 +147,10 @@ public class NewNewDrive extends OpMode {
     }
 
     // Custom methods
+    public BNO055IMU getImu(){
+        return imu;
+    }
+
     public boolean isBusy() {
         return (driveLeft.getPower() != 0 || driveRight.getPower() != 0);
     }
