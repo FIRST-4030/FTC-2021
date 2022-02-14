@@ -46,7 +46,7 @@ public class TFODModule extends OpMode {
     private ArrayList<Vector2f> bbCenterCubeBall = new ArrayList<>();
     private ArrayList<Vector2f> bbCenterDuck = new ArrayList<>();
     private ArrayList<Vector2f> bbCenterMarker = new ArrayList<>();
-    private Vector2f error_vector = new Vector2f(5,5);
+    private Vector2f error_vector = new Vector2f(217456,202302);
     private int cLSCubeBall = 0, cLSDuck = 0, cLSMarker = 0, tLS = 0;
     private String telemetryStringCache = "";
     private CameraLens camera = new CameraLens(CameraLens.C270_FOV);
@@ -54,9 +54,19 @@ public class TFODModule extends OpMode {
     /**
      * After calling this class, init() after setting variables
      */
-    public TFODModule(){}
+    public TFODModule(){
+        //default these values
+        camera.setTranslation(new Vector3f(0, 0, 0));
+        camera.setRotation(new Matrix4f());
+    }
 
-
+    /**
+     * After calling this class, init() after setting variables
+     */
+    public TFODModule(Vector3f camPosition, Matrix4f camRotation){
+        camera.setTranslation(camPosition);
+        camera.setRotation(camRotation);
+    }
 
     /**
      * Initializes TF for us to use
@@ -410,6 +420,7 @@ public class TFODModule extends OpMode {
     @Override
     public void stop() {
         tfod.shutdown();
+        vuforia.close();
     }
 
 
