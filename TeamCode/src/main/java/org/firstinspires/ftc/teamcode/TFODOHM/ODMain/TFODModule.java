@@ -397,7 +397,25 @@ public class TFODModule extends OpMode {
 
     @Override
     public void init() {
+        try{
+            initVuforia();
+        } catch (Exception e) {
+            telemetry.log().add("Vuforia Cannot Initialize!");
+        }
 
+        try{
+            initTensorFlow();
+        } catch (Exception e) {
+            telemetry.log().add("TensorFlow Cannot Initialize!");
+        }
+
+        if (tfod != null){
+            tfod.activate();
+            tfod.setZoom(1.0, 16.0/9.0);
+        }
+        
+        telemetry.log().add("Vuforia Class Null? "+ vuforia == null ? "Yes" : "No");
+        telemetry.log().add("TF Class Null? "+ tfod == null ? "Yes" : "No");
     }
 
     @Override
