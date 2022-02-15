@@ -240,9 +240,9 @@ public class NewNewAuto extends MultiOpModeManager {
                     case ARC:
                         depositor.prep();
                         if (redAlliance) {
-                            drive.arcTo(-r1, arcLength1, speedMin, speedMax);
+                            drive.arcToNew(-r1, arcLength1, speedMin, speedMax);
                         } else {
-                            drive.arcTo(r1, arcLength1, speedMin, speedMax);
+                            drive.arcToNew(r1, arcLength1, speedMin, speedMax);
                         }
                         collectorArm.setPosition(COLLECTOR_UP);
                         collectCmdState = collectCmd.IDLE;
@@ -264,9 +264,9 @@ public class NewNewAuto extends MultiOpModeManager {
                         break;
                     case PARK:
                         if (redAlliance) {
-                            drive.arcTo(r2duck, -arcLength2duck, -speedMin, -speedMax);
+                            drive.arcToNew(r2duck, -arcLength2duck, -speedMin, -speedMax);
                         } else {
-                            drive.arcTo(-r2duck, -arcLength2duck, -speedMin, -speedMax);
+                            drive.arcToNew(-r2duck, -arcLength2duck, -speedMin, -speedMax);
                         }
                         if (drive.isDone() && !drive.isBusy()) {
                             drive.setDoneFalse();
@@ -275,9 +275,9 @@ public class NewNewAuto extends MultiOpModeManager {
                         break;
                     case ADD1:
                         if (redAlliance) {
-                            drive.arcTo(r3duck, arcLength3duck, speedMin, speedMax);
+                            drive.arcToNew(r3duck, arcLength3duck, speedMin, speedMax);
                         } else {
-                            drive.arcTo(r3duck, arcLength3duck - 2, speedMin, speedMax);
+                            drive.arcToNew(r3duck, arcLength3duck - 2, speedMin, speedMax);
                         }
                         if (drive.isDone() && !drive.isBusy()) {
                             drive.setDoneFalse();
@@ -292,9 +292,9 @@ public class NewNewAuto extends MultiOpModeManager {
                         break;
                     case ADD12:
                         if (redAlliance) {
-                            drive.arcTo(r3duck2, -arcLength3duck2, -speedMin, -speedMax);
+                            drive.arcToNew(r3duck2, -arcLength3duck2, -speedMin, -speedMax);
                         } else {
-                            drive.arcTo(-r3duck2, -arcLength3duck2 + .25, -speedMin, -speedMax);
+                            drive.arcToNew(-r3duck2, -arcLength3duck2 + .25, -speedMin, -speedMax);
                         }
                         if (drive.isDone() && !drive.isBusy()) {
                             drive.setDoneFalse();

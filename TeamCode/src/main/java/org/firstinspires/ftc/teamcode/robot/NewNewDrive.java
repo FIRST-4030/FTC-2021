@@ -35,7 +35,7 @@ public class NewNewDrive extends OpMode {
     private boolean notOver2ndMoveL = false;
     private boolean notOver2ndMoveR = false;
     private boolean angleSet = false;
-    private boolean logging = false;
+    private boolean logging = true;
 
     // Hardware
     private DcMotor driveLeft;
@@ -64,16 +64,20 @@ public class NewNewDrive extends OpMode {
     public void init() {
         // Drive wheels
         try {
+            // Looks for motor named "BL" in config file
             driveLeft = hardwareMap.get(DcMotor.class, "BL");
             driveLeft.setDirection(DcMotorSimple.Direction.FORWARD);
             driveLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             driveLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            // Active Brake is turned on when motor power is 0
             driveLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+            // Looks for motor named "BR" in config file
             driveRight = hardwareMap.get(DcMotor.class, "BR");
             driveRight.setDirection(DcMotorSimple.Direction.FORWARD);
             driveRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             driveRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            // Active Brake is turned on when motor power is 0
             driveRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
             BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -459,7 +463,8 @@ public class NewNewDrive extends OpMode {
         double maxRatio = Math.max(Math.abs(leftTicks), Math.abs(rightTicks)) / Math.abs(midTicks);
         if ((isBusy() || !done) && speedCurveL.isValid() && speedCurveR.isValid() && imuAngleRamp.isValid() && started) {
             // speed is calculated using the curve defined above
-            correction = checkDirectionNew(imuAngleRamp.getY((left ? driveLeft.getCurrentPosition() : driveRight.getCurrentPosition())));
+            correction = checkDirectionNew(imuAngleRamp.getY((driveLeft.getCurrentPosition() + driveRight.getCurrentPosition())/2.0));
+            telemetry.log().add("Correction: " + correction);
             driveLeft.setPower((leftTicks / midTicks) / maxRatio * speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0) - (correction));
             driveRight.setPower((rightTicks / midTicks) / maxRatio * speedCurveR.getY(driveRight.getCurrentPosition() * 1.0) + (correction));
             if (Math.abs(r) - trackWidthHalf < 1) {
@@ -502,9 +507,10 @@ public class NewNewDrive extends OpMode {
         if (logging) {
             logData("arcTo()", started + "," + done + "," +
                     speedCurveL.isValid() + "," + speedCurveL.getSize() + "," +
-                    speedCurveR.isValid() + "," + speedCurveR.getSize() + "," + imuAngleRamp.getY((left ? driveLeft.getCurrentPosition() : driveRight.getCurrentPosition())) + "," +
+                    speedCurveR.isValid() + "," + speedCurveR.getSize() + "," + imuAngleRamp.getY(((driveLeft.getCurrentPosition() + driveRight.getCurrentPosition())/2.0)) + "," +
                     arcLengthL + "," + arcLengthR + "," +
-                    leftTicks + "," + rightTicks + "," + midTicks + "," + maxRatio);
+                    leftTicks + "," + rightTicks + "," + midTicks + "," + maxRatio + "," +
+                    correction + "," + getAngle());
         }
     }
 
