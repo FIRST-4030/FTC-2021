@@ -8,6 +8,7 @@ public class TFMathExtension {
     public static final double pi = Math.PI;
     public static final double e = Math.E;
     public static final double golden_ratio = (1 + Math.sqrt(5)) / 2;
+    public static final double tau = Math.PI * 2;
 
     //quick conversions
     public static final double rad2deg = 180 / pi;
