@@ -54,6 +54,7 @@ public class arcToTest extends MultiOpModeManager {
     public static double arcLength = 2 * Math.PI * Math.abs(r);
     public static double COLLECTOR_UP = 0.55;
     public static int num = 0;
+    private int testing_num = 1;
 
     // Members
     private AUTO_STATE state = AUTO_STATE.DONE;
