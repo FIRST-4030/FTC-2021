@@ -48,9 +48,9 @@ public class arcToTest extends MultiOpModeManager {
     private Servo collectorArm = null;
 
     // Constants
-    public static double r = 10;
+    public static double r = 20;
     public static double speedMin = 0.1;
-    public static double speedMax = 0.8;
+    public static double speedMax = 0.5;
     public static double arcLength = 2 * Math.PI * Math.abs(r);
     public static double COLLECTOR_UP = 0.55;
     public static int num = 0;

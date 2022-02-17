@@ -12,7 +12,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.teamcode.utils.PiecewiseFunction;
 
 @Config
@@ -427,10 +426,10 @@ public class NewNewDrive extends OpMode {
         double arcLengthL;
         double arcLengthR;
         double arcLengthInner;
-        double arcLengthOuter = 0;
+        double arcLengthOuter;
         double leftTicks;
         double rightTicks;
-        double angle = 0;
+        double angle;
 
         if (r == 0) {
             angle = 0;
@@ -451,7 +450,6 @@ public class NewNewDrive extends OpMode {
                 arcLengthR = arcLengthInner;
             }
         }
-        boolean left = (arcLengthL == arcLengthOuter);
 
         leftTicks = arcLengthL * TICKS_PER_INCH;
         rightTicks = arcLengthR * TICKS_PER_INCH;
@@ -521,7 +519,6 @@ public class NewNewDrive extends OpMode {
         }
         double arcLengthL1, arcLengthR1;
         double arcLengthL2, arcLengthR2;
-        ;
         double arcLengthInner1, arcLengthOuter1 = 0;
         double arcLengthInner2, arcLengthOuter2 = 0;
         double leftTicks1, rightTicks1;
@@ -649,7 +646,6 @@ public class NewNewDrive extends OpMode {
         }
         double arcLengthL1, arcLengthR1;
         double arcLengthL2, arcLengthR2;
-        ;
         double arcLengthL3, arcLengthR3;
         double arcLengthInner1, arcLengthOuter1;
         double arcLengthInner2, arcLengthOuter2;
@@ -892,7 +888,7 @@ public class NewNewDrive extends OpMode {
         rampUpTicks *= Math.signum(pathTicks);
         rampDownTicks *= Math.signum(pathTicks);
 
-        pfunc.addElement(currentTicks - 0.025 * pathTicks, startAngle);
+        pfunc.addElement(currentTicks, startAngle);
         pfunc.addElement(currentTicks + rampUpTicks, rampUpTicks / pathTicks * endAngle);
         pfunc.addElement(currentTicks + pathTicks - rampDownTicks, (pathTicks - rampDownTicks) / pathTicks * endAngle);
         pfunc.addElement(currentTicks + pathTicks, endAngle);
@@ -945,12 +941,6 @@ public class NewNewDrive extends OpMode {
 
     public void returnToPos(double distance) {
         arcTo(0, distance, 0.1, 0.2);
-    }
-
-    public void stopDrive() {
-        driveLeft.setPower(0);
-        driveRight.setPower(0);
-        done = true;
     }
 
     /**

@@ -33,7 +33,8 @@ public class TFODMain extends OpMode {
             "Ball",
             "Cube",
             "Duck",
-            "Marker"
+            "Marker",
+            "GLaDOS"
     };
 
     /**
@@ -246,9 +247,14 @@ public class TFODMain extends OpMode {
                                 bbBottomRight.add(normalizedBR);
                                 break;
                             case "MARKER":
-                                objHMDetected.put(LABELS[3], true); //Market
+                                objHMDetected.put(LABELS[3], true); //Marker
                                 bbMarkerTL.add(normalizedTL);
                                 bbMarkerBR.add(normalizedBR);
+                                break;
+                            case "GLaDOS":
+                                objHMDetected.put(LABELS[4], true); //GLaDOS
+                                bbTopLeft.add(normalizedTL);
+                                bbBottomRight.add(normalizedBR);
                                 break;
                         }
                     }
