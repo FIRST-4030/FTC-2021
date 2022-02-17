@@ -36,11 +36,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.TFODOHM.ODMain.TFODMain;
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.TFMathExtension;
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector2f;
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector3f;
-import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
+import org.firstinspires.ftc.teamcode.tfodohm.TFMaths.TFMathExtension;
+import org.firstinspires.ftc.teamcode.tfodohm.TFMaths.Vector2f;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;

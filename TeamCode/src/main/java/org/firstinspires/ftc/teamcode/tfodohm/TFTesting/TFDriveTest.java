@@ -1,32 +1,18 @@
-package org.firstinspires.ftc.teamcode.TFODOHM.TFTesting;
+package org.firstinspires.ftc.teamcode.tfodohm.TFTesting;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.android.util.Size;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.TFODOHM.ODMain.CameraLens;
-import org.firstinspires.ftc.teamcode.TFODOHM.ODMain.TFODModule;
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Matrix4f;
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Matrix4fBuilder;
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.TFMathExtension;
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector2f;
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector3f;
+import org.firstinspires.ftc.teamcode.tfodohm.ODMain.TFODModule;
+import org.firstinspires.ftc.teamcode.tfodohm.TFMaths.Matrix4f;
+import org.firstinspires.ftc.teamcode.tfodohm.TFMaths.Matrix4fBuilder;
+import org.firstinspires.ftc.teamcode.tfodohm.TFMaths.TFMathExtension;
+import org.firstinspires.ftc.teamcode.tfodohm.TFMaths.Vector2f;
+import org.firstinspires.ftc.teamcode.tfodohm.TFMaths.Vector3f;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 import org.firstinspires.ftc.teamcode.robot.NewNewDrive;
-import org.firstinspires.ftc.teamcode.robot.tfMathArcTest;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnum;
 import org.firstinspires.ftc.teamcode.utils.OrderedEnumHelper;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import kotlin.jvm.internal.Reflection;
 
 @Config
 @Autonomous(name = "TFDrive", group = "Test")

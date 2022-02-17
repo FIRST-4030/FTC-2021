@@ -1,11 +1,11 @@
-package org.firstinspires.ftc.teamcode.TFODOHM.ODMain;
+package org.firstinspires.ftc.teamcode.tfodohm.ODMain;
 
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Matrix4f;
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Plane3f;
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.TFMathExtension;
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector2f;
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector3f;
-import org.firstinspires.ftc.teamcode.TFODOHM.TFMaths.Vector4f;
+import org.firstinspires.ftc.teamcode.tfodohm.TFMaths.Matrix4f;
+import org.firstinspires.ftc.teamcode.tfodohm.TFMaths.Plane3f;
+import org.firstinspires.ftc.teamcode.tfodohm.TFMaths.TFMathExtension;
+import org.firstinspires.ftc.teamcode.tfodohm.TFMaths.Vector2f;
+import org.firstinspires.ftc.teamcode.tfodohm.TFMaths.Vector3f;
+import org.firstinspires.ftc.teamcode.tfodohm.TFMaths.Vector4f;
 
 /**
  * This class simulates the viewable space of a camera

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.TFODOHM.ODMain;
+package org.firstinspires.ftc.teamcode.tfodohm.ODMain;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
