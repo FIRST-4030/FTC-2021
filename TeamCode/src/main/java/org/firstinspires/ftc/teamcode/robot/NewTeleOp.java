@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode.robot;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -39,6 +40,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 
 @Config
@@ -300,28 +302,6 @@ public class NewTeleOp extends MultiOpModeManager {
                 collector.setPower(-1);
                 break;
         }
-        /* RobotLog.d("," + "Collector" + "," + getRuntime() + "," +
-                gamepad2.left_bumper + "," + collected + "," +
-                collectorArm.getPosition() + "," + collector.getPower() + "," +
-                collectorTimer.seconds() + "," + collectCmdState); */
-
-        // Capstone
-        /*if (gamepad2.dpad_down) {
-            capstoneTarget = CAP_DOWN;
-        } else if (gamepad2.dpad_up) {
-            capstoneTarget = CAP_MID;
-        }
-        if (capstoneTarget >= 0 && capstoneTarget <= 1) {
-            capstoneTarget += (gamepad2.right_stick_y * 0.02);
-        }
-
-        double capError = capstoneTarget - capstoneArm.getPosition();
-        if (capError != 0 && capTimer.seconds() > delayTime) {
-            double delta = Math.max(CAPSTONE_DELTA, Math.abs(capError));
-            delta *= Math.signum(capError);
-            capstoneArm.setPosition(capstoneArm.getPosition() + delta);
-            capTimer.reset();
-        }*/
     }
 
     @Override
