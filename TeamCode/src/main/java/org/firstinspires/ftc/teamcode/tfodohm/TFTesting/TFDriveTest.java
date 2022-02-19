@@ -23,8 +23,8 @@ public class TFDriveTest extends MultiOpModeManager {
     private AUTO_STATE state = AUTO_STATE.DONE;
     private AUTO_STATE oldState = AUTO_STATE.DONE;
 
-    private final Vector3f camera_pos = new Vector3f();
-    private final Matrix4f camera_rot = Matrix4fBuilder.buildGenRot(0, 0, 0);
+    private final Vector3f camera_pos = new Vector3f(5.5f, 15.5f, -7.5f);
+    private final Matrix4f camera_rot = Matrix4fBuilder.buildGenRot(-53, -185, 2);
 
     @Override
     public void init() {
@@ -50,6 +50,8 @@ public class TFDriveTest extends MultiOpModeManager {
         telemetry.addData("TFObjectDetection Null? ", tfodModule.getTfod() == null ? "Yes" : "No");
         telemetry.addData("Vuforia Null? ", tfodModule.getVuforia() == null ? "Yes" : "No");
         telemetry.addData("IMU Null? ", drive.getImu() == null ? "Yes" : "No");
+
+        telemetry.log().add(tfodModule.calcCoordinate(new Vector2f(0,0)).toString());
     }
 
     @Override
