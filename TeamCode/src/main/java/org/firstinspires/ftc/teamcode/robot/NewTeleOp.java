@@ -45,6 +45,7 @@ import org.firstinspires.ftc.teamcode.momm.MultiOpModeManager;
 
 @Config
 @TeleOp(name = "NewTeleOp", group = "Test")
+// inherits MultiOpModeManager which allows calling functions and methods from multiple different OpMode classes
 public class NewTeleOp extends MultiOpModeManager {
     // Hardware
     private DcMotor leftDrive = null;
@@ -85,6 +86,7 @@ public class NewTeleOp extends MultiOpModeManager {
     private static double fastFactor = 0;
     private static double fastFactor2 = 0;
     collectCmd collectCmdState = collectCmd.IDLE;
+    private static double collectStartDelay = (Math.PI / 10);
 
     private static boolean collectorActive = false;
     private static boolean collected = false;
@@ -150,7 +152,6 @@ public class NewTeleOp extends MultiOpModeManager {
 
         // Capstone Grabber
         try {
-            //capstoneHook = hardwareMap.get(Servo.class, "Caphook");
             capstoneArm = hardwareMap.get(Servo.class, "Caparm");
         } catch (Exception e) {
             telemetry.log().add("Could not find capstone dep");
@@ -211,67 +212,77 @@ public class NewTeleOp extends MultiOpModeManager {
         rightDrive.setPower(RIGHT_DRIVE_POW * fastFactor2);
 
         // Duck spinner
-        /* if (gamepad1.a) {
-            DUCK_POWER = duckPowerMin;
-            duckTimer.reset();
-        } else if (gamepad1.b) {
-            DUCK_POWER = -duckPowerMin;
-            duckTimer.reset();
-        }
-
-        if (DUCK_POWER != 0 && duckTimer.seconds() < duckRampTime) {
-            DUCK_POWER = (duckPowerMin + (duckTimer.seconds() / duckRampTime) *
-                    (duckPowerMax - duckPowerMin)) * Math.signum(DUCK_POWER);
-        } else {
-            DUCK_POWER = 0.0;
-        }
-        duckSpinner.setPower(DUCK_POWER);
-        duckSpinner2.setPower(DUCK_POWER); */
         duckSpin.loop();
 
         // Depositor
         depositor.loop();
+        // When depositor is preparing freight and collector is idle,
+        // change its state to ejecting to prevent any stuckness
         if (!depositor.isDone() && depositor.state == Depositor.AUTO_STATE.DOOR_PREP && collectCmdState == collectCmd.IDLE) {
             collectCmdState = collectCmd.BEFORE_EJECT;
         }
 
-        // Collector state
+        // Collector
+        // boolean variable 'collected' is only updated when it is false,
+        // and when it is true, it doesn't change until the collector is no longer in the COLLECT state,
+        // or if the timer is less than the collection start delay time, which means it might be a false trigger
         if (!collected) {
             collected = sensorCollector.isPressed();
-        } else if (collectCmdState != collectCmd.COLLECT || collectorTimer.seconds() <= (Math.PI / 10)) {
+        } else if (collectCmdState != collectCmd.COLLECT || collectorTimer.seconds() <= collectStartDelay) {
             collected = sensorCollector.isPressed();
         }
         telemetry.addData("Collected? ", collected);
+        // Collector state
+        // This current collector works by holding down a button (gamepad2 left bumper) to start collecting
+        // and it goes on to ejecting (opposite direction) when button is released or the sensor is triggered
         switch (collectCmdState) {
             case IDLE:
+                // IDLE state
+                // Checks user input and starts collection by moving on to the BEFORE_COLLECT state,
+                // if left bumper on gamepad2 is pressed
                 if (gamepad2.left_bumper) {
                     collectCmdState = collectCmd.BEFORE_COLLECT;
                 }
                 break;
             case BEFORE_COLLECT:
+                // Resets timer and move onto the COLLECT state
                 collectorTimer.reset();
                 collectCmdState = collectCmd.COLLECT;
                 break;
             case COLLECT:
+                // Checks driver input
+                // If the bumper that was held to start collecting is released,
+                // move on to the BEFORE_EJECT state for ejection
                 if (!gamepad2.left_bumper) {
                     collectCmdState = collectCmd.BEFORE_EJECT;
                 }
-                if (collected && collectorTimer.seconds() > (Math.PI / 10)) {
+                // Checks sensor and time passed after timer reset in the BEFORE_COLLECT state
+                // If the sensor is triggered, 'collected' would return true
+                // And if the time in second is more than the desired start time of collection (0.314...right now),
+                // timer is reset and state is changed to SENSOR_DELAY
+                if (collected && collectorTimer.seconds() > collectStartDelay) {
                     collectorTimer.reset();
                     collectCmdState = collectCmd.SENSOR_DELAY;
                 }
                 break;
             case SENSOR_DELAY:
                 collected = false;
+                // this state is only for when the sensor is triggered
+                // it adds a delay time before ejecting so that
                 if (collectorTimer.seconds() > DELAY_TIME) {
                     collectCmdState = collectCmd.BEFORE_EJECT;
                 }
                 break;
             case BEFORE_EJECT:
+                // resets timer again and change state to EJECT
                 collectorTimer.reset();
                 collectCmdState = collectCmd.EJECT;
                 break;
             case EJECT:
+                // checks timer
+                // When timer time is longer (greater) than the EJECT_TIME (2 seconds),
+                // or when user input of gamepad2 right bumper is detected
+                // stop ejection and change state to IDLE
                 if (collectorTimer.seconds() > EJECT_TIME) {
                     collectCmdState = collectCmd.IDLE;
                 }
@@ -282,6 +293,7 @@ public class NewTeleOp extends MultiOpModeManager {
         }
 
         // Collector commands
+        // additional commands for collectorArm servo and collector motor
         switch (collectCmdState) {
             case IDLE:
                 collectorArm.setPosition(COLLECTOR_UP);
@@ -308,6 +320,7 @@ public class NewTeleOp extends MultiOpModeManager {
     public void stop() {
     }
 
+    // Collector states enum list
     enum collectCmd {
         IDLE,
         BEFORE_COLLECT,
