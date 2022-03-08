@@ -176,8 +176,12 @@ public class NewNewAuto extends MultiOpModeManager {
 
     @Override
     public void init_loop() {
+        // button inputs changes redAlliance boolean to true or false
+        // boolean determines running red or blue alliance code
         if (gamepad1.dpad_right) redAlliance = true;
         if (gamepad1.dpad_left) redAlliance = false;
+        // button inputs changes duckSide boolean to true or false
+        // boolean determines running duck side or warehouse side code
         if (gamepad1.dpad_up) duckSide = true;
         if (gamepad1.dpad_down) duckSide = false;
         in.loop();

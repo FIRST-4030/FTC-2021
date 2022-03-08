@@ -195,7 +195,7 @@ public class NewTeleOp extends MultiOpModeManager {
 
     @Override
     public void loop() {
-        // PoV drive
+        // Tank drive
         if (gamepad1.left_trigger > ACCEL_CONSTANT) {
             fastFactor = gamepad1.left_trigger;
         } else {
