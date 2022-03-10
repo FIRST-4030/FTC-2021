@@ -29,12 +29,14 @@ public class LoopUtilTesting extends LoopUtil {
 
     @Override
     public void opUpdate(double deltaTime) {
-        update_wait_for(10);
-        telemetry.addData("Hello World! Current Time: ", getCurrentTime());
+        update_wait_for(1000);
+        telemetry.addData("Current Time: ", getCurrentTimeMs());
+        telemetry.addData("Current Time: ", getCurrentTimeSec());
     }
 
     @Override
     public void opFixedUpdate(double deltaTime) {
+
         opFixedUpdateCount++;
         telemetry.addData("Fixed Update Count: ", opFixedUpdateCount);
         telemetry.addData("Delta Time: ", deltaTime);

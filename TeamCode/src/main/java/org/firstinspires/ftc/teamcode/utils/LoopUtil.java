@@ -12,7 +12,11 @@ Terminology:
 public abstract class LoopUtil extends OpMode {
 
     private ElapsedTime loop_timer;
-    private boolean timeStart = false, running = false;
+
+    private boolean
+            timeStart = false,
+            running = false;
+
     private double
             delta_time,
             loop_start_time,
@@ -68,7 +72,7 @@ public abstract class LoopUtil extends OpMode {
         loop_start_time = loop_timer.milliseconds();
 
         //calculate the difference of this loop's start time from the last loop's start time
-        delta_time = loop_end_time - loop_start_time;
+        delta_time = loop_start_time - loop_end_time;
 
         //set this loop's end time to the start
         loop_end_time = loop_start_time;
@@ -78,6 +82,7 @@ public abstract class LoopUtil extends OpMode {
 
         //extra for logging additional data
         frameTime += delta_time;
+
 
         while (unprocessed_time >= UPDATE_CAP){
             //everytime this loops, it will try to update as many times as what a perfect loop will update every second;
@@ -102,6 +107,7 @@ public abstract class LoopUtil extends OpMode {
                 }
             }
         }
+
 
         //this will try to update every loop call, which can make it "consistent"
         //so, to realistically not make the OpMode thread sleep, we make it skip the update method instead
@@ -143,8 +149,16 @@ public abstract class LoopUtil extends OpMode {
         return delta_time;
     }
 
-    public double getCurrentTime(){
+    public double getCurrentTimeMs(){
         return loop_timer.milliseconds();
+    }
+
+    public double getFps(){
+        return this.fps;
+    }
+
+    public double getCurrentTimeSec(){
+        return loop_timer.milliseconds() / 1000;
     }
 
     public boolean isRunning(){
