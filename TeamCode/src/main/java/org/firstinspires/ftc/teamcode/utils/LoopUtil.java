@@ -3,13 +3,23 @@ package org.firstinspires.ftc.teamcode.utils;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
+import org.firstinspires.ftc.teamcode.robot.Globals;
+
+import java.util.Vector;
+
 /*
 Terminology:
     Delta Time - how long it takes to do something
     Update - Method that executes every single time it's called in a loop/main structure
     Fixed Update - updates that will execute a fixed amount of times per time unit
  */
-public abstract class LoopUtil extends OpMode {
+public abstract class LoopUtil extends OpMode{
+
+    //MOMM integration
+    private final Vector<OpMode> opmodes;
+    public final InputHandler input;
+
 
     private ElapsedTime loop_timer;
 
@@ -26,6 +36,107 @@ public abstract class LoopUtil extends OpMode {
             unprocessed_time,
             frameTime, frames, fps,
             MIN_WAIT_LIMIT, UPDATE_CAP;
+
+
+    public LoopUtil(){
+        Globals.opmode = this;
+        opmodes = new Vector<>();
+        input = new InputHandler(this);
+    }
+
+    /**
+     * This method will register an OpMode passed in as the parameter
+     * <br>Throws a NullPointerException if you don't pass an OpMode
+     * <br>Throws an IllegalArgumentException if you pass LoopUtil into OpMode
+     * <br>Throws an IllegalArgumentException if it already has the OpMode registered
+     * @param opMode
+     */
+    public void register(OpMode opMode){
+        if (opMode == null) {
+            throw new NullPointerException(getClass().getSimpleName() + ": " +
+                    "OpMode not specified");
+        }
+        if (opMode.equals(this)) {
+            throw new IllegalArgumentException(getClass().getSimpleName() + ": " +
+                    "Refusing to re-register the primary OpMode: " + opMode.getClass().getSimpleName());
+        }
+        if (opmodes.contains(opMode)) {
+            throw new IllegalArgumentException(getClass().getSimpleName() + ": " +
+                    "OpMode already registered: " + opMode.getClass().getSimpleName());
+        }
+
+        opMode.hardwareMap = hardwareMap;
+        opMode.telemetry = telemetry;
+        opMode.gamepad1 = gamepad1;
+        opMode.gamepad2 = gamepad2;
+
+        opmodes.add(opMode);
+    }
+
+    /**
+     * This method will deregister the specified OpMode
+     * <br>Throws a NullPointerException if there's no OpMode passed as an argument
+     * @param opMode
+     */
+    public void deregister(OpMode opMode) {
+        if (opMode == null) {
+            throw new NullPointerException(getClass().getSimpleName() + ": " +
+                    "OpMode not specified");
+        }
+        opmodes.remove(opMode);
+    }
+
+    /**
+     * init() all registered OpModes
+     */
+    public void initOpModes(){
+        for (OpMode op : opmodes){
+            op.time = time;
+            op.init();
+        }
+    }
+
+    /**
+     * init_loop() all registered OpModes
+     */
+    public void initLoopOpModes(){
+        input.loop();
+        for (OpMode op : opmodes){
+            op.time = time;
+            op.init_loop();
+        }
+    }
+
+    /**
+     * start() all registered OpModes
+     */
+    public void startOpModes(){
+        for (OpMode op : opmodes){
+            op.time = time;
+            op.start();
+        }
+    }
+
+    /**
+     * loop() all registered OpModes
+     */
+    public void loopOpModes(){
+        input.loop();
+        for (OpMode op : opmodes){
+            op.time = time;
+            op.loop();
+        }
+    }
+
+    /**
+     * stop() all registered OpModes
+     */
+    public void stopOpModes(){
+        for (OpMode op : opmodes){
+            op.time = time;
+            op.stop();
+        }
+    }
 
     @Override
     public void init() {
