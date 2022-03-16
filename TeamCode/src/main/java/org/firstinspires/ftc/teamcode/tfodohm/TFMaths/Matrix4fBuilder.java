@@ -1,10 +1,6 @@
 package org.firstinspires.ftc.teamcode.tfodohm.TFMaths;
 
 public class Matrix4fBuilder {
-    /**
-     * In these methods under this class, almost all matrices built expect a Vector4f with W being 1 to achieve the desired effect
-     */
-    public static void affineHelp(){return;}
 
     /**
      * Builds a translation matrix that transforms the X, Y, Z by the forth column, vector t

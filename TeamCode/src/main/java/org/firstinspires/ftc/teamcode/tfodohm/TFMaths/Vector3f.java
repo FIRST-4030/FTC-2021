@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class Vector3f {
 
-    private float x, y, z;
+    public float x, y, z;
 
     public Vector3f(){
         this.x = 0;

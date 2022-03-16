@@ -1,15 +1,19 @@
 package org.firstinspires.ftc.teamcode.tfodohm.TFMaths;
 
 import java.io.IOException;
-
+/*
+[0, 1, 2]
+[3, 4, 5]
+[6, 7, 8]
+*/
 public class Matrix3f {
 
     private float[] m;
 
     public Matrix3f(){
         m = new float[]{1.0f, 0.0f, 0.0f,
-                0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 1.0f};
+                        0.0f, 1.0f, 0.0f,
+                        0.0f, 0.0f, 1.0f};
     }
 
     public Matrix3f(float[] newMatrix) {
@@ -20,29 +24,7 @@ public class Matrix3f {
             e.printStackTrace();
         }
     }
-
-    public Vector3f matMul(Vector3f a){
-        float nx = a.getX() * this.m[0] + a.getY() * this.m[1] + a.getZ() * this.m[2];
-        float ny = a.getX() * this.m[3] + a.getY() * this.m[4] + a.getZ() * this.m[5];
-        float nz = a.getX() * this.m[6] + a.getY() * this.m[7] + a.getZ() * this.m[8];
-
-        return new Vector3f(nx, ny, nz);
-    }
-
-    public static Matrix3f matMul(Matrix3f a, Matrix3f b){
-        float[][] cols = new float[][] {b.getCol(0), b.getCol(1), b.getCol(2)};
-        float[][] rows = new float[][] {a.getRow(0), a.getRow(1), a.getRow(2)};
-        float[] output = new float[9];
-
-        for (int i = 0; i < 3; i++) {
-            output[0 + i * 3] = cols[0][0] * rows[i][0] + cols[0][1] * rows[i][1] + cols[0][2] * rows[i][2];
-            output[1 + i * 3] = cols[1][0] * rows[i][0] + cols[1][1] * rows[i][1] + cols[1][2] * rows[i][2];
-            output[2 + i * 3] = cols[2][0] * rows[i][0] + cols[2][1] * rows[i][1] + cols[2][2] * rows[i][2];
-        }
-
-        return new Matrix3f(output);
-    }
-
+    /*********************************************************************************/
     public void add(Matrix3f b){
         for (int i = 0; i < 9; i++){
             this.m[i] += b.m[i];
@@ -55,6 +37,14 @@ public class Matrix3f {
         }
     }
 
+    public Vector3f matMul(Vector3f a){
+        float nx = a.x * this.m[0] + a.y * this.m[1] + a.z * this.m[2];
+        float ny = a.x * this.m[3] + a.y * this.m[4] + a.z * this.m[5];
+        float nz = a.x * this.m[6] + a.y * this.m[7] + a.z * this.m[8];
+
+        return new Vector3f(nx, ny, nz);
+    }
+    /*********************************************************************************/
     public static Matrix3f add(Matrix3f a, Matrix3f b){
         float[] newMat = new float[9];
         for (int i = 0; i < 9; i++){
@@ -73,6 +63,20 @@ public class Matrix3f {
         return new Matrix3f(newMat);
     }
 
+    public static Matrix3f matMul(Matrix3f a, Matrix3f b){
+        float[][] cols = new float[][] {b.getCol(0), b.getCol(1), b.getCol(2)};
+        float[][] rows = new float[][] {a.getRow(0), a.getRow(1), a.getRow(2)};
+        float[] output = new float[9];
+
+        for (int i = 0; i < 3; i++) {
+            output[0 + i * 3] = cols[0][0] * rows[i][0] + cols[0][1] * rows[i][1] + cols[0][2] * rows[i][2];
+            output[1 + i * 3] = cols[1][0] * rows[i][0] + cols[1][1] * rows[i][1] + cols[1][2] * rows[i][2];
+            output[2 + i * 3] = cols[2][0] * rows[i][0] + cols[2][1] * rows[i][1] + cols[2][2] * rows[i][2];
+        }
+
+        return new Matrix3f(output);
+    }
+    /*********************************************************************************/
     public float det(){
         float a = (m[4] * m[8] - m[5] * m[7]) * m[0];
         float b = (m[3] * m[8] - m[5] * m[6]) * m[1];
@@ -112,7 +116,7 @@ public class Matrix3f {
 
         this.m = cofactor_mat;
     }
-
+    /*********************************************************************************/
     public float[] getRow(int idx){
         return new float[]{this.m[idx * 3], this.m[idx * 3 + 1], this.m[idx * 3 + 2]};
     }
@@ -121,7 +125,7 @@ public class Matrix3f {
         return new float[]{this.m[idx], this.m[idx + 3], this.m[idx + 6]};
     }
 
-    public float getMinorDet(int element_idx){
+    public float getMinorDet(int element_idx){ //peak hardcoding
         float[] minor_mat = new float[4];
 
         switch (element_idx) {
@@ -190,6 +194,13 @@ public class Matrix3f {
         return this.m;
     }
 
+    public Matrix3f getAsTranspose(){
+        return new Matrix3f(new float[]
+                {m[0], m[3], m[6],
+                 m[1], m[4], m[7],
+                 m[2], m[5], m[8]});
+    }
+
     public Matrix3f getAsInversion(){
 
         if (this.det() == 0){
@@ -216,7 +227,7 @@ public class Matrix3f {
 
         return new Matrix3f(cofactor_mat);
     }
-
+    /*********************************************************************************/
     @Override
     public String toString(){
         return "\n" + m[0] + " " + m[1] + " " + m[2] + "\n" + m[3] + " " + m[4] + " " + m[5] + "\n" + m[6] + " " + m[7] + " " + m[8] + "\n";

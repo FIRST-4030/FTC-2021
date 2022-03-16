@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.tfodohm.TFMaths;
 import java.io.IOException;
 
 public class Vector2f {
-    private float x, y;
+    public float x, y;
 
     public Vector2f(){
         this.x = 0;
