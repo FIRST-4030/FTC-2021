@@ -174,146 +174,10 @@ public class NewNewDrive extends OpMode {
         loggingEnabled = false;
     }
 
-    /**
-     * Initialize the headers for all of the logged data
-     * Note that this does NOT add headers for any function-specific data
-     */
-    private void logDataInit() {
-        RobotLog.d("");
-        RobotLog.d(",Drive Function,Time (s),Left Position (in),Right Position (in),Left Velocity (in/s),Right Velocity (in/s)");
-    }
-
-    /**
-     * Log the basic drive data to a text file. Also log the "additionalData" string;
-     */
-    private void logData(String functionName, String additionalData) {
-        if (loggingEnabled)
-            RobotLog.d("," + functionName + "," + getRuntime() + "," +
-                    driveLeft.getCurrentPosition() / TICKS_PER_INCH + "," + driveRight.getCurrentPosition() / TICKS_PER_INCH + "," +
-                    driveLeft.getPower() * MAX_VELOCITY + "," + driveRight.getPower() * MAX_VELOCITY + "," +
-                    additionalData);
-    }
-
-    // speedMin - minimum speed of the drive, (-1) - 1
-    // speedMax - maximum speed of the drive, (-1) - 1
-    // distance - drive distance, inches; positive
-    public void driveTo(double distance, double speedMin, double speedMax) {
-        if (distance == 0) {
-            return;
-        }
-        correction = checkDirection();
-        double midTicks = distance * TICKS_PER_INCH;
-        speedMin = Math.max(-1, speedMin);
-        speedMin = Math.min(1, speedMin);
-        speedMax = Math.max(-1, speedMax);
-        speedMax = Math.min(1, speedMax);
-
-        if ((isBusy() || !done) && speedCurveL.isValid() && speedCurveR.isValid() && started) {
-            // speed is calculated using the curve defined above
-            driveLeft.setPower(speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0) - correction);
-            driveRight.setPower(speedCurveR.getY(driveRight.getCurrentPosition() * 1.0) + correction);
-            done = speedCurveL.isClamped() && speedCurveR.isClamped();
-        }
-
-        if (!started) {
-            resetAngle();
-
-            // initialize speedCurveL and speedCurveR to have motor ticks be the X coordinate and motor speed be the Y coordinate
-            // Ramp-and-hold
-            rampAndHold(speedCurveL, (int) midTicks, driveLeft.getCurrentPosition(), speedMin, speedMax, 1);
-            rampAndHold(speedCurveR, (int) midTicks, driveRight.getCurrentPosition(), speedMin, speedMax, 1);
-            started = true;
-            done = false;
-        } else if (done) {
-            driveLeft.setPower(0);
-            driveRight.setPower(0);
-            started = false;
-            speedCurveL.reset();
-            speedCurveR.reset();
-        }
-
-        telemetry.log().add(getClass().getSimpleName() + "::driveTo(): Motors in use");
-        telemetry.addData("left ticks", driveLeft.getCurrentPosition());
-        telemetry.addData("right ticks", driveRight.getCurrentPosition());
-        telemetry.addData("leftVel", driveLeft.getPower());
-        telemetry.addData("rightVel", driveRight.getPower());
-        logData("driveTo()", started + "," + done + "," + speedCurveL.isValid() + "," + speedCurveL.getSize() + "," + speedCurveR.isValid() + "," + speedCurveR.getSize());
-    }
-
-    // angle = angle of rotation, degrees; positive is left, negative is right
-    // speedMin - minimum speed of the drive, 0 - 1
-    // speedMax - maximum speed of the drive, 0 - 1
-    public void turnTo(double angle, double speedMin, double speedMax) {
-        if (angle == 0) {
-            return;
-        }
-
-        speedMin = Math.abs(speedMin);
-        speedMax = Math.abs(speedMax);
-        double speed = 0;
-        double v; // inches per second
-        if (!imuAngleRamp.isValid()) v = 40.0 * speedMax;
-        else v = 40.0 * imuAngleRamp.getAverage();
-        double arcLength = Math.PI * (angle / 180.0) * trackWidthHalf; // inches
-        double arcLengthL;
-        double arcLengthR;
-        if (angle < 0) {    // if angle is negative, we are turning to the right
-            // difference is signs on the trackWidth
-            angle *= -1;
-            arcLengthL = Math.PI * (angle / 180.0) * trackWidthHalf;
-            arcLengthR = Math.PI * (angle / 180.0) * -trackWidthHalf;
-        } else {
-            arcLengthL = Math.PI * (angle / 180.0) * -trackWidthHalf;
-            arcLengthR = Math.PI * (angle / 180.0) * trackWidthHalf;
-        }
-        double time = Math.abs(arcLength / v);
-        double leftVel = v * arcLengthL / arcLength;
-        double rightVel = v * arcLengthR / arcLength;
-        double maxRatio = 1;
-
-        if ((isBusy() || !done) && imuAngleRamp.isValid() && started) {
-            // speed is calculated using the curve defined above
-            speed = imuAngleRamp.getY(rampTimer.seconds() / time);
-            done = imuAngleRamp.isClamped();
-
-            maxRatio = Math.max(Math.abs(leftVel), Math.abs(rightVel)) / Math.abs(v);
-            driveLeft.setPower(speed * (leftVel / v) / maxRatio);
-            driveRight.setPower(speed * (rightVel / v) / maxRatio);
-        }
-
-        if (!started) {
-            rampTimer.reset();
-            driveLeft.setPower(speedMin * (leftVel / v));
-            driveRight.setPower(speedMin * (rightVel / v));
-
-            // initialize speedCurve to have time be the X coordinate and motor speed be the Y coordinate
-            imuAngleRamp.setClampLimits(true);
-            imuAngleRamp.addElement(0.00, speedMin);
-            imuAngleRamp.addElement(0.25, speedMax);
-            imuAngleRamp.addElement(0.75, speedMax);
-            imuAngleRamp.addElement(1.00, speedMin);
-
-            started = true;
-            done = false;
-        } else if (done) {
-            driveLeft.setPower(0);
-            driveRight.setPower(0);
-            started = false;
-            imuAngleRamp.reset();
-        }
-
-        telemetry.log().add(getClass().getSimpleName() + "::arcTo(): Motors in use");
-        if (isBusy() || !done) telemetry.addData("max ratio", maxRatio);
-        telemetry.addData("leftVel", leftVel);
-        telemetry.addData("rightVel", rightVel);
-        telemetry.addData("speed", speed);
-        telemetry.addData("timer", rampTimer.seconds());
-        telemetry.addData("time", time);
-        logData("turnTo()", "");
-    }
-
-    // angle = angle of rotation, degrees; positive is left, negative is right
-    // r - radius of rotation, inches
+    // arc method with imu only for straight lines
+    // r - radius of rotation, inches; positive is right, negative is left,
+    // 0 is straight move
+    // arcLength - length of move, inches; positive is forward, negative is backward
     // speedMin - minimum speed of the drive, (-1) - 1
     // speedMax - maximum speed of the drive, (-1) - 1
     public void arcTo(double r, double arcLength, double speedMin, double speedMax) {
@@ -326,7 +190,6 @@ public class NewNewDrive extends OpMode {
         double arcLengthOuter;
         double leftTicks;
         double rightTicks;
-        // it should be, but ensure that the radius is positive
         double angle;
 
         if (r == 0) {
@@ -419,6 +282,143 @@ public class NewNewDrive extends OpMode {
         }
     }
 
+    /**
+     * Initialize the headers for all of the logged data
+     * Note that this does NOT add headers for any function-specific data
+     */
+    private void logDataInit() {
+        RobotLog.d("");
+        RobotLog.d(",Drive Function,Time (s),Left Position (in),Right Position (in),Left Velocity (in/s),Right Velocity (in/s)");
+    }
+
+    /**
+     * Log the basic drive data to a text file. Also log the "additionalData" string;
+     */
+    private void logData(String functionName, String additionalData) {
+        if (loggingEnabled)
+            RobotLog.d("," + functionName + "," + getRuntime() + "," +
+                    driveLeft.getCurrentPosition() / TICKS_PER_INCH + "," + driveRight.getCurrentPosition() / TICKS_PER_INCH + "," +
+                    driveLeft.getPower() * MAX_VELOCITY + "," + driveRight.getPower() * MAX_VELOCITY + "," +
+                    additionalData);
+    }
+
+    public void driveTo(double distance, double speedMin, double speedMax) {
+        if (distance == 0) {
+            return;
+        }
+        correction = checkDirection();
+        double midTicks = distance * TICKS_PER_INCH;
+        speedMin = Math.max(-1, speedMin);
+        speedMin = Math.min(1, speedMin);
+        speedMax = Math.max(-1, speedMax);
+        speedMax = Math.min(1, speedMax);
+
+        if ((isBusy() || !done) && speedCurveL.isValid() && speedCurveR.isValid() && started) {
+            // speed is calculated using the curve defined above
+            driveLeft.setPower(speedCurveL.getY(driveLeft.getCurrentPosition() * 1.0) - correction);
+            driveRight.setPower(speedCurveR.getY(driveRight.getCurrentPosition() * 1.0) + correction);
+            done = speedCurveL.isClamped() && speedCurveR.isClamped();
+        }
+
+        if (!started) {
+            resetAngle();
+
+            // initialize speedCurveL and speedCurveR to have motor ticks be the X coordinate and motor speed be the Y coordinate
+            // Ramp-and-hold
+            rampAndHold(speedCurveL, (int) midTicks, driveLeft.getCurrentPosition(), speedMin, speedMax, 1);
+            rampAndHold(speedCurveR, (int) midTicks, driveRight.getCurrentPosition(), speedMin, speedMax, 1);
+            started = true;
+            done = false;
+        } else if (done) {
+            driveLeft.setPower(0);
+            driveRight.setPower(0);
+            started = false;
+            speedCurveL.reset();
+            speedCurveR.reset();
+        }
+
+        telemetry.log().add(getClass().getSimpleName() + "::driveTo(): Motors in use");
+        telemetry.addData("left ticks", driveLeft.getCurrentPosition());
+        telemetry.addData("right ticks", driveRight.getCurrentPosition());
+        telemetry.addData("leftVel", driveLeft.getPower());
+        telemetry.addData("rightVel", driveRight.getPower());
+        logData("driveTo()", started + "," + done + "," + speedCurveL.isValid() + "," + speedCurveL.getSize() + "," + speedCurveR.isValid() + "," + speedCurveR.getSize());
+    }
+
+    public void turnTo(double angle, double speedMin, double speedMax) {
+        if (angle == 0) {
+            return;
+        }
+
+        speedMin = Math.abs(speedMin);
+        speedMax = Math.abs(speedMax);
+        double speed = 0;
+        double v; // inches per second
+        if (!imuAngleRamp.isValid()) v = 40.0 * speedMax;
+        else v = 40.0 * imuAngleRamp.getAverage();
+        double arcLength = Math.PI * (angle / 180.0) * trackWidthHalf; // inches
+        double arcLengthL;
+        double arcLengthR;
+        if (angle < 0) {    // if angle is negative, we are turning to the right
+            // difference is signs on the trackWidth
+            angle *= -1;
+            arcLengthL = Math.PI * (angle / 180.0) * trackWidthHalf;
+            arcLengthR = Math.PI * (angle / 180.0) * -trackWidthHalf;
+        } else {
+            arcLengthL = Math.PI * (angle / 180.0) * -trackWidthHalf;
+            arcLengthR = Math.PI * (angle / 180.0) * trackWidthHalf;
+        }
+        double time = Math.abs(arcLength / v);
+        double leftVel = v * arcLengthL / arcLength;
+        double rightVel = v * arcLengthR / arcLength;
+        double maxRatio = 1;
+
+        if ((isBusy() || !done) && imuAngleRamp.isValid() && started) {
+            // speed is calculated using the curve defined above
+            speed = imuAngleRamp.getY(rampTimer.seconds() / time);
+            done = imuAngleRamp.isClamped();
+
+            maxRatio = Math.max(Math.abs(leftVel), Math.abs(rightVel)) / Math.abs(v);
+            driveLeft.setPower(speed * (leftVel / v) / maxRatio);
+            driveRight.setPower(speed * (rightVel / v) / maxRatio);
+        }
+
+        if (!started) {
+            rampTimer.reset();
+            driveLeft.setPower(speedMin * (leftVel / v));
+            driveRight.setPower(speedMin * (rightVel / v));
+
+            // initialize speedCurve to have time be the X coordinate and motor speed be the Y coordinate
+            imuAngleRamp.setClampLimits(true);
+            imuAngleRamp.addElement(0.00, speedMin);
+            imuAngleRamp.addElement(0.25, speedMax);
+            imuAngleRamp.addElement(0.75, speedMax);
+            imuAngleRamp.addElement(1.00, speedMin);
+
+            started = true;
+            done = false;
+        } else if (done) {
+            driveLeft.setPower(0);
+            driveRight.setPower(0);
+            started = false;
+            imuAngleRamp.reset();
+        }
+
+        telemetry.log().add(getClass().getSimpleName() + "::turnTo(): Motors in use");
+        if (isBusy() || !done) telemetry.addData("max ratio", maxRatio);
+        telemetry.addData("leftVel", leftVel);
+        telemetry.addData("rightVel", rightVel);
+        telemetry.addData("speed", speed);
+        telemetry.addData("timer", rampTimer.seconds());
+        telemetry.addData("time", time);
+        logData("turnTo()", "");
+    }
+
+    // arc method using imu all the time
+    // r - radius of rotation, inches; positive is right, negative is left
+    // arcLength - length of move, inches; positive is forward, negative is backward
+    // speedMin - minimum speed of the drive, (-1) - 1
+    // speedMax - maximum speed of the drive, (-1) - 1
     public void arcToNew(double r, double arcLength, double speedMin, double speedMax) {
         if (arcLength == 0) {
             return;
