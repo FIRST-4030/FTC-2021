@@ -102,6 +102,7 @@ public class DuckSpin extends OpMode {
     public void start() {
     }
 
+    // sets speeds and time to teleop values
     public void teleop(boolean red) {
         speedMin = teleopMin;
         speedMax = teleopMax;
@@ -112,6 +113,7 @@ public class DuckSpin extends OpMode {
         state = red ? AUTO_STATE.SPIN_RED : AUTO_STATE.SPIN_BLUE;
     }
 
+    // sets speeds and time to autonomous values
     public void auto(boolean red) {
         speedMin = autoMin;
         speedMax = autoMax;

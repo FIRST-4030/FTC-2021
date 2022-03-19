@@ -94,17 +94,23 @@ public class TFDriveTest extends MultiOpModeManager {
                     tfodModule.scan();
                     scanned = true;
                 }
+                if (scanned) {state = AUTO_STATE.SORT;}
+                break;
+
+            case SORT:
                 if (!tfodModule.isBusy() && scanned && !(sorted)){
                     tempV2 = tfodModule.sortCBBB();
                     sorted = true;
                 }
+                if (sorted) {state = AUTO_STATE.CALC;}
+                break;
+
+            case CALC:
                 if (!tfodModule.isBusy() && sorted && !(calculated)){
                     targetPreCasted = tfodModule.calcCoordinate(tempV2);
                     calculated = true;
                 }
-                if (!tfodModule.isBusy() && (scanned && sorted && calculated) && gamepad1.a){
-                    state = AUTO_STATE.RESET_VAR;
-                }
+                if (calculated) {state = AUTO_STATE.RESET_VAR;}
                 break;
 
             case RESET_VAR: //reset all variables used to check stuff in the previous case
@@ -118,9 +124,7 @@ public class TFDriveTest extends MultiOpModeManager {
                 storedRadius = f[0];
                 storedArcLength = f[1];
                 inIMG = false;
-                if (gamepad1.a) {
-                    state = AUTO_STATE.START_MOVE;
-                }
+                state = AUTO_STATE.START_MOVE;
                 break;
 
             case START_MOVE:
@@ -135,7 +139,7 @@ public class TFDriveTest extends MultiOpModeManager {
                 break;
 
             case REVERSE_MOVE:
-                if (reversingMove = false){
+                if (reversingMove == false){
                     reversingMove = true;
                     drive.arcTo(-storedRadius, -storedArcLength, speedMin, speedMax);
                 }
@@ -164,13 +168,13 @@ public class TFDriveTest extends MultiOpModeManager {
     public void stop() {
         tfodModule.stop();
         drive.stop();
-        state = AUTO_STATE.DONE;
-        super.stop();
     }
 
     enum AUTO_STATE implements OrderedEnum {
         VERIFICATION,
         SCAN,
+        SORT,
+        CALC,
         RESET_VAR,
         START_MOVE,
         REVERSE_MOVE,

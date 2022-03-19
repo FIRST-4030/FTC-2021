@@ -196,17 +196,24 @@ public class NewTeleOp extends MultiOpModeManager {
     @Override
     public void loop() {
         // Tank drive
+        // turbo/acceleration system
+        // left trigger for acceleration of left drive when it is pushed down enough
+        // (more than default speed proportion "ACCEL_CONSTANT")
         if (gamepad1.left_trigger > ACCEL_CONSTANT) {
             fastFactor = gamepad1.left_trigger;
         } else {
             fastFactor = ACCEL_CONSTANT;
         }
+        // right trigger for acceleration of right drive when it is pushed down enough
+        // (more than default speed proportion "ACCEL_CONSTANT")
         if (gamepad1.right_trigger > ACCEL_CONSTANT) {
             fastFactor2 = gamepad1.right_trigger;
         } else {
             fastFactor2 = ACCEL_CONSTANT;
         }
+        // left joystick for left drive
         LEFT_DRIVE_POW = Math.pow(-gamepad1.left_stick_y, 1);
+        // right joystick for right drive
         RIGHT_DRIVE_POW = Math.pow(-gamepad1.right_stick_y, 1);
         leftDrive.setPower(LEFT_DRIVE_POW * fastFactor);
         rightDrive.setPower(RIGHT_DRIVE_POW * fastFactor2);
