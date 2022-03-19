@@ -22,7 +22,7 @@ public class TankDriveConstants {
      * from DriveVelocityPIDTuner.
      */
     public static final boolean RUN_USING_ENCODER = true;
-    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(18, 0, 0, 17.5);
+    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(16, 12, 18.75, 17.5); //P:18 I:0 D:0 F:17.5
             //getMotorVelocityF(MAX_RPM / 60 * TICKS_PER_REV));
 
     /*

@@ -53,7 +53,7 @@ import java.util.List;
 //6.7975
 @Config
 //@Disabled
-@Autonomous(group = "drive")
+@Autonomous(name="PID Testing lmao", group = "drive")
 public class DriveVelocityPIDTuner extends LinearOpMode {
     public static double DISTANCE = 72; // in
     private DcMotorEx leftFront, leftRear, rightRear, rightFront;
