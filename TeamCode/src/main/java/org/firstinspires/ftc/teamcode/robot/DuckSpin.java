@@ -195,11 +195,14 @@ public class DuckSpin extends OpMode {
     public void stop() {
     }
 
-    // put in speedMin and speedMax, -1 to 1
+    // Duck Ramp Speed Function
+    // speedMin is starting speed, -1 to 1
+    // speedMax is speed before accelerating to throw duck, -1 to 1
     // time is the total time of one routine
     // rampStop is the time before it accelerates to full speed
     // pow is the power for the poly curve
-    //
+    // boolean auto determines if it's autonomous
+    // boolean red determines if it is red side or blue side
     public void duckRampPoly(double speedMin, double speedMax, double time, double rampStop, double pow, boolean auto, boolean red) {
         if (time == 0) {
             return;
@@ -247,6 +250,7 @@ public class DuckSpin extends OpMode {
     }
 
     // An encoder-synchronized piecewise function for unloading ducks quickly
+    // Not currently used and needs improvements/further steps
     private int rampBarThrow(PiecewiseFunction pfunc, int currentTicks) {
         // A speed slow enough for a safe start
         double speedStart = teleopMin;
@@ -278,6 +282,7 @@ public class DuckSpin extends OpMode {
         return currentTicks + barTicks + ejectTicks;
     }
 
+    // enum list of auto states
     enum AUTO_STATE implements OrderedEnum {
         IDLE,
         SPIN_BLUE,

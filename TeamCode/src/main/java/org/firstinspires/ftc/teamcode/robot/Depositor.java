@@ -90,16 +90,20 @@ public class Depositor extends OpMode {
     public void init() {
 
         try {
+            // initializes belt and resets its motor encoder
             belt = hardwareMap.get(DcMotor.class, "Depbelt");
             belt.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             belt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            // initializes low, mid, and high doors
             low = hardwareMap.get(Servo.class, "Deplow");
             low.setPosition(LOW_CLOSE);
             mid = hardwareMap.get(Servo.class, "Depmid");
             mid.setPosition(MID_CLOSE);
             high = hardwareMap.get(Servo.class, "Dephigh");
             high.setPosition(HIGH_INIT);
+            // initializes the servo-powered hinge that moves the whole depositor
             tilt = hardwareMap.get(Servo.class, "Deptilt");
+            // initializes the magnetic limit switch that resets belt encoder position
             sensor = hardwareMap.get(TouchSensor.class, "DS");
 
             sensorTriggered = false;
@@ -119,7 +123,7 @@ public class Depositor extends OpMode {
         if (!enabled) {
             return;
         }
-
+        // belt moves until sensor is triggered, then its encoder would be reset
         if (sensor.isPressed()) {
             sensorTriggered = true;
         }
@@ -179,6 +183,7 @@ public class Depositor extends OpMode {
                     belt.setPower(BELT_SPEED);
                     prepPosSet = true;
                 }
+                // Dead band encoder position check for belt to stop
                 if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < BELT_POSITION_DEADBAND) {
                     belt.setPower(0);
                     state = AUTO_STATE.DONE;
@@ -200,6 +205,7 @@ public class Depositor extends OpMode {
                             belt.setTargetPosition((belt.getCurrentPosition() / 927 * 927) + HIGH_PREP_POS);
                             break;
                     }
+                    // Check encoder pos and determine moving up or down to reach target pos
                     if (belt.getTargetPosition() >= belt.getCurrentPosition()) {
                         belt.setPower(PREP_SPEED);
                         Up = true;
@@ -209,6 +215,8 @@ public class Depositor extends OpMode {
                     }
                     prepPosSet = true;
                 }
+                // Dead band encoder position check for belt to stop
+                // Larger dead band to prevent overshooting, because of the faster speed during this step
                 if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < (BELT_POSITION_DEADBAND + 30)) {
                     state = AUTO_STATE.DONE;
                 } else if (Up && belt.getCurrentPosition() >= belt.getTargetPosition()) {
@@ -232,6 +240,7 @@ public class Depositor extends OpMode {
                             belt.setTargetPosition((((belt.getCurrentPosition() / 927) + 1) * 927));
                             break;
                     }
+                    // Dead band encoder position check for belt to stop
                     if (belt.getTargetPosition() < belt.getCurrentPosition()) {
                         belt.setTargetPosition(belt.getTargetPosition() + 927);
                     }
@@ -255,6 +264,7 @@ public class Depositor extends OpMode {
                     belt.setPower(BELT_SPEED);
                     prepPosSet = true;
                 }
+                // Dead band encoder position check for belt to stop
                 if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < BELT_POSITION_DEADBAND) {
                     low.setPosition(LOW_CLOSE);
                     mid.setPosition(MID_CLOSE);
@@ -263,20 +273,21 @@ public class Depositor extends OpMode {
                     state = AUTO_STATE.DONE;
                 }
                 break;
-            case TILT_BACK:
+            case TILT_BACK: // Tilts depositor backward
                 tilt.setPosition(TILT_BACK);
                 state = AUTO_STATE.DONE;
                 break;
-            case TILT_FORWARD:
+            case TILT_FORWARD:  // Tilts depositor forward
                 tilt.setPosition(TILT_FORWARD);
                 state = AUTO_STATE.DONE;
                 break;
-            case REVERSE_RUN:      // Run the belt in reverse for a set time (for TeleOp only)
+            case REVERSE_RUN:   // Run the belt in reverse for a set time (for TeleOp only)
                 belt.setPower(-BELT_SPEED);
                 break;
-            case RESET_BELT:
+            case RESET_BELT:    // Resets Belt to starting position
                 if (!prepPosSet) {
                     belt.setTargetPosition((((belt.getCurrentPosition() / 927) + 1) * 927));
+                    // Check encoder pos and determine moving up or down to reach target pos
                     if (belt.getTargetPosition() >= belt.getCurrentPosition()) {
                         belt.setPower(RESET_BELT_SPEED);
                     } else {
@@ -284,6 +295,7 @@ public class Depositor extends OpMode {
                     }
                     prepPosSet = true;
                 }
+                // Dead band encoder position check for belt to stop
                 if (Math.abs(belt.getCurrentPosition() - belt.getTargetPosition()) < (BELT_POSITION_DEADBAND - 15)) {
                     state = AUTO_STATE.DONE;
                 }
@@ -297,15 +309,23 @@ public class Depositor extends OpMode {
                 break;
         }
 
+        // Forcefully changes auto state to DONE, stops all running processes/states
         if (gamepad2.dpad_down) {
             state = AUTO_STATE.DONE;
         }
+        // Allows manual control when autonomous movements are finished
         if (state == AUTO_STATE.DONE) {
+            // Same for all doors
+            // First push of button sets door used
+            // and prepares the flipper to position with the DOOR_PREP state
+            // Second push of button opens the door
+            // and flipper pushes out freight moving up with the DOOR_OPEN state
             if (gamepad2.x) {
-                if (required_Door == DOOR_USED.LOW_DOOR) {
+                // Checks if door is set to LOW_DOOR
+                if (required_Door == DOOR_USED.LOW_DOOR) {  // Second push
                     telemetry.addData("action: ", "going to low door open");
                     state = AUTO_STATE.DOOR_OPEN;
-                } else {
+                } else {    // First push
                     setDoor(DOOR_USED.LOW_DOOR);
                     telemetry.addData("action: ", "going to low door prep");
                     state = AUTO_STATE.DOOR_PREP;
@@ -330,7 +350,7 @@ public class Depositor extends OpMode {
                     telemetry.addData("action: ", "going to high door prep");
                     state = AUTO_STATE.DOOR_PREP;
                 }
-            } else if (gamepad2.dpad_up) {
+            } else if (gamepad2.dpad_up) {  // Uses TILT_DOOR_OPEN state instead
                 if (required_Door == DOOR_USED.HIGH_DOOR) {
                     state = AUTO_STATE.TILT_DOOR_OPEN;
                 }
@@ -343,6 +363,7 @@ public class Depositor extends OpMode {
                 telemetry.addData("action: ", "going to tilt backward");
                 state = AUTO_STATE.TILT_BACK;
             }
+            // Manual controls for opening the doors
             if (gamepad2.a) {
                 mid.setPosition(MID_OPEN);
             } else {
@@ -358,6 +379,7 @@ public class Depositor extends OpMode {
             } else {
                 low.setPosition(LOW_CLOSE);
             }
+            // Manual control for belt with joystick
             belt.setPower(gamepad2.right_stick_y * 0.85);
         }
 
@@ -383,6 +405,7 @@ public class Depositor extends OpMode {
                 enabled + "," + required_Door);
     }
 
+    // enum list of auto states
     enum AUTO_STATE implements OrderedEnum {
         TILTED_FORWARD,     // Tilt forward, move flipper to start position
         DOOR_PREP,          // Move the flipper to below the required door
@@ -399,6 +422,7 @@ public class Depositor extends OpMode {
         }
     }
 
+    // enum list of doors
     enum DOOR_USED {
         LOW_DOOR,
         MID_DOOR,
@@ -425,6 +449,7 @@ public class Depositor extends OpMode {
         state = AUTO_STATE.RESET_BELT;
         loop();
     }
+
     public boolean isDone() {
         return (state == AUTO_STATE.DONE || state == AUTO_STATE.TILTED_FORWARD);
     }
