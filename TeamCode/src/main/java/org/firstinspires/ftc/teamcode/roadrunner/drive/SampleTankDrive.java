@@ -54,7 +54,8 @@ import java.util.List;
 public class SampleTankDrive extends TankDrive {
     public static PIDCoefficients AXIAL_PID = new PIDCoefficients(0, 0, 0);
     public static PIDCoefficients CROSS_TRACK_PID = new PIDCoefficients(0, 0, 0);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(36, 0, 0);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(10, 13, 13); //P: 36; I:0; D:0
+    //6, 2.5, 6
 
     public static double VX_WEIGHT = 1;
     public static double OMEGA_WEIGHT = 1;
@@ -350,7 +351,7 @@ public class SampleTankDrive extends TankDrive {
         }
         return Arrays.asList(leftSum / leftMotors.size(), rightSum / rightMotors.size());
     }
-
+    @NonNull
     @Override
     public List<Double> getWheelVelocities() {
         double leftSum = 0, rightSum = 0;

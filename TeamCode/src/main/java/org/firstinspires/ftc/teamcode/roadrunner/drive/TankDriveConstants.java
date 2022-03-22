@@ -22,9 +22,9 @@ public class TankDriveConstants {
      * from DriveVelocityPIDTuner.
      */
     public static final boolean RUN_USING_ENCODER = true;
-    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(16, 14, 18.75, 17.5); //P:18 I:0 D:0 F:17.5
+    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(18, 16, 18, 18); //P:18 I:0 D:0 F:17.5
             //getMotorVelocityF(MAX_RPM / 60 * TICKS_PER_REV));
-
+            //P:9, I:8, D:9, F:9
     /*
      * These are physical constants that can be determined from your robot (including the track
      * width; it will be tune empirically later although a rough estimate is important). Users are
@@ -80,9 +80,17 @@ public class TankDriveConstants {
     public static double MAX_ANG_VEL = Math.toRadians(168.11696942844486);
     public static double MAX_ANG_ACCEL = Math.toRadians(168.11696942844486); */
     public static DriveConstraints BASE_CONSTRAINTS = new DriveConstraints(
+            35, 20, 0.0,
+            2, 2, 1
+    );
+
+    /*
+    prev base constants
+    public static DriveConstraints BASE_CONSTRAINTS = new DriveConstraints(
             35, 44.74646833626544, 0.0,
             Math.toRadians(168.11696942844486), Math.toRadians(168.11696942844486), 0.0
     );
+     */
 
 
     public static double encoderTicksToInches(double ticks) {
