@@ -192,6 +192,7 @@ public class NewNewDrive extends OpMode {
         double rightTicks;
         double angle;
 
+        // go straight and use imu correction when r is 0
         if (r == 0) {
             correction = checkDirection();
             arcLengthL = arcLength;
@@ -227,6 +228,8 @@ public class NewNewDrive extends OpMode {
             midTicks = 1;
         }
 
+        // since the max limit is 1 for setting power of motor,
+        // we need to keep the ratio between both left and right drive while capping it
         double maxRatio = Math.max(Math.abs(leftTicks), Math.abs(rightTicks)) / Math.abs(midTicks);
         if ((isBusy() || !done) && speedCurveL.isValid() && speedCurveR.isValid() && started) {
             // speed is calculated using the curve defined above
@@ -261,6 +264,7 @@ public class NewNewDrive extends OpMode {
             started = true;
             done = false;
         } else if (done) {
+            // resets and stops when drive move is finished
             driveLeft.setPower(0);
             driveRight.setPower(0);
             started = false;
@@ -345,6 +349,7 @@ public class NewNewDrive extends OpMode {
         logData("driveTo()", started + "," + done + "," + speedCurveL.isValid() + "," + speedCurveL.getSize() + "," + speedCurveR.isValid() + "," + speedCurveR.getSize());
     }
 
+    // old turning method that is not used or updated
     public void turnTo(double angle, double speedMin, double speedMax) {
         if (angle == 0) {
             return;
@@ -512,7 +517,7 @@ public class NewNewDrive extends OpMode {
         }
     }
 
-
+    // attempt to combine two moves into one
     public void combinedCurves(double r1, double arcLength1, double r2, double arcLength2, double speedMin, double speedMax) {
         if (arcLength1 == 0 && arcLength2 == 0) {
             return;
@@ -640,6 +645,7 @@ public class NewNewDrive extends OpMode {
         }
     }
 
+    // attempt to combine 3 moves
     public void combined3Curves(double r1, double arcLength1, double r2, double arcLength2, double r3, double arcLength3, double speedMin, double speedMax) {
         if (arcLength1 == 0 && arcLength2 == 0 && arcLength3 == 0) {
             return;
@@ -842,6 +848,7 @@ public class NewNewDrive extends OpMode {
         pfunc.setClampLimits(true);
     }
 
+    // attempt of a ramp and hold function for combined moves
     private void combinedRampAndHold(
             PiecewiseFunction pfunc,
             int pathTicks, int currentTicks, int firstTicks, int lastTicks,
@@ -874,6 +881,7 @@ public class NewNewDrive extends OpMode {
         pfunc.setClampLimits(true);
     }
 
+    // ramp for imu
     private void imuRamp(
             PiecewiseFunction pfunc,
             int pathTicks, int currentTicks,

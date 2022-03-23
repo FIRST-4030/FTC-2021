@@ -260,7 +260,7 @@ public class SampleTankDrive extends TankDrive {
                 break;
             }
             case FOLLOW_TRAJECTORY: {
-                setDriveSignal(follower.update(currentPose));
+                //setDriveSignal(follower.update(currentPose));
 
                 Trajectory trajectory = follower.getTrajectory();
 

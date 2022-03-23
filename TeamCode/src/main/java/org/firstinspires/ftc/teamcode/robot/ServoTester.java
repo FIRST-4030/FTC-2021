@@ -44,7 +44,7 @@ import org.firstinspires.ftc.teamcode.gamepad.InputHandler;
 import org.firstinspires.ftc.teamcode.gamepad.PAD_KEY;
 
 @Config
-@TeleOp(name = "ServoTest", group = "Test")
+@TeleOp(name = "ServoPosTest", group = "Test")
 public class ServoTester extends OpMode{
     // Hardware
     private Servo collectorArm = null;
@@ -68,7 +68,7 @@ public class ServoTester extends OpMode{
         boolean error = false;
         telemetry.addData("Status", "Initializing...");
 
-        // Collector
+        // Initialize test servos and buttons
         try {
             collectorArm = hardwareMap.get(Servo.class, "CollectorArm");
             mid = hardwareMap.get(Servo.class, "Depmid");
@@ -108,8 +108,7 @@ public class ServoTester extends OpMode{
         if (in.down("+")) {
             servoPos += INCREMENT;
             servoPos = Math.min(1.0f, servoPos);
-            // Moving the servo position and number should decrease
-        } else if (in.down("-")) {
+        } else if (in.down("-")) {  // Moving the servo position and number should decrease
             servoPos -= INCREMENT;
             servoPos = Math.max(0.0f, servoPos);
         }

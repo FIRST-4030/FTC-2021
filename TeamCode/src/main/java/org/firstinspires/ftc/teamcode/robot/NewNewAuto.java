@@ -86,8 +86,6 @@ public class NewNewAuto extends MultiOpModeManager {
     public static double arcLength4wh2 = 18;
     public static double r4wh3 = 0;
     public static double arcLength4wh3 = 28;
-    public static double r4duck = 0;
-    public static double arcLength4duck = 30;
     public static double collectDistance = 16;
     public static double COLLECTOR_UP = 0.53;
     public static double COLLECTOR_DOWN = 0.90;
@@ -116,6 +114,8 @@ public class NewNewAuto extends MultiOpModeManager {
         boolean error = false;
         telemetry.addData("Status", "Initializing...");
 
+        // initializes opmodes of distance sensor, depositor, and duck spinner
+        // uses register function from MultiOpModeManager
         try {
             super.register(new Depositor());
             super.register(new Distance());
@@ -139,6 +139,7 @@ public class NewNewAuto extends MultiOpModeManager {
             error = true;
         }
 
+        // Registers and initializes drive with drive functions in NewNewDrive class
         try {
             super.register(new NewNewDrive());
 
@@ -195,6 +196,7 @@ public class NewNewAuto extends MultiOpModeManager {
         telemetry.addData("Direction", duckSide ? "Duck" : "Warehouse");
         telemetry.addData("DelayTime (seconds) ", delayTime);
 
+        // starts scanning with distance sensors during initialization
         if (distance.isDone()) {
             distance.startScan();
             if (distance.position() == Distance.BARCODE.LEFT) {
@@ -204,6 +206,7 @@ public class NewNewAuto extends MultiOpModeManager {
             } else if (distance.position() == Distance.BARCODE.RIGHT) {
                 depositor.setDoor(Depositor.DOOR_USED.HIGH_DOOR);
             } else {
+                // logic for guessing if element pos not sensed (NONE)
                 if (!duckSide) {
                     if (redAlliance) {
                         depositor.setDoor(Depositor.DOOR_USED.LOW_DOOR);
@@ -215,12 +218,15 @@ public class NewNewAuto extends MultiOpModeManager {
         }
         telemetry.addData("Barcode Pos: ", distance.position());
         telemetry.addData("Door: ", depositor.doorUsed());
+        // calls and runs all other init_loop() functions from registered opmodes
         super.init_loop();
     }
 
     @Override
     public void start() {
+        // calls and runs all other start() functions from registered opmodes
         super.start();
+        // resetting variables at the start
         num = 0;
         collectDistance = 9;
         collectStep = false;
@@ -232,13 +238,17 @@ public class NewNewAuto extends MultiOpModeManager {
 
     @Override
     public void loop() {
+        // conditiion to check delayTime,
+        // when the set delayTime is reached, start everything
         if (delayTimer.seconds() >= delayTime) {
+            // calls and runs all other loop() functions from registered opmodes
             depositor.loop();
             distance.loop();
             duck.loop();
             if (state != oldState) {
                 oldState = state;
             }
+            // duck side autonomous steps
             if (duckSide) {
                 switch (state) {
                     case ARC:
@@ -332,8 +342,7 @@ public class NewNewAuto extends MultiOpModeManager {
                     case DONE:
                         break;
                 }
-            } else {
-                // Warehouse Side
+            } else {    // Warehouse Side Steps
                 switch (state) {
                     case ARC:
                         depositor.prep();
@@ -407,6 +416,9 @@ public class NewNewAuto extends MultiOpModeManager {
                             startedCollecting = false;
                             state = AUTO_STATE.RETURN;
                         } else if (collectCmdState == collectCmd.COLLECT && collectorTimer.seconds() > 6) {
+                            // if collector is collecting for more than 6 seconds
+                            // and no freight has triggered the sensor
+                            // stop the whole process, run the last step and park
                             collectCmdState = collectCmd.IDLE;
                             depositor.reset();
                             state = AUTO_STATE.LAST;
@@ -532,9 +544,8 @@ public class NewNewAuto extends MultiOpModeManager {
                 }
             }
 
-            // Arm
-            telemetry.addData("collector pos", collectorArm.getPosition());
-            telemetry.addData("State", collectCmdState);
+            telemetry.addData("collector pos: ", collectorArm.getPosition());
+            telemetry.addData("collector state: ", collectCmdState);
 
             // Collector state
             collected = sensorCollector.isPressed();
