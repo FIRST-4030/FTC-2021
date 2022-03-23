@@ -22,9 +22,9 @@ public class TankDriveConstants {
      * from DriveVelocityPIDTuner.
      */
     public static final boolean RUN_USING_ENCODER = true;
-    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(18, 16, 18, 18); //P:18 I:0 D:0 F:17.5
+    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(4/*18*/, 3/*16*/, 4/*18*/, 4/*18*/); //P:18 I:0 D:0 F:17.5
             //getMotorVelocityF(MAX_RPM / 60 * TICKS_PER_REV));
-            //P:9, I:8, D:9, F:9
+            //P:4, I:3, D:4, F:4
     /*
      * These are physical constants that can be determined from your robot (including the track
      * width; it will be tune empirically later although a rough estimate is important). Users are
@@ -33,9 +33,10 @@ public class TankDriveConstants {
      * angular distances although most angular parameters are wrapped in Math.toRadians() for
      * convenience. Make sure to exclude any gear ratio included in MOTOR_CONFIG from GEAR_RATIO.
      */
-    public static double WHEEL_RADIUS = 1.19; // in
-    public static double GEAR_RATIO = 1.6756756756756757; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 20.05; // in
+    public static double WHEEL_RADIUS = 0.48/*1.19*/; // in
+    public static double GEAR_RATIO = 19/*1.6756756756756757*/; // output (wheel) speed / input (motor) speed
+    public static double TRACK_WIDTH = 1/*20.05*/; // in
+    //15
 
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using
@@ -80,8 +81,8 @@ public class TankDriveConstants {
     public static double MAX_ANG_VEL = Math.toRadians(168.11696942844486);
     public static double MAX_ANG_ACCEL = Math.toRadians(168.11696942844486); */
     public static DriveConstraints BASE_CONSTRAINTS = new DriveConstraints(
-            35, 20, 0.0,
-            2, 2, 1
+            20, 20, 0.0,
+            4, 4, 0
     );
 
     /*
