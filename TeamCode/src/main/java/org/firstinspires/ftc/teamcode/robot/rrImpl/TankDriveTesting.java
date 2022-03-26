@@ -2,28 +2,44 @@ package org.firstinspires.ftc.teamcode.robot.rrImpl;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.teamcode.utils.LoopUtil;
 
-public class TankDriveTesting extends OpMode {
-    private TankDriveTestingConstants tConsts = new TankDriveTestingConstants();
+@Config
+@Autonomous(name="RRIMPLTest", group="Test")
+public class TankDriveTesting extends LoopUtil {
 
-    public TankDriveTesting(){
+
+    @Override
+    public void opInit() {
 
     }
 
     @Override
-    public void init() {
+    public void opInitLoop() {
 
     }
 
     @Override
-    public void loop() {
+    public void opStart() {
 
     }
-}
 
-class TankDriveTestingConstants{
-    public final double TICKS_PER_REV = 537.6;
-    public final double MAX_RPM = 340;
+    @Override
+    public void opUpdate(double deltaTime) {
+
+    }
+
+    @Override
+    public void opFixedUpdate(double deltaTime) {
+
+    }
+
+    @Override
+    public void opStop() {
+
+    }
 }
