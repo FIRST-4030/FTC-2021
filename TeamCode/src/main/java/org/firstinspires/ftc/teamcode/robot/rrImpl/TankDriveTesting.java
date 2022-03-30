@@ -12,10 +12,11 @@ import org.firstinspires.ftc.teamcode.utils.LoopUtil;
 @Autonomous(name="RRIMPLTest", group="Test")
 public class TankDriveTesting extends LoopUtil {
 
+    SampleTankDrive drive;
 
     @Override
     public void opInit() {
-
+        drive = new SampleTankDrive(hardwareMap);
     }
 
     @Override
