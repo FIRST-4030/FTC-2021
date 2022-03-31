@@ -275,4 +275,8 @@ public abstract class LoopUtil extends OpMode{
     public boolean isRunning(){
         return running;
     }
+
+    public void setUpdateCap(int updates){
+        UPDATE_CAP = 1.0 / updates;
+    }
 }
