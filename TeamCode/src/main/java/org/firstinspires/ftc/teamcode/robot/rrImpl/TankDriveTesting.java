@@ -26,6 +26,7 @@ public class TankDriveTesting extends LoopUtil {
     public static Path2dRecorder estimatedPaths, currentPaths;
     public static Trajectory trajectory;
     public static TelemetryPacket tPacket;
+    public static FtcDashboard dashboard;
 
     //poses
     public static Pose2d startingPose = new Pose2d(0, 0);
@@ -39,6 +40,8 @@ public class TankDriveTesting extends LoopUtil {
         //roadrunner stuffs
         tPacket = new TelemetryPacket();
         drive = new SampleTankDrive(hardwareMap);
+        dashboard = FtcDashboard.getInstance();
+        dashboard.setTelemetryTransmissionInterval(25);
 
         //classes so you can record the poses
         estimatedPaths = new Path2dRecorder();
@@ -79,7 +82,7 @@ public class TankDriveTesting extends LoopUtil {
         DashboardUtil.drawPoseHistory(tPacket.fieldOverlay().setStroke("#ff0000"), currentPaths.getAsList());
         DashboardUtil.drawPoseHistory(tPacket.fieldOverlay().setStroke("#000000"), estimatedPaths.getAsList());
         DashboardUtil.drawRobot(tPacket.fieldOverlay(), drive.getPoseEstimate());
-        drive.dashboard.sendTelemetryPacket(tPacket);
+        dashboard.sendTelemetryPacket(tPacket);
     }
 
     @Override
