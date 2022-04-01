@@ -67,7 +67,7 @@ public class SampleTankDrive extends TankDrive {
         FOLLOW_TRAJECTORY
     }
 
-    private FtcDashboard dashboard;
+    public FtcDashboard dashboard;
     private NanoClock clock;
 
     private Mode mode;
