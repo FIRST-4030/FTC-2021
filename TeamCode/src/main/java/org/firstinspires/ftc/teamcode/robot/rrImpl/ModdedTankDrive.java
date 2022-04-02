@@ -287,11 +287,9 @@ public class ModdedTankDrive extends TankDrive {
                  * Start of Modded Part
                  */
                 sampledPathRecorder.record(trajectory.getPath());
-                fieldOverlay.setStroke("#3F51B5");
-                DashboardUtil.drawRobot(fieldOverlay, currentPose);
 
-                DashboardUtil.drawPoseHistory(fieldOverlay.setStroke("#3F51B5"), currentPoseRecorder.getAsList());
-                DashboardUtil.drawSampledPaths(fieldOverlay, sampledPathRecorder.getAsList());
+                DashboardUtil.drawPoseHistory(fieldOverlay.setStroke("#ff0000"), currentPoseRecorder.getAsList());
+                DashboardUtil.drawSampledPaths(fieldOverlay.setStroke("#000000"), sampledPathRecorder.getAsList());
                 /**
                  * End of Modded Part
                  */
