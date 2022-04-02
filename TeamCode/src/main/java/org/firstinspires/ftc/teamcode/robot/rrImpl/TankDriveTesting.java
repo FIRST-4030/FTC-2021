@@ -22,7 +22,7 @@ import java.util.HashMap;
 public class TankDriveTesting extends LoopUtil {
 
     //basic roadrunner stuff
-    public static SampleTankDrive drive;
+    public static ModdedTankDrive drive;
     public static Path2dRecorder estimatedPaths, currentPaths;
     public static Trajectory trajectory;
     public static TelemetryPacket tPacket;
@@ -39,7 +39,7 @@ public class TankDriveTesting extends LoopUtil {
 
         //roadrunner stuffs
         tPacket = new TelemetryPacket();
-        drive = new SampleTankDrive(hardwareMap);
+        drive = new ModdedTankDrive(hardwareMap);
         dashboard = FtcDashboard.getInstance();
         dashboard.setTelemetryTransmissionInterval(25);
 
@@ -79,10 +79,7 @@ public class TankDriveTesting extends LoopUtil {
 
     @Override
     public void opFixedUpdate(double deltaTime) {
-        DashboardUtil.drawPoseHistory(tPacket.fieldOverlay().setStroke("#ff0000"), currentPaths.getAsList());
-        DashboardUtil.drawPoseHistory(tPacket.fieldOverlay().setStroke("#000000"), estimatedPaths.getAsList());
-        DashboardUtil.drawRobot(tPacket.fieldOverlay(), drive.getPoseEstimate());
-        dashboard.sendTelemetryPacket(tPacket);
+
     }
 
     @Override
