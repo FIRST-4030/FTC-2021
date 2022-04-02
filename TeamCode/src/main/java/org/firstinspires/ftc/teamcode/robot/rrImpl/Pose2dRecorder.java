@@ -5,11 +5,11 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Path2dRecorder {
+public class Pose2dRecorder {
 
     private List<Pose2d> recordedPoses;
 
-    public Path2dRecorder(){
+    public Pose2dRecorder(){
         this.recordedPoses = new ArrayList<>();
     }
 

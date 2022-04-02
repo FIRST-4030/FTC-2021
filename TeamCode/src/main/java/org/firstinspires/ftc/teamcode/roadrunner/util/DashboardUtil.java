@@ -44,6 +44,12 @@ public class DashboardUtil {
         drawSampledPath(canvas, path, DEFAULT_RESOLUTION);
     }
 
+    public static void drawSampledPaths(Canvas canvas, List<Path> paths) {
+        for (Path path : paths) {
+            drawSampledPath(canvas, path, DEFAULT_RESOLUTION);
+        }
+    }
+
     public static void drawRobot(Canvas canvas, Pose2d pose) {
         canvas.strokeCircle(pose.getX(), pose.getY(), ROBOT_RADIUS);
         Vector2d v = pose.headingVec().times(ROBOT_RADIUS);

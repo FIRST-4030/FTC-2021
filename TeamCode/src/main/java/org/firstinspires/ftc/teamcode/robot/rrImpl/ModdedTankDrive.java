@@ -81,7 +81,8 @@ public class ModdedTankDrive extends TankDrive {
     private TrajectoryFollower follower;
 
     private List<Pose2d> poseHistory;
-    private Path2dRecorder currentPoseRecorder, lastErrorRecorder;
+    private Pose2dRecorder currentPoseRecorder;
+    private PathRecorder sampledPathRecorder;
 
     private List<DcMotorEx> motors, leftMotors, rightMotors;
     private BNO055IMU imu;
@@ -91,8 +92,8 @@ public class ModdedTankDrive extends TankDrive {
     public ModdedTankDrive(HardwareMap hardwareMap) {
         super(kV, kA, kStatic, TRACK_WIDTH);
 
-        currentPoseRecorder = new Path2dRecorder();
-        lastErrorRecorder = new Path2dRecorder();
+        currentPoseRecorder = new Pose2dRecorder();
+        sampledPathRecorder = new PathRecorder();
 
         dashboard = FtcDashboard.getInstance();
         dashboard.setTelemetryTransmissionInterval(25);
@@ -223,7 +224,6 @@ public class ModdedTankDrive extends TankDrive {
         Pose2d lastError = getLastError();
 
         currentPoseRecorder.record(currentPose);
-        lastErrorRecorder.record(lastError);
 
         poseHistory.add(currentPose);
 
@@ -283,6 +283,19 @@ public class ModdedTankDrive extends TankDrive {
                 DashboardUtil.drawPoseHistory(fieldOverlay, poseHistory);
                 DashboardUtil.drawRobot(fieldOverlay, currentPose);
 
+                /**
+                 * Start of Modded Part
+                 */
+                sampledPathRecorder.record(trajectory.getPath());
+                fieldOverlay.setStroke("#3F51B5");
+                DashboardUtil.drawRobot(fieldOverlay, currentPose);
+
+                DashboardUtil.drawPoseHistory(fieldOverlay.setStroke("#3F51B5"), currentPoseRecorder.getAsList());
+                DashboardUtil.drawSampledPaths(fieldOverlay, sampledPathRecorder.getAsList());
+                /**
+                 * End of Modded Part
+                 */
+
                 if (!follower.isFollowing()) {
                     mode = org.firstinspires.ftc.teamcode.roadrunner.drive.SampleTankDrive.Mode.IDLE;
                     setDriveSignal(new DriveSignal());
@@ -291,12 +304,6 @@ public class ModdedTankDrive extends TankDrive {
                 break;
             }
         }
-
-        fieldOverlay.setStroke("#3F51B5");
-        DashboardUtil.drawRobot(fieldOverlay, currentPose);
-
-        DashboardUtil.drawPoseHistory(fieldOverlay.setStroke("#3F51B5"), currentPoseRecorder.getAsList());
-        DashboardUtil.drawPoseHistory(fieldOverlay.setStroke("#000000"), lastErrorRecorder.getAsList());
 
         dashboard.sendTelemetryPacket(packet);
     }

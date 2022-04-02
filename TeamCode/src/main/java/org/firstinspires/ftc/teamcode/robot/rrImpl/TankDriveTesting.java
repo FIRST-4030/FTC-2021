@@ -4,18 +4,10 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.qualcomm.hardware.modernrobotics.comm.ModernRoboticsUsbUtil;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleTankDrive;
-import org.firstinspires.ftc.teamcode.roadrunner.util.DashboardUtil;
-import org.firstinspires.ftc.teamcode.utils.Heading;
 import org.firstinspires.ftc.teamcode.utils.LoopUtil;
-
-import java.io.BufferedWriter;
-import java.util.HashMap;
 
 @Config
 @Autonomous(name="RRIMPLTest", group="Test")
@@ -23,7 +15,7 @@ public class TankDriveTesting extends LoopUtil {
 
     //basic roadrunner stuff
     public static ModdedTankDrive drive;
-    public static Path2dRecorder estimatedPaths, currentPaths;
+    public static Pose2dRecorder estimatedPaths, currentPaths;
     public static Trajectory trajectory;
     public static TelemetryPacket tPacket;
     public static FtcDashboard dashboard;
@@ -44,8 +36,8 @@ public class TankDriveTesting extends LoopUtil {
         dashboard.setTelemetryTransmissionInterval(25);
 
         //classes so you can record the poses
-        estimatedPaths = new Path2dRecorder();
-        currentPaths = new Path2dRecorder();
+        estimatedPaths = new Pose2dRecorder();
+        currentPaths = new Pose2dRecorder();
 
         estimatedPaths.record(startingPose);
         currentPaths.record(startingPose);
