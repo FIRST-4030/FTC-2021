@@ -91,6 +91,9 @@ public class ModdedTankDrive extends TankDrive {
     public ModdedTankDrive(HardwareMap hardwareMap) {
         super(kV, kA, kStatic, TRACK_WIDTH);
 
+        currentPoseRecorder = new Path2dRecorder();
+        lastErrorRecorder = new Path2dRecorder();
+
         dashboard = FtcDashboard.getInstance();
         dashboard.setTelemetryTransmissionInterval(25);
 
