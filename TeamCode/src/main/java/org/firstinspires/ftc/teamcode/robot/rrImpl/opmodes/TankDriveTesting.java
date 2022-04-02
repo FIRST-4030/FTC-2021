@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.robot.rrImpl;
+package org.firstinspires.ftc.teamcode.robot.rrImpl.opmodes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.robot.rrImpl.util.ModdedTankDrive;
 import org.firstinspires.ftc.teamcode.tfodohm.TFMaths.TFMathExtension;
 import org.firstinspires.ftc.teamcode.utils.LoopUtil;
 
@@ -17,7 +18,6 @@ public class TankDriveTesting extends LoopUtil {
 
     //basic roadrunner stuff
     public static ModdedTankDrive drive;
-    public static Pose2dRecorder estimatedPaths, currentPaths;
     public static Trajectory trajectory;
     public static TelemetryPacket tPacket;
     public static FtcDashboard dashboard;
@@ -38,15 +38,10 @@ public class TankDriveTesting extends LoopUtil {
         drive = new ModdedTankDrive(hardwareMap);
         dashboard = FtcDashboard.getInstance();
         dashboard.setTelemetryTransmissionInterval(25);
-
-        //classes so you can record the poses
-        estimatedPaths = new Pose2dRecorder();
-        currentPaths = new Pose2dRecorder();
-
-        estimatedPaths.record(startingPose);
-        currentPaths.record(startingPose);
-
         drive.setPoseEstimate(startingPose);
+
+        //external stuffs
+        trackedHeading = drive.getRawExternalHeading();
     }
 
     @Override
@@ -61,14 +56,12 @@ public class TankDriveTesting extends LoopUtil {
 
     @Override
     public void opUpdate(double deltaTime) {
-        trackedHeading = drive.getRawExternalHeading() + angleOffset;
+        trackedHeading += angleOffset;
         Trajectory trajectory = drive.trajectoryBuilder(startingPose)
                 .splineTo(splineTarget, trackedHeading)
                 .build();
 
         startingPose = trajectory.end().plus(new Pose2d(0, 0, Math.toRadians(-90)));
-        estimatedPaths.record(startingPose);
-        currentPaths.record(drive.getLastError());
         splineTarget.rotated(angleOffset);
     }
 

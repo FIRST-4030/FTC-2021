@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.robot.rrImpl;
+package org.firstinspires.ftc.teamcode.robot.rrImpl.util;
 
 
 import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.BASE_CONSTRAINTS;
@@ -43,6 +43,8 @@ import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigu
 
 import org.firstinspires.ftc.teamcode.roadrunner.util.DashboardUtil;
 import org.firstinspires.ftc.teamcode.roadrunner.util.LynxModuleUtil;
+import org.firstinspires.ftc.teamcode.robot.rrImpl.util.PathRecorder;
+import org.firstinspires.ftc.teamcode.robot.rrImpl.util.Pose2dRecorder;
 
 import java.util.ArrayList;
 import java.util.Arrays;

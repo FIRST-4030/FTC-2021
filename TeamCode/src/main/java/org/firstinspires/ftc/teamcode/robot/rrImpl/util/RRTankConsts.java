@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.robot.rrImpl;
+package org.firstinspires.ftc.teamcode.robot.rrImpl.util;
 
 import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
