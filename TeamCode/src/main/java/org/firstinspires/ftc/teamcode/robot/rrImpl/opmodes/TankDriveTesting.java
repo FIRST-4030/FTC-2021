@@ -25,9 +25,7 @@ public class TankDriveTesting extends LoopUtil {
     //poses
     public static Pose2d startingPose = new Pose2d(0, 0);
     public static double DISTANCE = 30;
-    public static double angleOffset = TFMathExtension.pi/4;
     public static double trackedHeading = 0;
-    public static Vector2d splineTarget = new Vector2d(9, 9);
 
     @Override
     public void opInit() {
@@ -56,13 +54,13 @@ public class TankDriveTesting extends LoopUtil {
 
     @Override
     public void opUpdate(double deltaTime) {
-        trackedHeading += angleOffset;
-        Trajectory trajectory = drive.trajectoryBuilder(startingPose)
-                .splineTo(splineTarget, trackedHeading)
+        Trajectory traj = drive.trajectoryBuilder(startingPose)
+                .forward(DISTANCE)
                 .build();
+        drive.followTrajectory(traj);
+        drive.turn(Math.toRadians(-90));
 
-        startingPose = trajectory.end().plus(new Pose2d(0, 0, Math.toRadians(-90)));
-        splineTarget.rotated(angleOffset);
+        startingPose = traj.end().plus(new Pose2d(0, 0, Math.toRadians(-90)));
     }
 
     @Override
