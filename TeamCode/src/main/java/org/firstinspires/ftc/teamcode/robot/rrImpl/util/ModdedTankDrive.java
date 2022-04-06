@@ -290,8 +290,7 @@ public class ModdedTankDrive extends TankDrive {
                  */
                 sampledPathRecorder.record(trajectory.getPath());
 
-                DashboardUtil.drawPoseHistory(fieldOverlay.setStroke("#ff0000"), currentPoseRecorder.getAsList());
-                DashboardUtil.drawSampledPaths(fieldOverlay.setStroke("#000000"), sampledPathRecorder.getAsList());
+
                 /**
                  * End of Modded Part
                  */
@@ -304,6 +303,9 @@ public class ModdedTankDrive extends TankDrive {
                 break;
             }
         }
+
+        DashboardUtil.drawPoseHistory(fieldOverlay.setStroke("#ff0000"), currentPoseRecorder.getAsList());
+        DashboardUtil.drawSampledPaths(fieldOverlay.setStroke("#000000"), sampledPathRecorder.getAsList());
 
         dashboard.sendTelemetryPacket(packet);
     }
