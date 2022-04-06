@@ -70,6 +70,6 @@ public class TankDriveTesting extends LoopUtil {
 
     @Override
     public void opStop() {
-
+        drive.dispose();
     }
 }
