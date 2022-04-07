@@ -190,9 +190,9 @@ public class ModdedTankDrive extends TankDrive {
     }
 
     private int currentTrajBufferIdx = 0;
-    public void executeNext(){
+    public void trajectoryBufferExecuteNext(){
         //Follows the "first in last out" rule
-        if (!isBusy()){
+        if (!isBusy() && (trajectoryBuffer.size() != 0)){
             followTrajectory(trajectoryBuffer.get(currentTrajBufferIdx));
             switch (trajLoop){
                 default:
