@@ -8,18 +8,24 @@ import java.util.List;
 public class Pose2dRecorder {
 
     private List<Pose2d> recordedPoses;
+    private Pose2d lastPose = null;
 
     public Pose2dRecorder(){
         this.recordedPoses = new ArrayList<>();
     }
 
-    public void record(Pose2d path){
-        recordedPoses.add(path);
+    public void record(Pose2d pose2d){
+        if ((lastPose == null) || (!lastPose.equals(pose2d))) {
+            recordedPoses.add(pose2d);
+            lastPose = pose2d;
+        }
     }
 
     public void recordAll(Pose2d[] pose2ds){
-        for (Pose2d path : pose2ds){
-            recordedPoses.add(path);
+        for (Pose2d pose : pose2ds){
+            if ((lastPose == null) || (!lastPose.equals(pose))) {
+                recordedPoses.add(pose);
+            }
         }
     }
 
@@ -33,6 +39,7 @@ public class Pose2dRecorder {
 
     public void removeAll(){
         recordedPoses.clear();
+        lastPose = null;
     }
 
     public void replaceAt(int index, Pose2d newPath){

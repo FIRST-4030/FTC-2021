@@ -9,18 +9,25 @@ import java.util.List;
 public class PathRecorder {
 
     private List<Path> recordedPaths;
+    private Path lastPath = null;
 
     public PathRecorder(){
         this.recordedPaths = new ArrayList<>();
     }
 
     public void record(Path path){
-        recordedPaths.add(path);
+        if ((lastPath == null) || (!lastPath.equals(path))) {
+            recordedPaths.add(path);
+            lastPath = path;
+        }
     }
 
     public void recordAll(Path[] paths){
         for (Path path : paths){
-            recordedPaths.add(path);
+            if ((lastPath == null) || (!lastPath.equals(path))) {
+                recordedPaths.add(path);
+                lastPath = path;
+            }
         }
     }
 
@@ -34,6 +41,7 @@ public class PathRecorder {
 
     public void removeAll(){
         recordedPaths.clear();
+        lastPath = null;
     }
 
     public void replaceAt(int index, Path newPath){

@@ -43,8 +43,7 @@ import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigu
 
 import org.firstinspires.ftc.teamcode.roadrunner.util.DashboardUtil;
 import org.firstinspires.ftc.teamcode.roadrunner.util.LynxModuleUtil;
-import org.firstinspires.ftc.teamcode.robot.rrImpl.util.PathRecorder;
-import org.firstinspires.ftc.teamcode.robot.rrImpl.util.Pose2dRecorder;
+import org.firstinspires.ftc.teamcode.utils.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,7 +69,12 @@ public class ModdedTankDrive extends TankDrive {
         FOLLOW_TRAJECTORY
     }
 
-    public FtcDashboard dashboard;
+    public enum BufferLooping {
+        ONCE,
+        REPEAT
+    }
+
+    protected FtcDashboard dashboard;
     private NanoClock clock;
 
     private org.firstinspires.ftc.teamcode.roadrunner.drive.SampleTankDrive.Mode mode;
@@ -85,6 +89,7 @@ public class ModdedTankDrive extends TankDrive {
     private List<Pose2d> poseHistory;
     private Pose2dRecorder currentPoseRecorder;
     private PathRecorder sampledPathRecorder;
+    private List<Trajectory> trajectoryBuffer;
 
     private List<DcMotorEx> motors, leftMotors, rightMotors;
     private BNO055IMU imu;
@@ -96,6 +101,7 @@ public class ModdedTankDrive extends TankDrive {
 
         currentPoseRecorder = new Pose2dRecorder();
         sampledPathRecorder = new PathRecorder();
+        trajectoryBuffer = new ArrayList<>();
 
         dashboard = FtcDashboard.getInstance();
         dashboard.setTelemetryTransmissionInterval(25);
@@ -166,6 +172,45 @@ public class ModdedTankDrive extends TankDrive {
         // for instance, setLocalizer(new ThreeTrackingWheelLocalizer(...));
     }
 
+    /**
+     * Trajectory Buffering for stuff
+     */
+
+    private BufferLooping trajLoop = BufferLooping.ONCE;
+    public void setupTrajectoryBuffer(BufferLooping type){
+        trajLoop = type;
+    }
+
+    public void trajectoryBufferAdd(Trajectory traj){
+        trajectoryBuffer.add(traj);
+    }
+
+    public void trajectoryBufferRemove(int idx){
+        trajectoryBuffer.remove(idx);
+    }
+
+    private int currentTrajBufferIdx = 0;
+    public void executeNext(){
+        //Follows the "first in last out" rule
+        if (!isBusy()){
+            followTrajectory(trajectoryBuffer.get(currentTrajBufferIdx));
+            switch (trajLoop){
+                case ONCE:
+                    trajectoryBuffer.remove(0); //removes the first trajectory queued
+                    break;
+                case REPEAT:
+                    currentTrajBufferIdx++; //increment index when executed specified
+                    currentTrajBufferIdx %= trajectoryBuffer.size(); //normalizes the idx to the buffer's length
+                    break;
+            }
+
+        }
+    }
+
+    /**
+     * End of Trajectory Buffering
+     */
+
     public TrajectoryBuilder trajectoryBuilder(Pose2d startPose) {
         return new TrajectoryBuilder(startPose, constraints);
     }
@@ -225,22 +270,20 @@ public class ModdedTankDrive extends TankDrive {
         Pose2d currentPose = getPoseEstimate();
         Pose2d lastError = getLastError();
 
-        currentPoseRecorder.record(currentPose);
-
         poseHistory.add(currentPose);
 
         TelemetryPacket packet = new TelemetryPacket();
         Canvas fieldOverlay = packet.fieldOverlay();
 
-        packet.put("mode", mode);
+        packet.put("Mode: ", mode);
 
-        packet.put("x", currentPose.getX());
-        packet.put("y", currentPose.getY());
-        packet.put("heading", currentPose.getHeading());
+        packet.put("X: ", currentPose.getX());
+        packet.put("Y: ", currentPose.getY());
+        packet.put("Heading/Direction: ", currentPose.getHeading());
 
-        packet.put("xError", lastError.getX());
-        packet.put("yError", lastError.getY());
-        packet.put("headingError", lastError.getHeading());
+        packet.put("X Error: ", lastError.getX());
+        packet.put("Y Error: ", lastError.getY());
+        packet.put("Heading/Direction Error: ", lastError.getHeading());
 
         switch (mode) {
             case IDLE:
@@ -285,15 +328,9 @@ public class ModdedTankDrive extends TankDrive {
                 DashboardUtil.drawPoseHistory(fieldOverlay, poseHistory);
                 DashboardUtil.drawRobot(fieldOverlay, currentPose);
 
-                /**
-                 * Start of Modded Part
-                 */
-                sampledPathRecorder.record(trajectory.getPath());
-
-
-                /**
-                 * End of Modded Part
-                 */
+                //under FOLLOW_TRAJECTORY because we don't need to record every single update call
+                currentPoseRecorder.record(currentPose); //records the current position of the bot
+                sampledPathRecorder.record(trajectory.getPath()); //records the expected path of the bot
 
                 if (!follower.isFollowing()) {
                     mode = org.firstinspires.ftc.teamcode.roadrunner.drive.SampleTankDrive.Mode.IDLE;
@@ -304,10 +341,13 @@ public class ModdedTankDrive extends TankDrive {
             }
         }
 
+        dashboard.sendTelemetryPacket(packet);
+    }
+
+    public void draw(){
+        Canvas fieldOverlay = (new TelemetryPacket()).fieldOverlay();
         DashboardUtil.drawPoseHistory(fieldOverlay.setStroke("#ff0000"), currentPoseRecorder.getAsList());
         DashboardUtil.drawSampledPaths(fieldOverlay.setStroke("#000000"), sampledPathRecorder.getAsList());
-
-        dashboard.sendTelemetryPacket(packet);
     }
 
     public void dispose(){
