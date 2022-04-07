@@ -195,6 +195,7 @@ public class ModdedTankDrive extends TankDrive {
         if (!isBusy()){
             followTrajectory(trajectoryBuffer.get(currentTrajBufferIdx));
             switch (trajLoop){
+                default:
                 case ONCE:
                     trajectoryBuffer.remove(0); //removes the first trajectory queued
                     break;
