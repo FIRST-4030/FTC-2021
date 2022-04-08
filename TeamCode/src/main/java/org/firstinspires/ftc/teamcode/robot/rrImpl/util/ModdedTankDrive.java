@@ -58,7 +58,7 @@ public class ModdedTankDrive extends TankDrive {
     public static PIDCoefficients CROSS_TRACK_PID = new PIDCoefficients(0, 0, 0);
     //public static PIDCoefficients HEADING_PID = new PIDCoefficients(10, 13, 13); //P: 36; I:0; D:0
     //8, 5, 6
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(8, 5, 6);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(1, 0, 0.3);
 
     public static double VX_WEIGHT = 1;
     public static double OMEGA_WEIGHT = 1;

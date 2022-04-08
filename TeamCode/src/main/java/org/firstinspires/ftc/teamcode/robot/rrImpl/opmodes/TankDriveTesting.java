@@ -19,23 +19,19 @@ public class TankDriveTesting extends LoopUtil {
     //basic roadrunner stuff
     public static ModdedTankDrive drive;
     public static Trajectory trajectory;
-    public static TelemetryPacket tPacket;
-    public static FtcDashboard dashboard;
 
     //poses
     public static Pose2d startingPose = new Pose2d(0, 0);
     public static double DISTANCE = 30;
     public static double trackedHeading = 0;
+    public static double angleTurn = -90;
 
     @Override
     public void opInit() {
         setUpdateCap(30);
 
         //roadrunner stuffs
-        tPacket = new TelemetryPacket();
         drive = new ModdedTankDrive(hardwareMap);
-        dashboard = FtcDashboard.getInstance();
-        dashboard.setTelemetryTransmissionInterval(25);
         drive.setPoseEstimate(startingPose);
 
         //external stuffs
@@ -58,9 +54,9 @@ public class TankDriveTesting extends LoopUtil {
                 .forward(DISTANCE)
                 .build();
         drive.followTrajectory(traj);
-        drive.turn(Math.toRadians(-90));
+        drive.turn(Math.toRadians(angleTurn));
 
-        startingPose = traj.end().plus(new Pose2d(0, 0, Math.toRadians(-90)));
+        startingPose = traj.end().plus(new Pose2d(0, 0, Math.toRadians(angleTurn)));
     }
 
     @Override
