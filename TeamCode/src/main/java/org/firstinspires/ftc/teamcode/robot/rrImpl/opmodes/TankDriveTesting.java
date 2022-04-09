@@ -36,6 +36,7 @@ public class TankDriveTesting extends LoopUtil {
         drive = new ModdedTankDrive(hardwareMap);
         drive.setPoseEstimate(startingPose);
         dashboard = FtcDashboard.getInstance();
+        dashboard.setTelemetryTransmissionInterval(25);
         packet = new TelemetryPacket();
 
         //external stuffs
