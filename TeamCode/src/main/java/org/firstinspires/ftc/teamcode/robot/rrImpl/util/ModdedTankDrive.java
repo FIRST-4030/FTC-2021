@@ -43,7 +43,6 @@ import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigu
 
 import org.firstinspires.ftc.teamcode.roadrunner.util.DashboardUtil;
 import org.firstinspires.ftc.teamcode.roadrunner.util.LynxModuleUtil;
-import org.firstinspires.ftc.teamcode.utils.Pair;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -354,6 +353,10 @@ public class ModdedTankDrive extends TankDrive {
     public void dispose(){
         currentPoseRecorder.removeAll();
         sampledPathRecorder.removeAll();
+
+        for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
+            module.clearBulkCache();
+        }
     }
 
     public void waitForIdle() {
