@@ -10,6 +10,8 @@ import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants
 import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kStatic;
 import static org.firstinspires.ftc.teamcode.roadrunner.drive.TankDriveConstants.kV;
 
+import android.content.SharedPreferences;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -94,9 +96,12 @@ public class ModdedTankDrive extends TankDrive {
     private BNO055IMU imu;
 
     private VoltageSensor batteryVoltageSensor;
+    private HardwareMap hardwareMap;
 
     public ModdedTankDrive(HardwareMap hardwareMap) {
         super(kV, kA, kStatic, TRACK_WIDTH);
+
+        this.hardwareMap = hardwareMap;
 
         currentPoseRecorder = new Pose2dRecorder();
         sampledPathRecorder = new PathRecorder();
