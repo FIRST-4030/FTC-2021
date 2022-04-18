@@ -66,7 +66,7 @@ public class TankDriveTesting extends LoopUtil {
 
     @Override
     public void opFixedUpdate(double deltaTime) {
-        drive.draw();
+        drive.queueDraw();
     }
 
     @Override

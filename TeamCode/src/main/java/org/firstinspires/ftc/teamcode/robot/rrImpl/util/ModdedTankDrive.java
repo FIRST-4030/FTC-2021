@@ -64,6 +64,8 @@ public class ModdedTankDrive extends TankDrive {
     public static double VX_WEIGHT = 1;
     public static double OMEGA_WEIGHT = 1;
 
+    private boolean drawCall = false;
+
     public enum Mode {
         IDLE,
         TURN,
@@ -346,11 +348,21 @@ public class ModdedTankDrive extends TankDrive {
             }
         }
 
+        if (drawCall){
+            draw(packet);
+        }
+
+        drawCall = false;
+
         dashboard.sendTelemetryPacket(packet);
     }
 
-    public void draw(){
-        Canvas fieldOverlay = (new TelemetryPacket()).fieldOverlay();
+    public void queueDraw(){
+        this.drawCall = true;
+    }
+
+    public void draw(TelemetryPacket packet){
+        Canvas fieldOverlay = packet.fieldOverlay();
         DashboardUtil.drawPoseHistory(fieldOverlay.setStroke("#ff0000"), currentPoseRecorder.getAsList());
         DashboardUtil.drawSampledPaths(fieldOverlay.setStroke("#000000"), sampledPathRecorder.getAsList());
     }
