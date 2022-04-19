@@ -103,6 +103,7 @@ public class ModdedTankDrive extends TankDrive {
     public ModdedTankDrive(HardwareMap hardwareMap) {
         super(kV, kA, kStatic, TRACK_WIDTH);
 
+
         this.hardwareMap = hardwareMap;
 
         currentPoseRecorder = new Pose2dRecorder();
@@ -349,7 +350,8 @@ public class ModdedTankDrive extends TankDrive {
         }
 
         if (drawCall){
-            draw(packet);
+            DashboardUtil.drawPoseHistory(fieldOverlay.setStroke("#ff0000"), currentPoseRecorder.getAsList());
+            DashboardUtil.drawSampledPaths(fieldOverlay.setStroke("#000000"), sampledPathRecorder.getAsList());
         }
 
         drawCall = false;
@@ -361,15 +363,11 @@ public class ModdedTankDrive extends TankDrive {
         this.drawCall = true;
     }
 
-    public void draw(TelemetryPacket packet){
-        Canvas fieldOverlay = packet.fieldOverlay();
-        DashboardUtil.drawPoseHistory(fieldOverlay.setStroke("#ff0000"), currentPoseRecorder.getAsList());
-        DashboardUtil.drawSampledPaths(fieldOverlay.setStroke("#000000"), sampledPathRecorder.getAsList());
-    }
 
     public void dispose(){
         currentPoseRecorder.removeAll();
         sampledPathRecorder.removeAll();
+        turnController.reset();
 
         for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
             module.clearBulkCache();
