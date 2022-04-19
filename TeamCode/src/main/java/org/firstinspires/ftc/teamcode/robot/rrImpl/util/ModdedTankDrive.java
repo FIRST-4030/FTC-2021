@@ -295,7 +295,6 @@ public class ModdedTankDrive extends TankDrive {
 
         switch (mode) {
             case IDLE:
-                turnController.reset();
                 break;
             case TURN: {
                 double t = clock.seconds() - turnStart;
@@ -316,6 +315,7 @@ public class ModdedTankDrive extends TankDrive {
 
                 if (t >= turnProfile.duration()) {
                     mode = org.firstinspires.ftc.teamcode.roadrunner.drive.SampleTankDrive.Mode.IDLE;
+                    turnController.reset();
                     setDriveSignal(new DriveSignal());
                 }
 
