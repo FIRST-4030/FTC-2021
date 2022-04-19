@@ -372,7 +372,6 @@ public class ModdedTankDrive extends TankDrive {
         for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
             module.clearBulkCache();
         }
-
     }
 
     public void waitForIdle() {
