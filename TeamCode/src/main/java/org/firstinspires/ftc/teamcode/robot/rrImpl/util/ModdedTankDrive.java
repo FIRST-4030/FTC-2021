@@ -295,7 +295,7 @@ public class ModdedTankDrive extends TankDrive {
 
         switch (mode) {
             case IDLE:
-                // do nothing
+                turnController.reset();
                 break;
             case TURN: {
                 double t = clock.seconds() - turnStart;
@@ -322,7 +322,6 @@ public class ModdedTankDrive extends TankDrive {
                 break;
             }
             case FOLLOW_TRAJECTORY: {
-                turnController.reset();
                 setDriveSignal(follower.update(currentPose));
 
                 Trajectory trajectory = follower.getTrajectory();
