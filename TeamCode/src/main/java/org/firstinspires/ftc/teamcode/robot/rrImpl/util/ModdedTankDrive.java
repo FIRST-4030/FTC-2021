@@ -315,13 +315,14 @@ public class ModdedTankDrive extends TankDrive {
 
                 if (t >= turnProfile.duration()) {
                     mode = org.firstinspires.ftc.teamcode.roadrunner.drive.SampleTankDrive.Mode.IDLE;
-                    turnController.reset();
+
                     setDriveSignal(new DriveSignal());
                 }
 
                 break;
             }
             case FOLLOW_TRAJECTORY: {
+
                 setDriveSignal(follower.update(currentPose));
 
                 Trajectory trajectory = follower.getTrajectory();
