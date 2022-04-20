@@ -112,25 +112,25 @@ public class SwervePod extends PID<Double>{
         ArrayList<Double> td1 = new ArrayList<Double>();
         ArrayList<Double> td2 = new ArrayList<Double>();
 
-        double tpd = tpr/360;
+        double tpd = 1740;//tpr/360 = 1740;
 
         for(;m1.getCurrentPosition() < tpr;){
             telemetry.addData("pot1",m1.getCurrentPosition()/tpd);
             telemetry.addData("pot2",0);
-            if(pot.getMV1() > 0.2 && pot.getMV1() < 3.1){
+            //if(pot.getMV1() > 0.2 && pot.getMV1() < 3.1){
                 pd1.add(pot.getMV1());
                 td1.add(m1.getCurrentPosition()/tpd);
                 //telemetry.addData("pot1",1);
-            }
-            if(pot.getMV2()>0.15&&pot.getMV2()<2.7){
+            //}
+            //if(pot.getMV2()>0.15&&pot.getMV2()<2.7){
                 pd2.add(pot.getMV2());
                 td2.add(m1.getCurrentPosition()/tpd);
                 telemetry.addData("pot2",1);
-            }
+            //}
             telemetry.update();
         }
 
-        double[] pd1a = new double[pd1.size()];
+        /*double[] pd1a = new double[pd1.size()];
         double[] td1a = new double[pd1.size()];
 
         double[] pd2a = new double[pd2.size()];
@@ -144,10 +144,12 @@ public class SwervePod extends PID<Double>{
             pd2a[i] = (double)pd2.get(i);
             td2a[i] = (double)td2.get(i);
         }
+         */
 
         try {
-            RobotLog.d("AUTOTUNE poly 1: " + Arrays.toString(Polynomial.getConstants(pd1a, td1a,20)));
-            RobotLog.d("AUTOTUNE poly 2: " + Arrays.toString(Polynomial.getConstants(pd2a, td2a,20)));
+            RobotLog.d("AUTOTUNE poly 1: " + pd1);//Arrays.toString(Polynomial.getConstants(pd1a, td1a,20)));
+            RobotLog.d("AUTOTUNE poly 2: " + pd2);//Arrays.toString(Polynomial.getConstants(pd2a, td2a,20)));
+            RobotLog.d("AUTOTUNE cracker 1: " + td1);RobotLog.d("AUTOTUNE cracker 2: " + td2);
         } catch (Exception e) {
             RobotLog.d("uh oh " + e.getMessage() + " sdfsd" + Arrays.toString(e.getStackTrace()));
         }

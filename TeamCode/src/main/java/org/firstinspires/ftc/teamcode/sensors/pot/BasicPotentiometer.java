@@ -4,7 +4,10 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.utils.PiecewiseInterpolation;
 import org.firstinspires.ftc.teamcode.utils.Polynomial;
+
+import java.util.ArrayList;
 
 public class BasicPotentiometer implements Potentiometer {
 
@@ -14,10 +17,10 @@ public class BasicPotentiometer implements Potentiometer {
     private final double scaleRad = Math.PI / 180;
 
     //for linearization - for later
-    private final Polynomial poly;
+    private final PiecewiseInterpolation poly;
 
     //initalize hardware
-    public BasicPotentiometer(HardwareMap map, Telemetry telemetry, String name, double[] constants){
+    public BasicPotentiometer(HardwareMap map, Telemetry telemetry, String name, ArrayList<Double> constants){
         if(name == null || name.isEmpty()) {
             throw new IllegalArgumentException(this.getClass().getSimpleName() + ": invalid name - nonexistent");
         }
@@ -26,7 +29,7 @@ public class BasicPotentiometer implements Potentiometer {
         } catch (Exception e) {
             telemetry.log().add(this.getClass().getSimpleName() + ": nope nope plug this in");
         }
-        this.poly = new Polynomial(constants);
+        this.poly = new PiecewiseInterpolation(constants, constants);
     }
 
     //see overridden methods - just getters
@@ -38,7 +41,7 @@ public class BasicPotentiometer implements Potentiometer {
 
     @Override
     public double getAngleD() {
-        return poly.solve(getMV());
+        return poly.interpolate(getMV());
     }
 
     @Override

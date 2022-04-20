@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import java.util.ArrayList;
+
 public class DoublePotentiometer implements Potentiometer {
 
     //hardware
@@ -21,8 +23,8 @@ public class DoublePotentiometer implements Potentiometer {
         if(n1 == null || n2 == null || n1.isEmpty() || n2.isEmpty()){
             throw new IllegalArgumentException(this.getClass().getSimpleName() + ": invalid name");
         }
-        pot1 = new BasicPotentiometer(map, telemetry, n1, new double[]{1});
-        pot2 = new BasicPotentiometer(map, telemetry, n2, new double[]{1});
+        pot1 = new BasicPotentiometer(map, telemetry, n1, new ArrayList<Double>(1));
+        pot2 = new BasicPotentiometer(map, telemetry, n2, new ArrayList<Double>(1));
         this.OFFSET = offset;
     }
 
