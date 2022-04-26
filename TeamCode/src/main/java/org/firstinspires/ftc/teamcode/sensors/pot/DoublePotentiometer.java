@@ -23,8 +23,11 @@ public class DoublePotentiometer implements Potentiometer {
         if(n1 == null || n2 == null || n1.isEmpty() || n2.isEmpty()){
             throw new IllegalArgumentException(this.getClass().getSimpleName() + ": invalid name");
         }
-        pot1 = new BasicPotentiometer(map, telemetry, n1, new ArrayList<Double>(1));
-        pot2 = new BasicPotentiometer(map, telemetry, n2, new ArrayList<Double>(1));
+        ArrayList normalized = new ArrayList<Double>();
+        normalized.add(0);
+        normalized.add(1);
+        pot1 = new BasicPotentiometer(map, telemetry, n1, normalized);
+        pot2 = new BasicPotentiometer(map, telemetry, n2, normalized);
         this.OFFSET = offset;
     }
 
