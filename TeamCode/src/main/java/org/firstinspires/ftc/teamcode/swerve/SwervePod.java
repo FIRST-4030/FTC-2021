@@ -96,6 +96,7 @@ public class SwervePod extends PID<Double>{
         }
         tpr /= spinRes;
         tpr /= 2;
+        tpr = 1740; //todo
 
         m1.setPower(0);
 
@@ -107,24 +108,38 @@ public class SwervePod extends PID<Double>{
         m1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         m1.setPower(0.2);
 
-        ArrayList<Double> pd1 = new ArrayList<Double>();
-        ArrayList<Double> pd2 = new ArrayList<Double>();
-        ArrayList<Double> td1 = new ArrayList<Double>();
-        ArrayList<Double> td2 = new ArrayList<Double>();
+        ArrayList<Double> pd1a = new ArrayList<Double>();
+        ArrayList<Double> pd1b = new ArrayList<Double>();
+        ArrayList<Double> pd2a = new ArrayList<Double>();
+        ArrayList<Double> pd2b = new ArrayList<Double>();
+        ArrayList<Double> td1a = new ArrayList<Double>();
+        ArrayList<Double> td1b = new ArrayList<Double>();
+        ArrayList<Double> td2a = new ArrayList<Double>();
+        ArrayList<Double> td2b = new ArrayList<Double>();
 
-        double tpd = 1740;//tpr/360 = 1740;
+        double tpd  = tpr/360;
 
         for(;m1.getCurrentPosition() < tpr;){
             telemetry.addData("pot1",m1.getCurrentPosition()/tpd);
             telemetry.addData("pot2",0);
             //if(pot.getMV1() > 0.2 && pot.getMV1() < 3.1){
-                pd1.add(pot.getMV1());
-                td1.add(m1.getCurrentPosition()/tpd);
+            if(m1.getCurrentPosition()<tpr/2){
+                pd1a.add(pot.getMV1());
+                td1a.add(m1.getCurrentPosition()/tpd);
+            } else {
+                pd1b.add(pot.getMV1());
+                td1b.add(m1.getCurrentPosition()/tpd);
+            }
                 //telemetry.addData("pot1",1);
             //}
             //if(pot.getMV2()>0.15&&pot.getMV2()<2.7){
-                pd2.add(pot.getMV2());
-                td2.add(m1.getCurrentPosition()/tpd);
+            if(m1.getCurrentPosition()<tpr/4||m1.getCurrentPosition()>3*tpr/4){
+                pd2a.add(pot.getMV1());
+                td2a.add(m1.getCurrentPosition()/tpd);
+            } else {
+                pd2b.add(pot.getMV1());
+                td2b.add(m1.getCurrentPosition()/tpd);
+            }
                 telemetry.addData("pot2",1);
             //}
             telemetry.update();
@@ -147,9 +162,12 @@ public class SwervePod extends PID<Double>{
          */
 
         try {
-            RobotLog.d("AUTOTUNE poly 1: " + pd1);//Arrays.toString(Polynomial.getConstants(pd1a, td1a,20)));
-            RobotLog.d("AUTOTUNE poly 2: " + pd2);//Arrays.toString(Polynomial.getConstants(pd2a, td2a,20)));
-            RobotLog.d("AUTOTUNE cracker 1: " + td1);RobotLog.d("AUTOTUNE cracker 2: " + td2);
+            RobotLog.d("AUTOTUNE poly 1: " + pd1a);//Arrays.toString(Polynomial.getConstants(pd1a, td1a,20)));
+            RobotLog.d("AUTOTUNE poly 2: " + pd2a);//Arrays.toString(Polynomial.getConstants(pd2a, td2a,20)));
+            RobotLog.d("AUTOTUNE poly 3: " + pd1b);//Arrays.toString(Polynomial.getConstants(pd1a, td1a,20)));
+            RobotLog.d("AUTOTUNE poly 4: " + pd2b);
+            RobotLog.d("AUTOTUNE cracker 1: " + td1a);RobotLog.d("AUTOTUNE cracker 2: " + td2a);
+            RobotLog.d("AUTOTUNE cracker 3: " + td1b);RobotLog.d("AUTOTUNE cracker 4: " + td2b);
         } catch (Exception e) {
             RobotLog.d("uh oh " + e.getMessage() + " sdfsd" + Arrays.toString(e.getStackTrace()));
         }
@@ -216,8 +234,8 @@ public class SwervePod extends PID<Double>{
         m1.setPower(0.2);
         m2.setPower(0);
 
-        telemetry.addData("pot1", pot.getAngleD());
-        telemetry.addData("pot2", pot.getAngleD());
+        //telemetry.addData("pot1", pot.getAngleD());
+        //telemetry.addData("pot2", pot.getAngleD());
         telemetry.addData("potT", pot.getAngleD());
         telemetry.update();
     }

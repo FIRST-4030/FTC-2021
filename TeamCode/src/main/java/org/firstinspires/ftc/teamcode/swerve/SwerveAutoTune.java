@@ -37,7 +37,7 @@ public class SwerveAutoTune extends LinearOpMode {
         waitForStart();
 
         //run tuning
-        pod1.tune();
+        //pod1.tune();
 
         //does tpr make sense?
         //pod1.hmmm(1740);
@@ -47,7 +47,7 @@ public class SwerveAutoTune extends LinearOpMode {
 
         while(opModeIsActive()){
             //linearization working?
-            //pod1.spin();
+            pod1.spin();
         }
     }
 }
