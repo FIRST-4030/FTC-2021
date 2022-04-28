@@ -17,13 +17,14 @@ public class ObjectClassifier implements Runnable{
     private enum INTERNAL_STATE{
         IDLE,
         VERIFYING,
-        SCANNING
+        SCANNING,
+        SHUTDOWN
     }
 
-    private INTERNAL_STATE state = INTERNAL_STATE.IDLE;
+    private static INTERNAL_STATE state = INTERNAL_STATE.IDLE;
 
-    private ArrayList<BoundingBox> boundingBoxes;
-    private boolean isVerified = false,
+    private static ArrayList<BoundingBox> boundingBoxes;
+    private static boolean isVerified = false,
                     isDone = false;
 
     private static final String VUFORIA_KEY = "AV9rwXT/////AAABma+8TAirNkVYosxu9qv0Uz051FVEjKU+nkH+MaIvGuHMijrdgoZYBZwCW2aG8P3+eZecZZPq9UKsZiTHAg73h09NT48122Ui10c8DsPe0Tx5Af6VaBklR898w8xCTdOUa7AlBEOa4KfWX6zDngegeZT5hBLfJKE1tiDmYhJezVDlITIh7SHBv0xBvoQuXhemlzL/OmjrnLuWoKVVW0kLanImI7yra+L8eOCLLp1BBD/Iaq2irZCdvgziZPnMLeTUEO9XUbuW8txq9i51anvlwY8yvMXLvIenNC1xg4KFhMmFzZ8xnpx4nWZZtyRBxaDU99aXm7cQgkVP0VD/eBIDYN4AcB0/Pa7V376m6tRJ5UZh";
@@ -69,70 +70,76 @@ public class ObjectClassifier implements Runnable{
 
     @Override
     public void run() {
-        isDone = false;
+        synchronized (state) {
+            isDone = false;
+            switch (state) {
+                case IDLE:
+                    //do nothing here
+                    break;
+                case SHUTDOWN:
+                    //dispose resources being used
+                    boundingBoxes.clear();
+                    tfod.shutdown();
+                    vuforia.close();
+                    break;
+                case VERIFYING:
+                    isVerified = tfod.getRecognitions().size() > 0;
+                    state = INTERNAL_STATE.IDLE;
+                    break;
+                case SCANNING:
+                    if (isVerified) {
+                        boundingBoxes.clear(); //get rid of the old recognitions
+                        List<Recognition> recognitions = tfod.getRecognitions();
 
-        switch(state){
-            case IDLE:
-                //do nothing here
-                break;
-            case VERIFYING:
-                isVerified = tfod.getRecognitions().size() > 0;
-                state = INTERNAL_STATE.IDLE;
-                break;
-            case SCANNING:
-                boundingBoxes.clear(); //get rid of the old recognitions
-                List<Recognition> recognitions = tfod.getRecognitions();
-
-                for (int i = 0; i < recognitions.size(); i++) {
-                    Recognition cachedRecognition = recognitions.get(i);
-                    boundingBoxes.add(
-                            new BoundingBox(cachedRecognition.getTop(),
+                        for (int i = 0; i < recognitions.size(); i++) {
+                            Recognition cachedRecognition = recognitions.get(i);
+                            boundingBoxes.add(
+                                    new BoundingBox(cachedRecognition.getTop(),
                                             cachedRecognition.getBottom(),
                                             cachedRecognition.getRight(),
                                             cachedRecognition.getLeft(),
                                             cachedRecognition.estimateAngleToObject(angleUnit),
                                             angleUnit));
-                }
-
-                state = INTERNAL_STATE.IDLE;
-                break;
+                        }
+                    }
+                    state = INTERNAL_STATE.IDLE;
+                    break;
+            }
+            isDone = true;
         }
 
-        isDone = true;
     }
 
-    public void queueScan(){
-        waitUntilVerified();
-        state = INTERNAL_STATE.SCANNING;
+    public static void queueScan(){
+        if (isVerified) {
+            waitUntilIdle();
+            state = INTERNAL_STATE.SCANNING;
+        }
     }
 
-    public void queueVerify(){
+    public static void queueVerify(){
         waitUntilIdle();
         state = INTERNAL_STATE.VERIFYING;
     }
 
-    public void dispose(){
+    public static void dispose(){
         state = INTERNAL_STATE.IDLE;
-        boundingBoxes.clear();
-        tfod.shutdown();
-        vuforia.close();
+        waitUntilIdle();
     }
 
-    public void waitUntilIdle(){
+    public static void waitUntilIdle(){
         while(!isDone){}
     }
 
-    public void waitUntilVerified(){
+    public static void waitUntilVerified(){
         while(!isVerified){}
     }
 
-    public boolean isDone(){
+    public static boolean isDone(){
         return isDone;
     }
 
-    public boolean isVerified(){
+    public static boolean isVerified(){
         return isVerified;
     }
-
-
 }
