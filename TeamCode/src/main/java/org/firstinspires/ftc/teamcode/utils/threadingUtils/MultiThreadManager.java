@@ -1,31 +1,44 @@
 package org.firstinspires.ftc.teamcode.utils.threadingUtils;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 public class MultiThreadManager {
 
-    private Runnable[] tasks;
-    private Future[] tracker;
-    private ExecutorService executor;
+    private MRUTask[] mruTasks;
+    private boolean[] isDoneArray;
+    private Thread[] mruThreads;
 
-    public MultiThreadManager(Runnable... input_tasks) {
-        this.tasks = input_tasks;
-        this.executor = Executors.newScheduledThreadPool(this.tasks.length);
-        this.tracker = new Future[this.tasks.length];
+    private boolean started = false;
+
+    public MultiThreadManager(MRUTask... mruTasks){
+        this.mruTasks = new MRUTask[mruTasks.length]; //initialize task list
+        this.mruThreads = new Thread[mruTasks.length]; //initialize threads
+
     }
 
-    public void dispose(){
-        for (Future future: this.tracker) {
-            future.cancel(true);
+    public void init(){
+        if (!started){
+            for (int i = 0; i < mruTasks.length; i++) {
+                this.mruThreads[i] = new Thread(this.mruTasks[i]);
+            }
         }
-        executor.shutdown();
     }
 
-    public void update(){
-        for (int i = 0; i < tasks.length; i++) {
-            if ((tracker[i] == null) || (tracker[i].isDone())) tracker[i] = executor.submit(tasks[i]);
+    public void start(){
+        if (!started){
+            for (int i = 0; i < mruTasks.length; i++) {
+                this.mruThreads[i].start();
+            }
+        }
+    }
+
+    public synchronized void stop(){
+        if (started){
+            for (int i = 0; i < mruTasks.length; i++) {
+                try {
+                    this.mruThreads[i].join();
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }
