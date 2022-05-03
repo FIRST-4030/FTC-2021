@@ -16,14 +16,16 @@ public class BasicPotentiometer implements Potentiometer {
 
     private final double scaleRad = Math.PI / 180;
 
-    //for linearization - for later
     private final PiecewiseInterpolation poly;
+
+    private Telemetry telemetry;
 
     //initalize hardware
     public BasicPotentiometer(HardwareMap map, Telemetry telemetry, String name, double[] constants, double[]    crackers){
         if(name == null || name.isEmpty()) {
             throw new IllegalArgumentException(this.getClass().getSimpleName() + ": invalid name - nonexistent");
         }
+        this.telemetry = telemetry;
         try {
             pot = map.get(AnalogInput.class, name);
         } catch (Exception e) {
@@ -41,7 +43,7 @@ public class BasicPotentiometer implements Potentiometer {
 
     @Override
     public double getAngleD() {
-        return poly.interpolate(getMV());
+        return poly.interpolate(getMV(), telemetry);
     }
 
     @Override

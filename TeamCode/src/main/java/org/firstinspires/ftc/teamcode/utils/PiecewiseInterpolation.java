@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.utils;
 
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.tfodohm.TFMaths.Vector2f;
 
 import java.util.ArrayList;
@@ -16,8 +17,30 @@ public class PiecewiseInterpolation {
         this.dataY = dataY;
     }
 
-    public double interpolate(double f){
+    public double interpolate(double f, Telemetry t){
         double lx = -434, ux = -345, ly = -716, uy = -497;
+        int uxp = 879, lxp = -609;
+        for(int i = 0; i < dataX.length; i++){
+            if(f<dataX[i]){
+                if(lx<dataX[i]){
+                    lxp = i;
+                    lx = dataX[i];
+                }
+            }else if(f>dataX[i]){
+                if(ux>dataX[i]){
+                    uxp = i;
+                    ux = dataX[i];
+                }
+            } else return dataY[i];
+        }
+
+        if(lxp<0) return -40;
+        if(uxp>dataX.length) return 400;
+        ly = dataY[lxp];
+        uy = dataY[uxp];
+
+        return ((uy - ly) / (ux - lx)) * (f - lx) + ly;
+        /*
         if(f<dataX[0]) {
             for (int i = 0; i < dataX.length; i++) {
                 if (f > dataX[i]) {
@@ -28,10 +51,16 @@ public class PiecewiseInterpolation {
                     ux = dataX[i];
                     uy = dataY[i];
 
+                    t.addData("lx", lx);
+                    t.addData("ly", ly);
+                    t.addData("ux", ux);
+                    t.addData("uy", uy);
+
+
                     return ((uy - ly) / (ux - lx)) * (f - lx) + ly;
                 }
             }
-            return 1;
+            return -40;
         }
         for (int i = 0; i < dataX.length; i++) {
             if (f < dataX[i]) {
@@ -42,10 +71,16 @@ public class PiecewiseInterpolation {
                 ux = dataX[i-1];
                 uy = dataY[i-1];
 
-                return ((uy - ly) / (ux - lx)) * (f - lx) + ly;
+
+                t.addData("lx", lx);
+                t.addData("ly", ly);
+                t.addData("ux", ux);
+                t.addData("uy", uy);
+
+                return ((uy - ly) / (ux - lx));// * (f - lx) + ly;
             }
         }
 
-        return 0;
+        return 400;*/
     }
 }
