@@ -1,31 +1,51 @@
 package org.firstinspires.ftc.teamcode.utils;
 
+import com.qualcomm.robotcore.util.RobotLog;
+
 import org.firstinspires.ftc.teamcode.tfodohm.TFMaths.Vector2f;
 
 import java.util.ArrayList;
 
 public class PiecewiseInterpolation {
 
-    private ArrayList<Double> dataX;
-    private ArrayList<Double> dataY;
+    private double[] dataX;
+    private double[] dataY;
 
-    public PiecewiseInterpolation(ArrayList<Double> dataX,ArrayList<Double> dataY){
+    public PiecewiseInterpolation(double[] dataX, double[] dataY){
         this.dataX = dataX;
         this.dataY = dataY;
     }
 
     public double interpolate(double f){
         double lx = -434, ux = -345, ly = -716, uy = -497;
-        for(int i = 0; i < dataX.size(); i++){
-            if(f < dataX.get(i)){
-               lx = dataX.get(i);
-               ly = dataY.get(i);
-            } else {
-               ux = dataX.get(i);
-               uy = dataY.get(i);
-               break;
+        if(f<dataX[0]) {
+            for (int i = 0; i < dataX.length; i++) {
+                if (f > dataX[i]) {
+
+                    lx = dataX[i - 1];
+                    ly = dataY[i - 1];
+
+                    ux = dataX[i];
+                    uy = dataY[i];
+
+                    return ((uy - ly) / (ux - lx)) * (f - lx) + ly;
+                }
+            }
+            return 1;
+        }
+        for (int i = 0; i < dataX.length; i++) {
+            if (f < dataX[i]) {
+
+                lx = dataX[i];
+                ly = dataY[i];
+
+                ux = dataX[i-1];
+                uy = dataY[i-1];
+
+                return ((uy - ly) / (ux - lx)) * (f - lx) + ly;
             }
         }
-        return ((f - lx) / (ux - lx)) * (uy - ly);
+
+        return 0;
     }
 }
