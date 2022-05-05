@@ -47,7 +47,7 @@ public class SwerveAutoTune extends LinearOpMode {
 
         while(opModeIsActive()){
             //linearization working?
-            pod1.spin();
+                pod1.spin();
         }
     }
 }

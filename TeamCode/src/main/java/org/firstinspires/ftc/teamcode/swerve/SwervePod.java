@@ -126,21 +126,25 @@ public class SwervePod extends PID<Double>{
             if(m1.getCurrentPosition()<tpr/2){
                 pd1a.add(pot.getMV1());
                 td1a.add(m1.getCurrentPosition()/tpd);
+
+                telemetry.addData("pot1",1);
             } else {
                 pd1b.add(pot.getMV1());
                 td1b.add(m1.getCurrentPosition()/tpd);
+
+                telemetry.addData("pot1",0);
             }
-                //telemetry.addData("pot1",1);
             //}
             //if(pot.getMV2()>0.15&&pot.getMV2()<2.7){
             if(m1.getCurrentPosition()<tpr/4||m1.getCurrentPosition()>3*tpr/4){
                 pd2a.add(pot.getMV1());
                 td2a.add(m1.getCurrentPosition()/tpd);
+                telemetry.addData("pot2",1);
             } else {
                 pd2b.add(pot.getMV1());
                 td2b.add(m1.getCurrentPosition()/tpd);
+                telemetry.addData("pot2",0);
             }
-                telemetry.addData("pot2",1);
             //}
             telemetry.update();
         }
@@ -234,8 +238,12 @@ public class SwervePod extends PID<Double>{
         m1.setPower(0.2);
         m2.setPower(0);
 
-        //telemetry.addData("pot1", pot.getAngleD());
-        //telemetry.addData("pot2", pot.getAngleD());
+        telemetry.addData("pot1MV", pot.getMV1());
+        telemetry.addData("pot2MV", pot.getMV2());
+        telemetry.addData("pot1a", pot.getAngleD1a());
+        telemetry.addData("pot2a", pot.getAngleD2a());
+        telemetry.addData("pot1b", pot.getAngleD1b());
+        telemetry.addData("pot2b", pot.getAngleD2b());
         telemetry.addData("potT", pot.getAngleD());
         telemetry.update();
     }

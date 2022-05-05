@@ -20,7 +20,7 @@ public class BasicPotentiometer implements Potentiometer {
     private final PiecewiseInterpolation poly;
 
     //initalize hardware
-    public BasicPotentiometer(HardwareMap map, Telemetry telemetry, String name, ArrayList<Double> constants, ArrayList<Double> crackers){
+    public BasicPotentiometer(HardwareMap map, Telemetry telemetry, String name, double[] constants, double[]    crackers){
         if(name == null || name.isEmpty()) {
             throw new IllegalArgumentException(this.getClass().getSimpleName() + ": invalid name - nonexistent");
         }
@@ -56,7 +56,7 @@ public class BasicPotentiometer implements Potentiometer {
 
     @Override
     public boolean isZero(){
-        return getMV() == 0;
+        return getMV() <= 0.03;
     }
 
 }
