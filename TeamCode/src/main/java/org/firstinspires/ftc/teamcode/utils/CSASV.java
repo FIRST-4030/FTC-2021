@@ -8,39 +8,49 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CSASV<T>{
 
-    private ConcurrentHashMap<Class, T> csashm;
+    private ConcurrentHashMap<String, T> csashm;
 
     public CSASV(){
         csashm = new ConcurrentHashMap<>();
     }
 
-    public void register(Class root, T variable){
-        if (csashm.containsKey(root)) {return; }
-        csashm.put(root, variable);
+    public void register(Object root, T variable){
+        String simpleName = root.getClass().getSimpleName();
+        if (csashm.containsKey(simpleName)) {
+            return;
+        }
+        csashm.put(simpleName, variable);
     }
 
-    public void deregister(Class root){
-        if (csashm.containsKey(root)){
-            csashm.remove(root);
-        } else {return;}
+    public void deregister(Object root){
+        String simpleName = root.getClass().getSimpleName();
+        if (csashm.containsKey(simpleName)){
+            csashm.remove(simpleName);
+        } else {
+            return;
+        }
     }
 
     public void dispose(){
         csashm.clear();
     }
 
-    public synchronized T get(Class root){
-        if (csashm.containsKey(root)){
-            return csashm.get(root);
+    public synchronized T get(Object root){
+        String simpleName = root.getClass().getSimpleName();
+        if (csashm.containsKey(simpleName)){
+            return csashm.get(simpleName);
         } else {
             return null;
         }
     }
 
-    public synchronized void set(Class root, T variable){
-        if (csashm.containsKey(root)){
-            csashm.replace(root, variable);
-        } else { return; }
+    public synchronized void set(Object root, T variable){
+        String simpleName = root.getClass().getSimpleName();
+        if (csashm.containsKey(simpleName)){
+            csashm.replace(simpleName, variable);
+        } else {
+            return;
+        }
     }
 
 

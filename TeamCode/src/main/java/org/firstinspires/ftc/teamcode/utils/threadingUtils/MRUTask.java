@@ -1,30 +1,66 @@
 package org.firstinspires.ftc.teamcode.utils.threadingUtils;
 
+import org.firstinspires.ftc.teamcode.utils.CSASV;
+
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class MRUTask implements Runnable{
 
     //mimic making separate static value for each child class
-    private static ConcurrentHashMap<Class, Boolean>
-            isDone = new ConcurrentHashMap<>(),
-            isRunning = new ConcurrentHashMap<>();
+    private static CSASV<Boolean>
+            isDone = new CSASV<>(),
+            isRunning = new CSASV<>();
+
+    private static long UPDATE_CAP = 1/30;
 
     private Class staticAllocator = getClass();
 
-    public void setupTask(){
-        isDone.put(this.getClass(), true);
-        isRunning.put(this.getClass(), false);
+    public MRUTask(){
+        isDone.register(this, true);
+        isRunning.register(this, false);
     }
 
     public abstract void init();
-    public abstract void update();
+    public abstract void update(double deltaTime);
+    public abstract void fixed_update(double deltaTime);
 
     @Override
     public void run() {
-        if(getIsRunning()) {
+        double
+                start = 0,
+                end = 0,
+                delta = 0,
+                unprocessed = 0,
+                frameTime = 0,
+                frames = 0,
+                fps = 0;
+
+        while(getIsRunning()) {
+            start = System.currentTimeMillis();
+            delta = start - end;
+            end = start;
+
+            unprocessed += delta;
+
             setIsDone(false);
-            update();
+
+            while (unprocessed >= UPDATE_CAP) {
+                //everytime this loops, it will try to update as many times as what a perfect loop will update every second;
+                //this will limit the loop so it doesn't create an infinite loop and stall out the OpMode
+                unprocessed -= UPDATE_CAP;
+
+                if (frameTime >= 1.0) {
+                    //extra for logging additional data
+                    frameTime = 0;
+                    fps = frames;
+                    frames = 0;
+
+                    fixed_update(delta);
+                }
+                update(delta);
+            }
+
             setIsDone(true);
         }
     }
@@ -32,11 +68,11 @@ public abstract class MRUTask implements Runnable{
 
     //start of the child static stuff
     private void setIsDone(boolean doneState){
-        isDone.replace(staticAllocator, doneState);
+        isDone.set(this, doneState);
     }
 
     private boolean getIsDone(){
-        return isDone.get(staticAllocator);
+        return isDone.get(this);
     }
 
     public static boolean isDone(Class childClass){
@@ -44,11 +80,11 @@ public abstract class MRUTask implements Runnable{
     }
 
     private void setIsRunning(boolean runningState){
-        isRunning.replace(staticAllocator, runningState);
+        isRunning.set(this, runningState);
     }
 
     private boolean getIsRunning(){
-        return isRunning.get(staticAllocator);
+        return isRunning.get(this);
     }
 
     public static boolean isRunning(Class childClass){
