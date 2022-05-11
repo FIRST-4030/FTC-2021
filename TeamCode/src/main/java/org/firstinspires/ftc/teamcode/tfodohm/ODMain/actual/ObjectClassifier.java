@@ -8,11 +8,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.teamcode.utils.threadingUtils.MRUTask;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ObjectClassifier implements Runnable{
+public class ObjectClassifier extends MRUTask {
 
     private enum INTERNAL_STATE{
         IDLE,
@@ -69,7 +70,12 @@ public class ObjectClassifier implements Runnable{
     }
 
     @Override
-    public void run() {
+    public void init() {
+
+    }
+
+    @Override
+    public void update(double deltaTime) {
         synchronized (state) {
             isDone = false;
             switch (state) {
@@ -107,6 +113,10 @@ public class ObjectClassifier implements Runnable{
             }
             isDone = true;
         }
+    }
+
+    @Override
+    public void fixed_update(double deltaTime) {
 
     }
 
