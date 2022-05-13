@@ -1,10 +1,14 @@
 package org.firstinspires.ftc.teamcode.utils.fileRW;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
 import org.firstinspires.ftc.teamcode.utils.LoopUtil;
 
 import java.util.ArrayList;
 
+@Autonomous(name = "FileRW")
+@Config
 public class ConfigFileTesting extends LoopUtil {
     @Override
     public void opInit() {
