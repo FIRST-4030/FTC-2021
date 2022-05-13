@@ -7,10 +7,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,7 +25,7 @@ public class ConfigFileUtil {
         LONG,
     }
 
-    private static final long LOG_QUOTA = 25 * 1024 * 1024; // 25MB log quota for now
+    //private static final long LOG_QUOTA = 25 * 1024 * 1024; // 25MB log quota for now
 
     public static void writeToConfig(String name, List<?> data, int rows) {
         try {

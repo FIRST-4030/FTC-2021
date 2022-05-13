@@ -1,0 +1,50 @@
+package org.firstinspires.ftc.teamcode.utils.fileRW;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.utils.LoopUtil;
+
+import java.util.ArrayList;
+
+public class ConfigFileTesting extends LoopUtil {
+    @Override
+    public void opInit() {
+        ArrayList<Integer> matrix = new ArrayList<>();
+        matrix.add(0);
+        matrix.add(1);
+        matrix.add(2);
+        matrix.add(3);
+
+        ConfigFileUtil.writeToConfig("VirusPrototype1", matrix, 2);
+
+        Object[][] output = new Object[2][2];
+
+        ConfigFileUtil.readConfig(ConfigFileUtil.getConfig("VirusPrototype1"), output, ConfigFileUtil.ConfigDataType.INT);
+        telemetry.addData("Output: ", output[0] + "," + output[1] + ",\n" + output[2] + "," + output[3]);
+
+    }
+
+    @Override
+    public void opInitLoop() {
+
+    }
+
+    @Override
+    public void opStart() {
+
+    }
+
+    @Override
+    public void opUpdate(double deltaTime) {
+
+    }
+
+    @Override
+    public void opFixedUpdate(double deltaTime) {
+
+    }
+
+    @Override
+    public void opStop() {
+
+    }
+}
