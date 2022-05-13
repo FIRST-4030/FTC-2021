@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.utils.LoopUtil;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "FileRW")
+@Autonomous(name = "FileRW", group = "Test")
 @Config
 public class ConfigFileTesting extends LoopUtil {
     @Override
