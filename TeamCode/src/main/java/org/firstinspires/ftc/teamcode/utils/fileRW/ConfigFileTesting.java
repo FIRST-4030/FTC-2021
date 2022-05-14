@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.utils.fileRW;
 
+import android.app.Instrumentation;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -22,7 +24,7 @@ public class ConfigFileTesting extends LoopUtil {
 
         Object[][] output = new Object[2][2];
 
-        ConfigFileUtil.readConfig("VirusPrototype1", output, ConfigFileUtil.ConfigDataType.INT);
+        ConfigFileUtil.readConfig("VirusPrototype1", output, ConfigFileUtil.ConfigDataType.INT, new Instrumentation().getTargetContext());
         telemetry.addData("Output: ", output[0][0] + "," + output[0][1] + ",\n" + output[1][0] + "," + output[1][1]);
 
     }

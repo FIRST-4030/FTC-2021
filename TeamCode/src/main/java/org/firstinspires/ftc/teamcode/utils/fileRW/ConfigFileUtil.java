@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
  * Utility functions for log files.
  */
 public class ConfigFileUtil {
-    public static final String dir = ConfigFileUtil.class.getResource("/").getFile();;
+    public static final String dir = "";
     public static final String fileFormat = ".virus";
 
     public enum ConfigDataType{
@@ -58,15 +59,15 @@ public class ConfigFileUtil {
         return new File(dir + name + fileFormat);
     }
 
-    public static void readConfig(String name, Object[][] target, ConfigDataType type){
+    public static void readConfig(String name, Object[][] target, ConfigDataType type, Context context){
         int rows = target.length;
         String line;
         String[] data;
 
-        URL resources = ConfigFileUtil.class.getResource(name);
+        int labelid = context.getResources().getIdentifier(name, "raw", context.getPackageName());
 
         try{
-            FileReader fileReader = new FileReader(new File(resources.toURI()));
+            InputStreamReader fileReader = new InputStreamReader(context.getResources().openRawResource(labelid));
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             for (int i = 0; i < rows; i++) {
