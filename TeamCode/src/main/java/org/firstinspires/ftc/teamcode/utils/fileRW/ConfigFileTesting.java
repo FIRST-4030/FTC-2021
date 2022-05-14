@@ -22,7 +22,7 @@ public class ConfigFileTesting extends LoopUtil {
 
         Object[][] output = new Object[2][2];
 
-        ConfigFileUtil.readConfig(ConfigFileUtil.getConfig("VirusPrototype1"), output, ConfigFileUtil.ConfigDataType.INT);
+        ConfigFileUtil.readConfig("VirusPrototype1", output, ConfigFileUtil.ConfigDataType.INT);
         telemetry.addData("Output: ", output[0][0] + "," + output[0][1] + ",\n" + output[1][0] + "," + output[1][1]);
 
     }

@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.utils.fileRW;
 
+import android.content.Context;
+import android.content.res.Resources;
+
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
 import java.io.BufferedReader;
@@ -7,13 +10,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.net.URL;
 import java.util.List;
 
 /**
  * Utility functions for log files.
  */
 public class ConfigFileUtil {
-    public static final String dir = /*AppUtil.ROOT_FOLDER.toString() +  "assets/Robot_ConfigUD/"*/ "";
+    public static final String dir = ConfigFileUtil.class.getResource("/").getFile();;
     public static final String fileFormat = ".virus";
 
     public enum ConfigDataType{
@@ -54,13 +58,15 @@ public class ConfigFileUtil {
         return new File(dir + name + fileFormat);
     }
 
-    public static void readConfig(File file, Object[][] target, ConfigDataType type){
+    public static void readConfig(String name, Object[][] target, ConfigDataType type){
         int rows = target.length;
         String line;
         String[] data;
 
+        URL resources = ConfigFileUtil.class.getResource(name);
+
         try{
-            FileReader fileReader = new FileReader(file);
+            FileReader fileReader = new FileReader(new File(resources.toURI()));
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             for (int i = 0; i < rows; i++) {
