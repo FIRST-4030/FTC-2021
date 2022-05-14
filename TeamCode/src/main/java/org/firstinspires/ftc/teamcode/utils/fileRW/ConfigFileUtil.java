@@ -13,7 +13,7 @@ import java.util.List;
  * Utility functions for log files.
  */
 public class ConfigFileUtil {
-    public static final String dir = AppUtil.ROOT_FOLDER .toString()+ "/Robot_ConfigUD/";
+    public static final String dir = /*AppUtil.ROOT_FOLDER.toString() +  "assets/Robot_ConfigUD/"*/ "";
     public static final String fileFormat = ".virus";
 
     public enum ConfigDataType{
