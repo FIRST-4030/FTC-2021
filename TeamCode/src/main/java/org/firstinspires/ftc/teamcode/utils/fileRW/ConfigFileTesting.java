@@ -14,13 +14,13 @@ import java.util.ArrayList;
 public class ConfigFileTesting extends LoopUtil {
     @Override
     public void opInit() {
+        ConfigFileUtil.init();
+
         ArrayList<Integer> matrix = new ArrayList<>();
         matrix.add(0);
         matrix.add(1);
         matrix.add(2);
         matrix.add(3);
-
-        ConfigFileUtil.init();
 
         ConfigFileUtil.writeToConfig("VirusPrototype1", matrix, 2);
 
