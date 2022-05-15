@@ -1,19 +1,12 @@
 package org.firstinspires.ftc.teamcode.utils.fileRW;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.os.Environment;
-
-import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.URL;
 import java.util.List;
 
 /**
@@ -23,7 +16,7 @@ import java.util.List;
 public class ConfigFileUtil {
     public static final String dir = Environment.getExternalStorageDirectory().getPath() + "/UD_ROBOT_CONFIG";
     public static final String fileFormat = ".virus";
-    private static boolean initialized = false;
+    private static final boolean initialized = false;
 
     public static void init(){
         if (initialized) return;
