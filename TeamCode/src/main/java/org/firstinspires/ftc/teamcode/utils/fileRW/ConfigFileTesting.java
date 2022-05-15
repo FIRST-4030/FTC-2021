@@ -20,11 +20,13 @@ public class ConfigFileTesting extends LoopUtil {
         matrix.add(2);
         matrix.add(3);
 
+        ConfigFileUtil.init();
+
         ConfigFileUtil.writeToConfig("VirusPrototype1", matrix, 2);
 
         Object[][] output = new Object[2][2];
 
-        ConfigFileUtil.readConfig("VirusPrototype1", output, ConfigFileUtil.ConfigDataType.INT, new Instrumentation().getTargetContext());
+        ConfigFileUtil.readConfig("VirusPrototype1", output, ConfigFileUtil.ConfigDataType.INT);
         telemetry.addData("Output: ", output[0][0] + "," + output[0][1] + ",\n" + output[1][0] + "," + output[1][1]);
 
     }

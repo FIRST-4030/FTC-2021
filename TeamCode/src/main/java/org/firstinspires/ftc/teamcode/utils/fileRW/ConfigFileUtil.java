@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.utils.fileRW;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Environment;
 
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 
@@ -9,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
@@ -18,8 +20,16 @@ import java.util.List;
  * Utility functions for log files.
  */
 public class ConfigFileUtil {
-    public static final String dir = "";
+    public static final String dir = Environment.getExternalStorageDirectory().getPath() + "/UD_ROBOT_CONFIG";
     public static final String fileFormat = ".virus";
+    private static boolean initialized = false;
+
+    public static void init(){
+        if (initialized) return;
+
+        File directory = new File(dir);
+        directory.mkdir();
+    }
 
     public enum ConfigDataType{
         INT,
@@ -33,9 +43,10 @@ public class ConfigFileUtil {
     //private static final long LOG_QUOTA = 25 * 1024 * 1024; // 25MB log quota for now
 
     public static void writeToConfig(String name, List<?> data, int rows) {
+        if (!initialized) throw new IllegalStateException("You did not initialize this class! Try calling 'ConfigFileUtil.init();'!");
         try {
 
-            PrintWriter writer = new PrintWriter( dir + name + fileFormat, "UTF-8");
+            PrintWriter writer = new PrintWriter( dir + "/" + name + fileFormat, "UTF-8");
             BufferedWriter bufferedWriter = new BufferedWriter(writer);
             for (int i = 0; i < rows; i++) {
                 String line = "";
@@ -56,18 +67,18 @@ public class ConfigFileUtil {
     }
 
     public static File getConfig(String name){
-        return new File(dir + name + fileFormat);
+        if (!initialized) throw new IllegalStateException("You did not initialize this class! Try calling 'ConfigFileUtil.init();'!");
+        return new File(dir + "/" + name + fileFormat);
     }
 
-    public static void readConfig(String name, Object[][] target, ConfigDataType type, Context context){
+    public static void readConfig(String name, Object[][] target, ConfigDataType type){
+        if (!initialized) throw new IllegalStateException("You did not initialize this class! Try calling 'ConfigFileUtil.init();'!");
         int rows = target.length;
         String line;
         String[] data;
 
-        int labelid = context.getResources().getIdentifier(name, "raw", context.getPackageName());
-
         try{
-            InputStreamReader fileReader = new InputStreamReader(context.getResources().openRawResource(labelid));
+            FileReader fileReader = new FileReader(ConfigFileUtil.getConfig(name));
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             for (int i = 0; i < rows; i++) {
