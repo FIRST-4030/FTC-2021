@@ -18,6 +18,7 @@ import java.util.List;
 
 /**
  * Utility functions for log files.
+ * Can only read and write in .csv right now
  */
 public class ConfigFileUtil {
     public static final String dir = Environment.getExternalStorageDirectory().getPath() + "/UD_ROBOT_CONFIG";
