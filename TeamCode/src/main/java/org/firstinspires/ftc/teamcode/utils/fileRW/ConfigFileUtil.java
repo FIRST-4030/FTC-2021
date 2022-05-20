@@ -22,7 +22,9 @@ public class ConfigFileUtil {
         if (initialized) return;
         initialized = true;
         File directory = new File(dir);
-        directory.mkdir();
+        if(!directory.exists()) {
+            directory.mkdir();
+        }
     }
 
     public enum ConfigDataType{
