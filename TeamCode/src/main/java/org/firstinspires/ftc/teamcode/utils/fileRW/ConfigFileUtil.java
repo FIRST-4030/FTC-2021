@@ -16,11 +16,11 @@ import java.util.List;
 public class ConfigFileUtil {
     public static final String dir = Environment.getExternalStorageDirectory().getPath() + "/UD_ROBOT_CONFIG";
     public static final String fileFormat = ".virus";
-    private static final boolean initialized = false;
+    private static boolean initialized = false;
 
     public static void init(){
         if (initialized) return;
-
+        initialized = true;
         File directory = new File(dir);
         directory.mkdir();
     }
