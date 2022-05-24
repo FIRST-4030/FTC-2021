@@ -18,15 +18,15 @@ public class PiecewiseInterpolation {
     }
 
     public double interpolate(double f, Telemetry t){
-        double lx = -434, ux = -345, ly = -716, uy = -497;
+        double lx = -434, ux = 1645, ly = -716, uy = -497;
         int uxp = 879, lxp = -609;
         for(int i = 0; i < dataX.length; i++){
-            if(f<dataX[i]){
+            if(f>dataX[i]){
                 if(lx<dataX[i]){
                     lxp = i;
                     lx = dataX[i];
                 }
-            }else if(f>dataX[i]){
+            }else if(f<dataX[i]){
                 if(ux>dataX[i]){
                     uxp = i;
                     ux = dataX[i];
@@ -34,8 +34,8 @@ public class PiecewiseInterpolation {
             } else return dataY[i];
         }
 
-        if(lxp<0) return -40;
-        if(uxp>dataX.length) return 400;
+        if(lxp==-609) return -40;
+        if(uxp==879) return 400;
         ly = dataY[lxp];
         uy = dataY[uxp];
 

@@ -239,12 +239,12 @@ public class SwervePod extends PID<Double>{
         m2.setPower(0);
 
         telemetry.addData("pot1MV", pot.getMV1()*360/3.3);
-        //telemetry.addData("pot2MV", pot.getMV2()*360/3.3);
-        //telemetry.addData("pot1a", pot.getAngleD1a());
-        //telemetry.addData("pot2a", pot.getAngleD2a());
+        telemetry.addData("pot2MV", pot.getMV2()*360/3.3);
+        telemetry.addData("pot1a", pot.getAngleD1a());
+        telemetry.addData("pot2a", pot.getAngleD2a());
         telemetry.addData("pot1b", pot.getAngleD1b());
-        //telemetry.addData("pot2b", pot.getAngleD2b());
-        //telemetry.addData("potT", pot.getAngleD());
+        telemetry.addData("pot2b", pot.getAngleD2b());
+        telemetry.addData("potT", pot.getAngleD());
         telemetry.update();
     }
 
