@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.sensors.pot;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.utils.fileRW.ConfigFileUtil;
 
 import java.util.ArrayList;
 
@@ -19,6 +20,11 @@ public class DoublePotentiometer implements Potentiometer {
     private static double CLIP_TOP = 30;
     private static double CLIP_BOTTOM = 30;
 
+    double thr1 = 0.332;
+    double thr2 = 0.282;
+
+    double tolerance = 0.2;
+
     //initalize hardware
     public DoublePotentiometer(HardwareMap map, Telemetry telemetry, String n1, String n2, double offset){
         if(n1 == null || n2 == null || n1.isEmpty() || n2.isEmpty()){
@@ -27,6 +33,9 @@ public class DoublePotentiometer implements Potentiometer {
         ArrayList normalized = new ArrayList<Double>();
         normalized.add(0);
         normalized.add(1);
+
+        //Object[][] out = new Object[1][];
+        //ConfigFileUtil.readConfig("swerve_pod_1_profile", out);
 
 
         double[] poly1 = {0.0, 0.0, 0.0, 0.006, 0.025, 0.031, 0.045, 0.064, 0.075, 0.089, 0.1, 0.107, 0.117, 0.123, 0.137, 0.145, 0.157, 0.161, 0.168, 0.17400000000000002, 0.18, 0.19, 0.196, 0.203, 0.211, 0.216, 0.219, 0.228, 0.23600000000000002, 0.249, 0.258, 0.262, 0.275, 0.28400000000000003, 0.293, 0.307, 0.317, 0.332, 0.34900000000000003, 0.36, 0.376, 0.387, 0.402, 0.421, 0.434, 0.466, 0.492, 0.52, 0.555, 0.608, 0.66, 0.708, 0.755, 0.8190000000000001, 0.884, 0.996, 1.051, 1.245, 1.407, 1.614, 1.929, 2.562};
@@ -39,8 +48,8 @@ public class DoublePotentiometer implements Potentiometer {
         double[] cracker4 = {91.24137630984285, 94.34482448364703, 97.6551692023715, 100.75861737617566, 104.27585863982041, 107.17241026870431, 109.65516880774766, 113.17241007139239, 116.27585824519656, 118.96551332916019, 122.48275459280492, 126.20689240136994, 129.5172371200944, 133.03447838373913, 136.96551273722443, 140.8965470907097, 144.20689180943418, 147.31033998323835, 150.82758124688308, 154.34482251052782, 157.03447759449145, 160.13792576829562, 163.2413739420998, 166.34482211590398, 170.27585646938928, 173.79309773303402, 176.6896493619179, 180.41378717048292, 183.93102843412765, 187.03447660793185, 190.3448213266563, 193.86206259030104, 196.9655107641052, 200.8965451175905, 203.99999329139467, 207.7241310999597, 211.03447581868414, 214.34482053740862, 217.86206180105336, 221.1724065197778, 224.27585469358198, 227.58619941230646, 230.48275104119034, 233.7930957599148, 237.10344047863927, 240.82757828720426, 244.96550918560985, 248.68964699417486, 252.41378480273988, 255.51723297654405, 258.6206811503482, 261.51723277923213, 264.41378440811604, 267.72412912684047};
 
         pot1a = new BasicPotentiometer(map, telemetry, n1, poly1, cracker1);
-        pot2a = new BasicPotentiometer(map, telemetry, n2, poly3, cracker3);
-        pot1b = new BasicPotentiometer(map, telemetry, n1, poly2, cracker2);
+        pot2a = new BasicPotentiometer(map, telemetry, n2, poly2, cracker2);
+        pot1b = new BasicPotentiometer(map, telemetry, n1, poly3, cracker3);
         pot2b = new BasicPotentiometer(map, telemetry, n2, poly4, cracker4);
         pot1 = new BasicPotentiometer(map, telemetry, n1, new double[] {0,1}, new double[] {0,1});
         pot2 = new BasicPotentiometer(map, telemetry, n2, new double[] {0,1}, new double[] {0,1});
@@ -70,13 +79,35 @@ public class DoublePotentiometer implements Potentiometer {
         double angle3 = pot1b.getAngleD();
         double angle4 = pot2b.getAngleD();
 
-        //double mv1 = pot1a.getMV();
-        //double mv2 = pot2b.getMV();
+        double mv1 = pot1a.getMV();
+        double mv2 = pot2b.getMV();
 
-        if(angle1 == -40 || angle1 == 400){
-            return (angle2+angle4)/2;
+        double angleOut = 0;
+        double n = 0;
+
+        if(mv2 < thr1-tolerance){
+            n++;
+            angleOut+= angle1;
         }
-        return 0;
+        if(mv2 > thr1+tolerance){
+            n++;
+            angleOut+= angle3;
+        }
+        if(mv1 < thr2-tolerance){
+            n++;
+            angleOut+= angle2;
+        }
+        if(mv1 > thr1+tolerance){
+            n++;
+            angleOut+= angle4;
+        }
+
+        return angleOut/n;
+
+        //if(angle1 == -40 || angle1 == 400){
+        ///    return (angle2+angle4)/2;
+        //}
+        //return 0;
         /*
         double d1 = Math.abs(angle1-angle2);
         double d2 = Math.abs(angle3-angle4);
