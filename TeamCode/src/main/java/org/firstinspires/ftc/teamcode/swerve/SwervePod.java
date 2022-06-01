@@ -197,10 +197,10 @@ public class SwervePod extends PID<Double>{
 
     public void loop() {
         //get current position and set that in out correction
-        setFeedBack(-(((double)m1.getCurrentPosition()/277)+((double)m2.getCurrentPosition()/277)));//pot.getAngleD());
+        setFeedBack(pot.getAngleR());//pot.getAngleD());
 
         //visualization
-        telemetry.addData("feedBack", -(((double)m1.getCurrentPosition()/277)+((double)m2.getCurrentPosition()/277)));
+        telemetry.addData("feedBack", pot.getAngleR());
 
         // do fancy math and calculate correction value based on the error of the angle
         double correction = PIDloop();

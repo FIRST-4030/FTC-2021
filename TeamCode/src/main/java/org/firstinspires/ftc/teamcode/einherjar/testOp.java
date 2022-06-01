@@ -3,8 +3,8 @@ package org.firstinspires.ftc.teamcode.einherjar;
 import org.firstinspires.ftc.teamcode.utils.LoopUtil;
 
 
-@Config
-@TeleOp(name = "!GLADOS::TestOp", group = "!GLADOS")
+//@Config
+//@TeleOp(name = "!GLADOS::TestOp", group = "!GLADOS")
 public class testOp extends LoopUtil {
 
     @Override

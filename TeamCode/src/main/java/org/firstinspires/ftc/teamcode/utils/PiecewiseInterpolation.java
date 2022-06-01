@@ -40,47 +40,6 @@ public class PiecewiseInterpolation {
         uy = dataY[uxp];
 
         return ((uy - ly) / (ux - lx)) * (f - lx) + ly;
-        /*
-        if(f<dataX[0]) {
-            for (int i = 0; i < dataX.length; i++) {
-                if (f > dataX[i]) {
 
-                    lx = dataX[i - 1];
-                    ly = dataY[i - 1];
-
-                    ux = dataX[i];
-                    uy = dataY[i];
-
-                    t.addData("lx", lx);
-                    t.addData("ly", ly);
-                    t.addData("ux", ux);
-                    t.addData("uy", uy);
-
-
-                    return ((uy - ly) / (ux - lx)) * (f - lx) + ly;
-                }
-            }
-            return -40;
-        }
-        for (int i = 0; i < dataX.length; i++) {
-            if (f < dataX[i]) {
-
-                lx = dataX[i];
-                ly = dataY[i];
-
-                ux = dataX[i-1];
-                uy = dataY[i-1];
-
-
-                t.addData("lx", lx);
-                t.addData("ly", ly);
-                t.addData("ux", ux);
-                t.addData("uy", uy);
-
-                return ((uy - ly) / (ux - lx));// * (f - lx) + ly;
-            }
-        }
-
-        return 400;*/
     }
 }
