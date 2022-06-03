@@ -1,0 +1,47 @@
+package org.firstinspires.ftc.teamcode.utils.fileRW.main.lexer;
+
+import org.firstinspires.ftc.teamcode.utils.fileRW.main.FileRWRow;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
+
+public abstract class LexerTemplate {
+
+    private int x_position = 0;
+    private int y_position = 0;
+
+    public abstract List<LexerToken> lex(List<FileRWRow> rows);
+
+    protected void incrX(){
+        x_position += 1;
+    }
+
+    protected void decrX(){
+        x_position -= 1;
+    }
+
+    protected void setX(int nX){
+        x_position = nX;
+    }
+
+    protected int getX(){
+        return x_position;
+    }
+
+    protected void incrY(){
+        y_position += 1;
+    }
+
+    protected void decrY(){
+        y_position -= 1;
+    }
+
+    protected void setY(int nY){
+        y_position = nY;
+    }
+
+    protected int getY(){
+        return y_position;
+    }
+}
