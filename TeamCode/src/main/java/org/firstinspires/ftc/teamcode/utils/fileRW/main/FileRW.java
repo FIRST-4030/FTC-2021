@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Vector;
-import java.util.stream.Stream;
 
 public class FileRW {
 
@@ -22,6 +21,8 @@ public class FileRW {
 
 
     //explicitly removes empty constructor
+    private FileRW(){}
+
     public FileRW(String root_directory){
         this.root_directory = root_directory;
     }
