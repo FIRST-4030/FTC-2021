@@ -28,14 +28,14 @@ public class CSVLexer extends LexerTemplate {
 
     //some buffers are here, like the token buffer, the toLex (can make classify a no input func, but that reduces flexibility)
     private String toLex = "";
-    private List<LexerToken> tokenBuffer;
+    //private List<LexerToken> tokenBuffer;
 
     //defined whitespace here because it's annoying to remember the difference between " " and ' ' when comparing chars
     private final char charWhitespace = ' ';
     private final String stringWhitespace = " ";
 
     public CSVLexer(){
-        this.tokenBuffer = new Vector<>(0);
+        setTokenBuffer(new Vector<>());
     }
 
     //non-static because we want to be able to have multiple instances of this class; same reason for below methods
@@ -48,8 +48,8 @@ public class CSVLexer extends LexerTemplate {
         }
         CSVToken eof = CSVToken.eofTemplate.copy();
         eof.setY(getY());
-        this.tokenBuffer.add(eof);
-        return this.tokenBuffer;
+        getTokenBuffer().add(eof);
+        return getTokenBuffer();
     }
 
     public void lexRow(FileRWRow row){
@@ -57,7 +57,7 @@ public class CSVLexer extends LexerTemplate {
         int length = buffer.length;
 
         for (int i = 0; i < length; i++) {
-            tokenBuffer.add(classify(buffer[i], getX(), getY()));
+            getTokenBuffer().add(classify(buffer[i], getX(), getY()));
             setX(getX() + buffer[i].length());
         }
         setX(0);

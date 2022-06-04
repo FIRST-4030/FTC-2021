@@ -9,6 +9,7 @@ public class CSVToken implements LexerToken {
     public static final CSVToken intTemplate = new CSVToken("INT", "", 0, 0);
     public static final CSVToken doubleTemplate = new CSVToken("DOUBLE", "", 0, 0);
     public static final CSVToken errorTemplate = new CSVToken("ERROR", "", 0, 0);
+    public static final CSVToken boolTemplate = new CSVToken("BOOL", "", 0, 0);
     public static final CSVToken eofTemplate = new CSVToken("EOF", "", 0, 0);
 
     private String content, type;

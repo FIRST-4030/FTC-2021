@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 import java.util.Vector;
 
 public class FileRW {
@@ -19,6 +20,7 @@ public class FileRW {
     private String root_directory;
     private boolean initialized = false;
 
+    private Vector<String> writeBuffer = new Vector<>();
 
     //explicitly removes empty constructor
     private FileRW(){}

@@ -14,8 +14,6 @@ public abstract class MRUTask implements Runnable{
 
     private static long UPDATE_CAP = 1/30;
 
-    private Class staticAllocator = getClass();
-
     public MRUTask(){
         isDone.register(this, true);
         isRunning.register(this, false);
@@ -27,14 +25,7 @@ public abstract class MRUTask implements Runnable{
 
     @Override
     public void run() {
-        double
-                start = 0,
-                end = 0,
-                delta = 0,
-                unprocessed = 0,
-                frameTime = 0,
-                frames = 0,
-                fps = 0;
+        double start = 0, end = 0, delta = 0, unprocessed = 0, frameTime = 0, frames = 0, fps = 0;
 
         while(getIsRunning()) {
             start = System.currentTimeMillis();

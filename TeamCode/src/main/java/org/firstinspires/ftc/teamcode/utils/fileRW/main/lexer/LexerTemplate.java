@@ -10,6 +10,7 @@ public abstract class LexerTemplate {
 
     private int x_position = 0;
     private int y_position = 0;
+    private List<LexerToken> tokenBuffer;
 
     public abstract List<LexerToken> lex(List<FileRWRow> rows);
 
@@ -44,4 +45,8 @@ public abstract class LexerTemplate {
     protected int getY(){
         return y_position;
     }
+
+    protected void setTokenBuffer(List<LexerToken> nTokens){this.tokenBuffer = nTokens;}
+
+    protected List<LexerToken> getTokenBuffer(){return this.tokenBuffer;}
 }
