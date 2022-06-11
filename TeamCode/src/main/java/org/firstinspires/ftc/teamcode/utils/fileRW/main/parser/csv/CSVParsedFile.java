@@ -16,9 +16,15 @@ public class CSVParsedFile implements ParsedFile {
         this.contentMap = contentMap;
     }
 
-    public Vector<?> getRow(int idx){
-        if (!(idx < contentMap.length)) throw new ArrayIndexOutOfBoundsException("This row doesn't exist!");
-        return this.contentMap[idx];
+    public Object getElement(int x, int y){
+        if (!(y < contentMap.length)) throw new ArrayIndexOutOfBoundsException("This row doesn't exist!");
+        if (!(x < contentMap[y].size())) throw new ArrayIndexOutOfBoundsException("This column doesn't exist!");
+        return this.contentMap[y].get(x);
+    }
+
+    public Vector<?> getRow(int row){
+        if (!(row < contentMap.length)) throw new ArrayIndexOutOfBoundsException("This row doesn't exist!");
+        return this.contentMap[row];
     }
 
     @Override
