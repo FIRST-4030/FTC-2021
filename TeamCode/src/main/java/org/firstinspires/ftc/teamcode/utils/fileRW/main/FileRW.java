@@ -51,6 +51,20 @@ public class FileRW{
     }
 
     /**
+     * almost self-explaining, but lexerBehavior, parserBehavior, writeBehavior all require their respective objects passed in,<br>
+     * like CSV: new FileRW(new CSVLexer(), new CSVParser(), new CSVWriter());
+     * @param lexerBehavior
+     * @param parserBehavior
+     * @param writeBehavior
+     */
+    public FileRW(LexerTemplate lexerBehavior, ParserTemplate parserBehavior, WriterTemplate writeBehavior){
+        this.root_directory = FileRW.defaultDir;
+        this.lexer = lexerBehavior;
+        this.parser = parserBehavior;
+        this.writer = writeBehavior;
+    }
+
+    /**
      * This method needs to be called manually ~~because I'm lazy~~ because it's good practise I guess <br>
      * The method's function is to check if the directory exists, and if not, then create it, which solves the null file problem
      */

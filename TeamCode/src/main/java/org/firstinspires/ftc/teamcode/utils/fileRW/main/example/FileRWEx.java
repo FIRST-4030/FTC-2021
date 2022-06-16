@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.utils.fileRW.main.example;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
 import org.firstinspires.ftc.teamcode.utils.LoopUtil;
 import org.firstinspires.ftc.teamcode.utils.fileRW.main.FileRW;
 import org.firstinspires.ftc.teamcode.utils.fileRW.main.lexer.csv.CSVLexer;
@@ -19,6 +17,7 @@ public class FileRWEx extends LoopUtil {
         frw.init(); //initialize so we don't get a null directory
 
         frw.writeToRow(0, frw.translateToRow(Arrays.asList(10.5, 3.14e-5, 69.024))); //translate an array in WritableElements and pass that into the write to row method
+        frw.finalizeWriteTo("placeholder.virus");
 
         CSVParsedFile csvParsedFile = null;
         try {

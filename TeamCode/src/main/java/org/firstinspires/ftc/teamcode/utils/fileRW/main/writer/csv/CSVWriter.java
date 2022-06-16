@@ -8,7 +8,9 @@ import java.util.Vector;
 
 public class CSVWriter extends WriterTemplate {
 
-    public CSVWriter(){setBufferedElements(new Vector<>());}
+    public CSVWriter(){
+        setBufferedElements(new Vector<>());
+    }
 
     @Override
     public WritableElement translateToElement(Object element) {
